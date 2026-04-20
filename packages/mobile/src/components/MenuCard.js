@@ -1,10 +1,14 @@
 import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
+import { getResponsiveLayout } from "../theme/layout";
 import { formatCurrency, getCategoryLabel, theme } from "../theme/tokens";
 
 export function MenuCard({ item, onAdd, onPress, compact = false, style }) {
+  const { width } = useWindowDimensions();
+  const layout = getResponsiveLayout(width);
+
   return (
     <Pressable
       accessibilityHint="Abre os detalhes do prato"
@@ -17,22 +21,37 @@ export function MenuCard({ item, onAdd, onPress, compact = false, style }) {
         colors={["rgba(49,231,255,0.14)", "rgba(13,26,47,0.98)"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={[styles.panel, { borderColor: item.accentColor || theme.colors.border }]}
+        style={[
+          styles.panel,
+          layout.isCompact && styles.panelCompact,
+          { borderColor: item.accentColor || theme.colors.border }
+        ]}
       >
-        <View style={styles.topRow}>
+        <View style={[styles.topRow, layout.isCompact && styles.topRowStack]}>
           <Text style={styles.category}>{getCategoryLabel(item.category)}</Text>
-          <View style={styles.availabilityRow}>
+          <View style={[styles.availabilityRow, layout.isCompact && styles.availabilityRowCompact]}>
             {item.availableForDineIn ? <Text style={styles.availabilityTag}>Salao</Text> : null}
             {item.availableForDelivery ? (
               <Text style={styles.availabilityTag}>Delivery</Text>
             ) : null}
           </View>
         </View>
-        <Text style={[styles.name, compact && styles.nameCompact]}>{item.name}</Text>
-        <Text numberOfLines={compact ? 2 : 3} style={styles.description}>
+        <Text
+          style={[
+            styles.name,
+            compact && styles.nameCompact,
+            {
+              fontSize: layout.isTiny ? 24 : layout.isCompact ? 27 : compact ? 26 : 30,
+              lineHeight: layout.isTiny ? 30 : layout.isCompact ? 31 : compact ? 30 : 34
+            }
+          ]}
+        >
+          {item.name}
+        </Text>
+        <Text numberOfLines={layout.isCompact || compact ? 2 : 3} style={styles.description}>
           {item.description}
         </Text>
-        <View style={styles.footer}>
+        <View style={[styles.footer, layout.isCompact && styles.footerStack]}>
           <View>
             <Text style={styles.priceLabel}>A partir de</Text>
             <Text style={styles.price}>{formatCurrency(item.priceCents)}</Text>
@@ -44,7 +63,7 @@ export function MenuCard({ item, onAdd, onPress, compact = false, style }) {
               event.stopPropagation();
               onAdd();
             }}
-            style={styles.addButton}
+            style={[styles.addButton, layout.isCompact && styles.addButtonCompact]}
           >
             <Text style={styles.addText}>Adicionar</Text>
           </Pressable>
@@ -64,11 +83,19 @@ const styles = StyleSheet.create({
     minHeight: 244,
     padding: theme.spacing.lg
   },
+  panelCompact: {
+    minHeight: 0,
+    padding: theme.spacing.md
+  },
   topRow: {
     alignItems: "flex-start",
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: theme.spacing.sm
+  },
+  topRowStack: {
+    flexDirection: "column",
+    gap: 10
   },
   category: {
     color: theme.colors.accentSoft,
@@ -84,6 +111,10 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     marginLeft: 12
   },
+  availabilityRowCompact: {
+    justifyContent: "flex-start",
+    marginLeft: 0
+  },
   availabilityTag: {
     backgroundColor: "rgba(255,255,255,0.06)",
     borderRadius: theme.radius.pill,
@@ -97,8 +128,6 @@ const styles = StyleSheet.create({
   name: {
     color: theme.colors.text,
     fontFamily: theme.fonts.display,
-    fontSize: 30,
-    lineHeight: 34,
     marginBottom: 8
   },
   nameCompact: {
@@ -117,6 +146,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: 18
+  },
+  footerStack: {
+    alignItems: "stretch",
+    flexDirection: "column",
+    gap: 12
   },
   priceLabel: {
     color: theme.colors.textMuted,
@@ -137,6 +171,10 @@ const styles = StyleSheet.create({
     minHeight: 48,
     minWidth: 122,
     paddingHorizontal: 18
+  },
+  addButtonCompact: {
+    minWidth: 0,
+    width: "100%"
   },
   addText: {
     color: theme.colors.background,

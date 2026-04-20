@@ -131,7 +131,7 @@ export function ProfileScreen() {
 
   return (
     <KeyboardScrollScreen
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[styles.content, { padding: layout.contentPadding }]}
       extraKeyboardSpace={56}
       style={styles.screen}
     >
@@ -140,15 +140,27 @@ export function ProfileScreen() {
           colors={["#08172c", "#0b203d", "#13345b"]}
           end={{ x: 1, y: 1 }}
           start={{ x: 0, y: 0 }}
-          style={styles.hero}
+          style={[styles.hero, layout.isCompact && styles.heroCompact]}
         >
           <View style={[styles.heroTop, layout.isWide && styles.heroTopWide]}>
-            <View style={styles.identityRow}>
+            <View style={[styles.identityRow, layout.isCompact && styles.identityRowCompact]}>
               <View style={styles.avatar}>
-                <Text style={styles.avatarText}>{initial}</Text>
+                <Text style={[styles.avatarText, layout.isCompact && styles.avatarTextCompact]}>
+                  {initial}
+                </Text>
               </View>
               <View style={styles.identityCopy}>
-                <Text style={styles.name}>{user?.name}</Text>
+                <Text
+                  style={[
+                    styles.name,
+                    {
+                      fontSize: layout.isTiny ? 30 : layout.isCompact ? 36 : 46,
+                      lineHeight: layout.isTiny ? 34 : layout.isCompact ? 40 : 48
+                    }
+                  ]}
+                >
+                  {user?.name}
+                </Text>
                 <Text style={styles.email}>{user?.email}</Text>
                 <Text style={styles.role}>
                   {user?.role === "admin" ? "Administrador" : "Cliente"}
@@ -156,17 +168,38 @@ export function ProfileScreen() {
               </View>
             </View>
 
-            <View style={styles.heroActions}>
-              <ActionButton label="Atualizar" onPress={loadProfile} />
-              <ActionButton danger label="Encerrar sessao" onPress={logout} />
+            <View style={[styles.heroActions, layout.isCompact && styles.heroActionsCompact]}>
+              <ActionButton
+                fullWidth={layout.isCompact}
+                label="Atualizar"
+                onPress={loadProfile}
+              />
+              <ActionButton
+                danger
+                fullWidth={layout.isCompact}
+                label="Encerrar sessao"
+                onPress={logout}
+              />
             </View>
           </View>
 
           <View style={styles.statsRow}>
-            <SummaryCard label="Reservas" value={String(reservations.length)} />
-            <SummaryCard label="Pedidos" value={String(orders.length)} />
             <SummaryCard
+              compact={layout.isCompact}
+              label="Reservas"
+              minWidth={layout.statCardMinWidth}
+              value={String(reservations.length)}
+            />
+            <SummaryCard
+              compact={layout.isCompact}
+              label="Pedidos"
+              minWidth={layout.statCardMinWidth}
+              value={String(orders.length)}
+            />
+            <SummaryCard
+              compact={layout.isCompact}
               label="Endereco"
+              minWidth={layout.statCardMinWidth}
               value={primaryAddress ? "Pronto" : "Pendente"}
             />
           </View>
@@ -267,12 +300,16 @@ export function ProfileScreen() {
   );
 }
 
-function ActionButton({ danger = false, label, onPress }) {
+function ActionButton({ danger = false, fullWidth = false, label, onPress }) {
   return (
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
-      style={[styles.actionButton, danger && styles.actionButtonDanger]}
+      style={[
+        styles.actionButton,
+        fullWidth && styles.actionButtonFullWidth,
+        danger && styles.actionButtonDanger
+      ]}
     >
       <Text style={[styles.actionButtonText, danger && styles.actionButtonTextDanger]}>
         {label}
@@ -281,10 +318,16 @@ function ActionButton({ danger = false, label, onPress }) {
   );
 }
 
-function SummaryCard({ label, value }) {
+function SummaryCard({ compact = false, label, minWidth, value }) {
   return (
-    <View style={styles.summaryCard}>
-      <Text style={styles.summaryValue}>{value}</Text>
+    <View
+      style={[
+        styles.summaryCard,
+        compact && styles.summaryCardCompact,
+        { minWidth: compact ? 0 : minWidth }
+      ]}
+    >
+      <Text style={[styles.summaryValue, compact && styles.summaryValueCompact]}>{value}</Text>
       <Text style={styles.summaryLabel}>{label}</Text>
     </View>
   );
@@ -317,6 +360,9 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.lg,
     padding: theme.spacing.xl
   },
+  heroCompact: {
+    padding: theme.spacing.lg
+  },
   heroTop: {
     gap: 20
   },
@@ -329,6 +375,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     gap: 16
+  },
+  identityRowCompact: {
+    alignItems: "flex-start",
+    flexDirection: "column"
   },
   avatar: {
     alignItems: "center",
@@ -346,14 +396,16 @@ const styles = StyleSheet.create({
     fontSize: 36,
     lineHeight: 38
   },
+  avatarTextCompact: {
+    fontSize: 30,
+    lineHeight: 32
+  },
   identityCopy: {
     flexShrink: 1
   },
   name: {
     color: theme.colors.text,
-    fontFamily: theme.fonts.display,
-    fontSize: 46,
-    lineHeight: 48
+    fontFamily: theme.fonts.display
   },
   email: {
     color: theme.colors.text,
@@ -372,6 +424,10 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: 10
   },
+  heroActionsCompact: {
+    flexDirection: "column",
+    width: "100%"
+  },
   actionButton: {
     alignItems: "center",
     backgroundColor: "rgba(255,255,255,0.05)",
@@ -381,6 +437,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     minHeight: 44,
     paddingHorizontal: 16
+  },
+  actionButtonFullWidth: {
+    width: "100%"
   },
   actionButtonDanger: {
     borderColor: "rgba(255,139,156,0.35)"
@@ -407,11 +466,19 @@ const styles = StyleSheet.create({
     minWidth: 160,
     padding: 16
   },
+  summaryCardCompact: {
+    flexBasis: "47%",
+    flexGrow: 1
+  },
   summaryValue: {
     color: theme.colors.text,
     fontFamily: theme.fonts.display,
     fontSize: 34,
     lineHeight: 38
+  },
+  summaryValueCompact: {
+    fontSize: 28,
+    lineHeight: 32
   },
   summaryLabel: {
     color: theme.colors.textMuted,

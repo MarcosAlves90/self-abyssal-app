@@ -64,29 +64,62 @@ export function HomeScreen({ navigation }) {
   const nextReservation = reservations[0];
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.screen}
+      contentContainerStyle={[styles.content, { padding: layout.contentPadding }]}
+    >
       <View style={[styles.shell, { maxWidth: layout.contentMaxWidth }]}>
         <LinearGradient
           colors={["#08172c", "#0b203d", "#133053"]}
           end={{ x: 1, y: 1 }}
           start={{ x: 0, y: 0 }}
-          style={styles.hero}
+          style={[styles.hero, layout.isCompact && styles.heroCompact]}
         >
           <View style={[styles.heroTop, layout.isWide && styles.heroTopWide]}>
             <View style={styles.heroCopyBlock}>
               <Text style={styles.heroEyebrow}>Inicio</Text>
-              <Text style={styles.heroTitle}>Mergulhe, {firstName}.</Text>
+              <Text
+                style={[
+                  styles.heroTitle,
+                  {
+                    fontSize: layout.heroTitleSize,
+                    lineHeight: layout.heroTitleLineHeight
+                  }
+                ]}
+              >
+                Mergulhe, {firstName}.
+              </Text>
               <Text style={styles.heroSubtitle}>
                 Uma landing inspirada em discovery apps: contexto rapido, hierarquia
                 forte e caminhos claros para menu, reserva e perfil.
               </Text>
             </View>
 
-            <View style={styles.heroMetrics}>
-              <MetricCard label="Filiais" value={String(branches.length)} />
-              <MetricCard label="Destaques" value={String(featuredItems.length)} />
-              <MetricCard label="Carrinho" value={String(itemCount)} />
-              <MetricCard label="Reservas" value={String(reservations.length)} />
+            <View style={[styles.heroMetrics, layout.isCompact && styles.heroMetricsCompact]}>
+              <MetricCard
+                compact={layout.isCompact}
+                label="Filiais"
+                minWidth={layout.statCardMinWidth}
+                value={String(branches.length)}
+              />
+              <MetricCard
+                compact={layout.isCompact}
+                label="Destaques"
+                minWidth={layout.statCardMinWidth}
+                value={String(featuredItems.length)}
+              />
+              <MetricCard
+                compact={layout.isCompact}
+                label="Carrinho"
+                minWidth={layout.statCardMinWidth}
+                value={String(itemCount)}
+              />
+              <MetricCard
+                compact={layout.isCompact}
+                label="Reservas"
+                minWidth={layout.statCardMinWidth}
+                value={String(reservations.length)}
+              />
             </View>
           </View>
 
@@ -120,7 +153,17 @@ export function HomeScreen({ navigation }) {
           <Text style={styles.highlightEyebrow}>Proxima experiencia</Text>
           {nextReservation ? (
             <>
-              <Text style={styles.highlightTitle}>{nextReservation.branchName}</Text>
+              <Text
+                style={[
+                  styles.highlightTitle,
+                  {
+                    fontSize: layout.featureTitleSize,
+                    lineHeight: layout.featureTitleLineHeight
+                  }
+                ]}
+              >
+                {nextReservation.branchName}
+              </Text>
               <Text style={styles.highlightCopy}>
                 {new Date(nextReservation.scheduledAt).toLocaleString("pt-BR")} •{" "}
                 {nextReservation.depthLevel} • {nextReservation.guests} pessoas
@@ -128,7 +171,17 @@ export function HomeScreen({ navigation }) {
             </>
           ) : (
             <>
-              <Text style={styles.highlightTitle}>Nenhuma reserva no radar.</Text>
+              <Text
+                style={[
+                  styles.highlightTitle,
+                  {
+                    fontSize: layout.featureTitleSize,
+                    lineHeight: layout.featureTitleLineHeight
+                  }
+                ]}
+              >
+                Nenhuma reserva no radar.
+              </Text>
               <Text style={styles.highlightCopy}>
                 Abra a aba Reserva e monte sua proxima jornada presencial.
               </Text>
@@ -153,11 +206,21 @@ export function HomeScreen({ navigation }) {
               onPress={() => navigation.navigate("DishDetails", { item })}
               style={[styles.featuredCard, layout.isTablet && styles.featuredCardWide]}
             >
-              <View style={styles.featuredTopRow}>
+              <View style={[styles.featuredTopRow, layout.isTiny && styles.featuredTopRowStack]}>
                 <Text style={styles.featuredCategory}>{getCategoryLabel(item.category)}</Text>
                 <Text style={styles.featuredPrice}>{formatCurrency(item.priceCents)}</Text>
               </View>
-              <Text style={styles.featuredName}>{item.name}</Text>
+              <Text
+                style={[
+                  styles.featuredName,
+                  {
+                    fontSize: layout.featureTitleSize,
+                    lineHeight: layout.featureTitleLineHeight
+                  }
+                ]}
+              >
+                {item.name}
+              </Text>
               <Text numberOfLines={3} style={styles.featuredCopy}>
                 {item.description}
               </Text>
@@ -220,10 +283,16 @@ export function HomeScreen({ navigation }) {
   );
 }
 
-function MetricCard({ label, value }) {
+function MetricCard({ compact = false, label, minWidth, value }) {
   return (
-    <View style={styles.metricCard}>
-      <Text style={styles.metricValue}>{value}</Text>
+    <View
+      style={[
+        styles.metricCard,
+        compact && styles.metricCardCompact,
+        { minWidth: compact ? 0 : minWidth }
+      ]}
+    >
+      <Text style={[styles.metricValue, compact && styles.metricValueCompact]}>{value}</Text>
       <Text style={styles.metricLabel}>{label}</Text>
     </View>
   );
@@ -259,11 +328,14 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.xl,
     padding: theme.spacing.xl
   },
+  heroCompact: {
+    padding: theme.spacing.lg
+  },
   heroTop: {
     gap: 20
   },
   heroTopWide: {
-    alignItems: "flex-end",
+    alignItems: "flex-start",
     flexDirection: "row",
     justifyContent: "space-between"
   },
@@ -281,7 +353,7 @@ const styles = StyleSheet.create({
   heroTitle: {
     color: theme.colors.text,
     fontFamily: theme.fonts.display,
-    fontSize: 52
+    marginTop: 8
   },
   heroSubtitle: {
     color: theme.colors.textMuted,
@@ -295,6 +367,9 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: 12
   },
+  heroMetricsCompact: {
+    width: "100%"
+  },
   metricCard: {
     backgroundColor: "rgba(255,255,255,0.04)",
     borderRadius: theme.radius.md,
@@ -303,10 +378,17 @@ const styles = StyleSheet.create({
     minWidth: 138,
     padding: 14
   },
+  metricCardCompact: {
+    flexGrow: 1,
+    flexBasis: "47%"
+  },
   metricValue: {
     color: theme.colors.text,
     fontFamily: theme.fonts.display,
     fontSize: 34
+  },
+  metricValueCompact: {
+    fontSize: 28
   },
   metricLabel: {
     color: theme.colors.textMuted,
@@ -362,8 +444,6 @@ const styles = StyleSheet.create({
   highlightTitle: {
     color: theme.colors.text,
     fontFamily: theme.fonts.display,
-    fontSize: 34,
-    lineHeight: 38,
     marginBottom: 8
   },
   highlightCopy: {
@@ -396,6 +476,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 14
   },
+  featuredTopRowStack: {
+    alignItems: "flex-start",
+    gap: 6
+  },
   featuredCategory: {
     color: theme.colors.accentSoft,
     fontFamily: theme.fonts.bodyBold,
@@ -406,8 +490,6 @@ const styles = StyleSheet.create({
   featuredName: {
     color: theme.colors.text,
     fontFamily: theme.fonts.display,
-    fontSize: 34,
-    lineHeight: 38,
     marginBottom: 8
   },
   featuredCopy: {

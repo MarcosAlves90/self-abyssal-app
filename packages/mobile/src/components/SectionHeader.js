@@ -1,6 +1,7 @@
 import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 
+import { getResponsiveLayout } from "../theme/layout";
 import { theme } from "../theme/tokens";
 
 export function SectionHeader({
@@ -10,21 +11,40 @@ export function SectionHeader({
   actionLabel,
   onActionPress
 }) {
+  const { width } = useWindowDimensions();
+  const layout = getResponsiveLayout(width);
+
   return (
-    <View style={styles.row}>
-      <View style={styles.copy}>
+    <View style={[styles.row, layout.isCompact && styles.rowCompact]}>
+      <View style={[styles.copy, layout.isCompact && styles.copyCompact]}>
         {eyebrow ? <Text style={styles.eyebrow}>{eyebrow}</Text> : null}
-        <Text style={styles.title}>{title}</Text>
-        {description ? <Text style={styles.description}>{description}</Text> : null}
+        <Text
+          style={[
+            styles.title,
+            {
+              fontSize: layout.sectionTitleSize,
+              lineHeight: layout.sectionTitleLineHeight
+            }
+          ]}
+        >
+          {title}
+        </Text>
+        {description ? (
+          <Text style={[styles.description, layout.isCompact && styles.descriptionCompact]}>
+            {description}
+          </Text>
+        ) : null}
       </View>
       {actionLabel ? (
         <Pressable
           accessibilityRole="button"
           hitSlop={8}
           onPress={onActionPress}
-          style={styles.actionButton}
+          style={[styles.actionButton, layout.isCompact && styles.actionButtonCompact]}
         >
-          <Text style={styles.actionText}>{actionLabel}</Text>
+          <Text style={[styles.actionText, layout.isCompact && styles.actionTextCompact]}>
+            {actionLabel}
+          </Text>
         </Pressable>
       ) : null}
     </View>
@@ -40,10 +60,17 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: theme.spacing.md
   },
+  rowCompact: {
+    alignItems: "stretch"
+  },
   copy: {
     flex: 1,
     gap: 4,
     minWidth: 220
+  },
+  copyCompact: {
+    minWidth: 0,
+    width: "100%"
   },
   eyebrow: {
     color: theme.colors.accentSoft,
@@ -54,9 +81,7 @@ const styles = StyleSheet.create({
   },
   title: {
     color: theme.colors.text,
-    fontFamily: theme.fonts.display,
-    fontSize: 30,
-    lineHeight: 34
+    fontFamily: theme.fonts.display
   },
   description: {
     color: theme.colors.textMuted,
@@ -64,6 +89,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 22,
     marginTop: 2
+  },
+  descriptionCompact: {
+    lineHeight: 20
   },
   actionButton: {
     alignItems: "center",
@@ -75,9 +103,15 @@ const styles = StyleSheet.create({
     minHeight: 44,
     paddingHorizontal: 16
   },
+  actionButtonCompact: {
+    width: "100%"
+  },
   actionText: {
     color: theme.colors.text,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 13
+  },
+  actionTextCompact: {
+    textAlign: "center"
   }
 });

@@ -54,29 +54,50 @@ export function MenuScreen({ navigation }) {
   const layout = getResponsiveLayout(width);
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.screen}
+      contentContainerStyle={[styles.content, { padding: layout.contentPadding }]}
+    >
       <View style={[styles.shell, { maxWidth: layout.contentMaxWidth }]}>
         <LinearGradient
           colors={["#08172c", "#0c223c", "#13345b"]}
           end={{ x: 1, y: 1 }}
           start={{ x: 0, y: 0 }}
-          style={styles.hero}
+          style={[styles.hero, layout.isCompact && styles.heroCompact]}
         >
           <View style={[styles.heroTop, layout.isWide && styles.heroTopWide]}>
             <View style={styles.heroCopy}>
               <Text style={styles.heroEyebrow}>Cardapio</Text>
-              <Text style={styles.heroTitle}>Escolha como em apps de delivery premium.</Text>
+              <Text
+                style={[
+                  styles.heroTitle,
+                  {
+                    fontSize: layout.heroTitleSize,
+                    lineHeight: layout.heroTitleLineHeight
+                  }
+                ]}
+              >
+                Escolha como em apps de delivery premium.
+              </Text>
               <Text style={styles.heroSubtitle}>
                 Filtros evidentes, leitura editorial dos pratos e grid responsivo para
                 mobile e web.
               </Text>
             </View>
 
-            <View style={styles.heroAside}>
+            <View style={[styles.heroAside, layout.isCompact && styles.heroAsideCompact]}>
               <Text style={styles.heroAsideEyebrow}>
                 {itemCount ? "Carrinho ativo" : "Pronto para descobrir"}
               </Text>
-              <Text style={styles.heroAsideValue}>
+              <Text
+                style={[
+                  styles.heroAsideValue,
+                  {
+                    fontSize: layout.featureTitleSize,
+                    lineHeight: layout.featureTitleLineHeight
+                  }
+                ]}
+              >
                 {itemCount ? `${itemCount} itens` : `${items.length} pratos`}
               </Text>
               <Text style={styles.heroAsideCopy}>
@@ -88,7 +109,7 @@ export function MenuScreen({ navigation }) {
                 <Pressable
                   accessibilityRole="button"
                   onPress={() => navigation.navigate("Reserva")}
-                  style={styles.heroAction}
+                  style={[styles.heroAction, layout.isCompact && styles.heroActionCompact]}
                 >
                   <Text style={styles.heroActionText}>Abrir carrinho e entrega</Text>
                 </Pressable>
@@ -174,6 +195,9 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.xl,
     padding: theme.spacing.xl
   },
+  heroCompact: {
+    padding: theme.spacing.lg
+  },
   heroTop: {
     gap: 20
   },
@@ -196,8 +220,6 @@ const styles = StyleSheet.create({
   heroTitle: {
     color: theme.colors.text,
     fontFamily: theme.fonts.display,
-    fontSize: 50,
-    lineHeight: 54,
     marginTop: 8
   },
   heroSubtitle: {
@@ -215,6 +237,10 @@ const styles = StyleSheet.create({
     minWidth: 250,
     padding: theme.spacing.lg
   },
+  heroAsideCompact: {
+    minWidth: 0,
+    width: "100%"
+  },
   heroAsideEyebrow: {
     color: theme.colors.accentWarm,
     fontFamily: theme.fonts.bodyBold,
@@ -226,8 +252,6 @@ const styles = StyleSheet.create({
   heroAsideValue: {
     color: theme.colors.text,
     fontFamily: theme.fonts.display,
-    fontSize: 36,
-    lineHeight: 40,
     marginBottom: 8
   },
   heroAsideCopy: {
@@ -244,6 +268,9 @@ const styles = StyleSheet.create({
     marginTop: 16,
     minHeight: 46,
     paddingHorizontal: 16
+  },
+  heroActionCompact: {
+    width: "100%"
   },
   heroActionText: {
     color: theme.colors.background,

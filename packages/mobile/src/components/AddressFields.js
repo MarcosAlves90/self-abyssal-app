@@ -9,6 +9,7 @@ import {
   View
 } from "react-native";
 
+import { getResponsiveLayout } from "../theme/layout";
 import { theme } from "../theme/tokens";
 import { formatPostalCode } from "../utils/address";
 
@@ -19,12 +20,14 @@ export function AddressFields({
   onLookupPostalCode
 }) {
   const { width } = useWindowDimensions();
+  const layout = getResponsiveLayout(width);
   const isCompact = width < 520;
+  const shouldStackPostalCode = width < 560;
 
   return (
     <View style={styles.container}>
       <Field label="CEP">
-        <View style={styles.cepRow}>
+        <View style={[styles.cepRow, shouldStackPostalCode && styles.cepRowStack]}>
           <TextInput
             keyboardType="number-pad"
             maxLength={9}
@@ -38,12 +41,23 @@ export function AddressFields({
             accessibilityRole="button"
             disabled={isLookingUpPostalCode}
             onPress={onLookupPostalCode}
-            style={[styles.lookupButton, isLookingUpPostalCode && styles.lookupButtonDisabled]}
+            style={[
+              styles.lookupButton,
+              shouldStackPostalCode && styles.lookupButtonStacked,
+              isLookingUpPostalCode && styles.lookupButtonDisabled
+            ]}
           >
             {isLookingUpPostalCode ? (
               <ActivityIndicator color={theme.colors.background} size="small" />
             ) : (
-              <Text style={styles.lookupButtonText}>Buscar CEP</Text>
+              <Text
+                style={[
+                  styles.lookupButtonText,
+                  layout.isTiny && styles.lookupButtonTextCompact
+                ]}
+              >
+                Buscar CEP
+              </Text>
             )}
           </Pressable>
         </View>
@@ -159,6 +173,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 10
   },
+  cepRowStack: {
+    flexDirection: "column"
+  },
   cepInput: {
     flex: 1
   },
@@ -171,6 +188,10 @@ const styles = StyleSheet.create({
     minWidth: 116,
     paddingHorizontal: 14
   },
+  lookupButtonStacked: {
+    minWidth: 0,
+    width: "100%"
+  },
   lookupButtonDisabled: {
     opacity: 0.7
   },
@@ -178,6 +199,9 @@ const styles = StyleSheet.create({
     color: theme.colors.background,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 13
+  },
+  lookupButtonTextCompact: {
+    fontSize: 12
   },
   row: {
     flexDirection: "row",

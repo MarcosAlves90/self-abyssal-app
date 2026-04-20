@@ -229,7 +229,7 @@ export function ReservationScreen({ navigation }) {
 
   return (
     <KeyboardScrollScreen
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[styles.content, { padding: layout.contentPadding }]}
       extraKeyboardSpace={56}
       style={styles.screen}
     >
@@ -238,12 +238,20 @@ export function ReservationScreen({ navigation }) {
           colors={["#07172b", "#0b203d", "#123558"]}
           end={{ x: 1, y: 1 }}
           start={{ x: 0, y: 0 }}
-          style={styles.hero}
+          style={[styles.hero, layout.isCompact && styles.heroCompact]}
         >
           <View style={[styles.heroTop, layout.isWide && styles.heroTopWide]}>
             <View style={styles.heroCopy}>
               <Text style={styles.heroEyebrow}>Reserva e delivery</Text>
-              <Text style={styles.heroTitle}>
+              <Text
+                style={[
+                  styles.heroTitle,
+                  {
+                    fontSize: layout.heroTitleSize,
+                    lineHeight: layout.heroTitleLineHeight
+                  }
+                ]}
+              >
                 {mode === "reservation"
                   ? "Planeje sua noite em um fluxo de booking."
                   : "Feche seu delivery com leitura de checkout."}
@@ -254,25 +262,39 @@ export function ReservationScreen({ navigation }) {
               </Text>
             </View>
 
-            <View style={styles.heroStats}>
-              <HeroStat label="Reservas" value={String(reservations.length)} />
-              <HeroStat label="Itens" value={String(itemCount)} />
+            <View style={[styles.heroStats, layout.isCompact && styles.heroStatsCompact]}>
               <HeroStat
+                compact={layout.isCompact}
+                label="Reservas"
+                minWidth={layout.statCardMinWidth}
+                value={String(reservations.length)}
+              />
+              <HeroStat
+                compact={layout.isCompact}
+                label="Itens"
+                minWidth={layout.statCardMinWidth}
+                value={String(itemCount)}
+              />
+              <HeroStat
+                compact={layout.isCompact}
                 label="Entrega"
+                minWidth={layout.statCardMinWidth}
                 value={user?.savedAddresses?.[0]?.summary ? "Pronta" : "Pendente"}
               />
             </View>
           </View>
         </LinearGradient>
 
-        <View style={styles.modeRow}>
+        <View style={[styles.modeRow, layout.isCompact && styles.modeRowStack]}>
           <ModeButton
             active={mode === "reservation"}
+            fullWidth={layout.isCompact}
             label="Reserva presencial"
             onPress={() => setMode("reservation")}
           />
           <ModeButton
             active={mode === "delivery"}
+            fullWidth={layout.isCompact}
             label="Delivery"
             onPress={() => setMode("delivery")}
           />
@@ -281,9 +303,19 @@ export function ReservationScreen({ navigation }) {
         <View style={[styles.mainGrid, layout.isWide && styles.mainGridWide]}>
           <View style={styles.primaryColumn}>
             {mode === "reservation" ? (
-              <View style={styles.panel}>
+              <View style={[styles.panel, layout.isCompact && styles.panelCompact]}>
                 <Text style={styles.panelEyebrow}>Reserva presencial</Text>
-                <Text style={styles.panelTitle}>Monte sua noite em poucos blocos.</Text>
+                <Text
+                  style={[
+                    styles.panelTitle,
+                    {
+                      fontSize: layout.featureTitleSize,
+                      lineHeight: layout.featureTitleLineHeight
+                    }
+                  ]}
+                >
+                  Monte sua noite em poucos blocos.
+                </Text>
                 <Text style={styles.panelCopy}>
                   Filial, horario, convidados e profundidade aparecem como etapas claras,
                   em vez de um formulario compacto demais.
@@ -375,9 +407,19 @@ export function ReservationScreen({ navigation }) {
                 />
               </View>
             ) : (
-              <View style={styles.panel}>
+              <View style={[styles.panel, layout.isCompact && styles.panelCompact]}>
                 <Text style={styles.panelEyebrow}>Delivery</Text>
-                <Text style={styles.panelTitle}>Feche seu pedido com menos friccao.</Text>
+                <Text
+                  style={[
+                    styles.panelTitle,
+                    {
+                      fontSize: layout.featureTitleSize,
+                      lineHeight: layout.featureTitleLineHeight
+                    }
+                  ]}
+                >
+                  Feche seu pedido com menos friccao.
+                </Text>
                 <Text style={styles.panelCopy}>
                   A logica ficou mais proxima de apps de checkout: carrinho, contato,
                   endereco e pagamento em ordem natural.
@@ -386,9 +428,9 @@ export function ReservationScreen({ navigation }) {
                 {items.length ? (
                   items.map((item) => (
                     <View key={item.id} style={styles.cartItem}>
-                      <View style={styles.cartTopRow}>
+                      <View style={[styles.cartTopRow, layout.isCompact && styles.cartTopRowStack]}>
                         <Text style={styles.cartName}>{item.name}</Text>
-                        <Text style={styles.cartPrice}>
+                        <Text style={[styles.cartPrice, layout.isCompact && styles.cartPriceStack]}>
                           {formatCurrency(item.priceCents * item.quantity)}
                         </Text>
                       </View>
@@ -478,7 +520,14 @@ export function ReservationScreen({ navigation }) {
 
                 <View style={styles.summaryCard}>
                   <Text style={styles.summaryLabel}>Total estimado</Text>
-                  <Text style={styles.summaryValue}>{formatCurrency(totalCents)}</Text>
+                  <Text
+                    style={[
+                      styles.summaryValue,
+                      layout.isCompact && styles.summaryValueCompact
+                    ]}
+                  >
+                    {formatCurrency(totalCents)}
+                  </Text>
                   <Text style={styles.summaryAddress}>
                     {deliverySummary ||
                       "Complete o endereco para visualizar o resumo do delivery."}
@@ -569,22 +618,32 @@ export function ReservationScreen({ navigation }) {
   );
 }
 
-function HeroStat({ label, value }) {
+function HeroStat({ compact = false, label, minWidth, value }) {
   return (
-    <View style={styles.heroStat}>
-      <Text style={styles.heroStatValue}>{value}</Text>
+    <View
+      style={[
+        styles.heroStat,
+        compact && styles.heroStatCompact,
+        { minWidth: compact ? 0 : minWidth }
+      ]}
+    >
+      <Text style={[styles.heroStatValue, compact && styles.heroStatValueCompact]}>{value}</Text>
       <Text style={styles.heroStatLabel}>{label}</Text>
     </View>
   );
 }
 
-function ModeButton({ active, label, onPress }) {
+function ModeButton({ active, fullWidth = false, label, onPress }) {
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityState={{ selected: active }}
       onPress={onPress}
-      style={[styles.modeButton, active && styles.modeButtonActive]}
+      style={[
+        styles.modeButton,
+        fullWidth && styles.modeButtonFullWidth,
+        active && styles.modeButtonActive
+      ]}
     >
       <Text style={[styles.modeButtonText, active && styles.modeButtonTextActive]}>{label}</Text>
     </Pressable>
@@ -675,11 +734,14 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.lg,
     padding: theme.spacing.xl
   },
+  heroCompact: {
+    padding: theme.spacing.lg
+  },
   heroTop: {
     gap: 20
   },
   heroTopWide: {
-    alignItems: "flex-end",
+    alignItems: "flex-start",
     flexDirection: "row",
     justifyContent: "space-between"
   },
@@ -697,8 +759,6 @@ const styles = StyleSheet.create({
   heroTitle: {
     color: theme.colors.text,
     fontFamily: theme.fonts.display,
-    fontSize: 48,
-    lineHeight: 52,
     marginTop: 8
   },
   heroSubtitle: {
@@ -713,6 +773,9 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: 12
   },
+  heroStatsCompact: {
+    width: "100%"
+  },
   heroStat: {
     backgroundColor: "rgba(255,255,255,0.05)",
     borderRadius: theme.radius.md,
@@ -721,10 +784,17 @@ const styles = StyleSheet.create({
     minWidth: 136,
     padding: 14
   },
+  heroStatCompact: {
+    flexBasis: "47%",
+    flexGrow: 1
+  },
   heroStatValue: {
     color: theme.colors.text,
     fontFamily: theme.fonts.display,
     fontSize: 32
+  },
+  heroStatValueCompact: {
+    fontSize: 28
   },
   heroStatLabel: {
     color: theme.colors.textMuted,
@@ -736,6 +806,9 @@ const styles = StyleSheet.create({
     gap: 12,
     marginBottom: theme.spacing.lg
   },
+  modeRowStack: {
+    flexDirection: "column"
+  },
   modeButton: {
     alignItems: "center",
     backgroundColor: theme.colors.surface,
@@ -746,6 +819,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     minHeight: 48,
     paddingHorizontal: 16
+  },
+  modeButtonFullWidth: {
+    width: "100%"
   },
   modeButtonActive: {
     backgroundColor: "rgba(49,231,255,0.12)",
@@ -783,6 +859,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: theme.spacing.lg
   },
+  panelCompact: {
+    padding: theme.spacing.md
+  },
   panelEyebrow: {
     color: theme.colors.accentWarm,
     fontFamily: theme.fonts.bodyBold,
@@ -794,8 +873,6 @@ const styles = StyleSheet.create({
   panelTitle: {
     color: theme.colors.text,
     fontFamily: theme.fonts.display,
-    fontSize: 36,
-    lineHeight: 40,
     marginBottom: 10
   },
   panelCopy: {
@@ -890,6 +967,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 12
   },
+  cartTopRowStack: {
+    alignItems: "flex-start",
+    flexDirection: "column",
+    gap: 4
+  },
   cartName: {
     color: theme.colors.text,
     flex: 1,
@@ -901,6 +983,9 @@ const styles = StyleSheet.create({
     color: theme.colors.accentSoft,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 14
+  },
+  cartPriceStack: {
+    marginLeft: 0
   },
   quantityRow: {
     alignItems: "center",
@@ -997,9 +1082,11 @@ const styles = StyleSheet.create({
   summaryValue: {
     color: theme.colors.text,
     fontFamily: theme.fonts.display,
-    fontSize: 40,
-    lineHeight: 42,
     marginBottom: 8
+  },
+  summaryValueCompact: {
+    fontSize: 32,
+    lineHeight: 36
   },
   summaryAddress: {
     color: theme.colors.textMuted,

@@ -1,10 +1,14 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
+import { getResponsiveLayout } from "../theme/layout";
 import { theme } from "../theme/tokens";
 
 export function BranchCard({ branch, compact = false, style }) {
+  const { width } = useWindowDimensions();
+  const layout = getResponsiveLayout(width);
+
   return (
     <LinearGradient
       colors={["rgba(7,18,38,0.98)", "rgba(17,35,64,0.98)"]}
@@ -12,15 +16,26 @@ export function BranchCard({ branch, compact = false, style }) {
       end={{ x: 1, y: 1 }}
       style={[styles.card, compact && styles.cardCompact, style]}
     >
-      <View style={styles.topRow}>
+      <View style={[styles.topRow, layout.isCompact && styles.topRowStack]}>
         <View style={styles.copy}>
           <Text style={styles.eyebrow}>Experiencia presencial</Text>
-          <Text style={[styles.name, compact && styles.nameCompact]}>{branch.name}</Text>
+          <Text
+            style={[
+              styles.name,
+              compact && styles.nameCompact,
+              {
+                fontSize: layout.isTiny ? 24 : layout.isCompact ? 28 : compact ? 30 : 34,
+                lineHeight: layout.isTiny ? 30 : layout.isCompact ? 32 : compact ? 34 : 38
+              }
+            ]}
+          >
+            {branch.name}
+          </Text>
           <Text style={styles.meta}>
             {branch.city} • {branch.neighborhood}
           </Text>
         </View>
-        <View style={styles.hoursBadge}>
+        <View style={[styles.hoursBadge, layout.isCompact && styles.hoursBadgeCompact]}>
           <Text style={styles.hoursBadgeText}>{branch.openHours}</Text>
         </View>
       </View>
@@ -55,6 +70,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 12
   },
+  topRowStack: {
+    flexDirection: "column"
+  },
   copy: {
     flex: 1
   },
@@ -69,8 +87,6 @@ const styles = StyleSheet.create({
   name: {
     color: theme.colors.text,
     fontFamily: theme.fonts.display,
-    fontSize: 34,
-    lineHeight: 38,
     marginBottom: 6
   },
   nameCompact: {
@@ -90,6 +106,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingHorizontal: 12,
     paddingVertical: 8
+  },
+  hoursBadgeCompact: {
+    alignSelf: "flex-start"
   },
   hoursBadgeText: {
     color: theme.colors.text,
