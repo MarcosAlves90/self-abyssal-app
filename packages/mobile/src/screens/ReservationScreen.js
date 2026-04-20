@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import {
   Alert,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -10,6 +9,7 @@ import {
 } from "react-native";
 
 import { AddressFields } from "../components/AddressFields";
+import { KeyboardScrollScreen } from "../components/KeyboardScrollScreen";
 import { SectionHeader } from "../components/SectionHeader";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
@@ -206,7 +206,7 @@ export function ReservationScreen() {
   }
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+    <KeyboardScrollScreen style={styles.screen} contentContainerStyle={styles.content}>
       <SectionHeader eyebrow="BPMN" title="Reserva e delivery" />
 
       <View style={styles.modeRow}>
@@ -420,7 +420,7 @@ export function ReservationScreen() {
       ) : (
         <Text style={styles.emptyCopy}>Suas proximas reservas aparecerao aqui.</Text>
       )}
-    </ScrollView>
+    </KeyboardScrollScreen>
   );
 }
 

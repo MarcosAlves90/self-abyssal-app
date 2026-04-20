@@ -1,10 +1,7 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Alert,
-  KeyboardAvoidingView,
-  Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -12,11 +9,39 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
+import { KeyboardScrollScreen } from "../components/KeyboardScrollScreen";
 import { useAuth } from "../context/AuthContext";
 import { theme } from "../theme/tokens";
 
+const authModes = {
+  login: {
+    eyebrow: "Boas-vindas de volta",
+    title: "Entre para continuar sua experiencia.",
+    subtitle: "Acompanhe reservas, pedidos e endereco no mesmo fluxo.",
+    noticeTitle: "Mesmo acesso para tudo",
+    noticeCopy: "Use seu login para reservar mesa, pedir delivery e ajustar seu perfil sem repetir cadastro.",
+    submitLabel: "Entrar",
+    switchLabel: "Ainda nao tem conta?",
+    switchAction: "Criar agora"
+  },
+  register: {
+    eyebrow: "Nova conta",
+    title: "Crie seu acesso em poucos campos.",
+    subtitle: "Comece com seus dados principais. O endereco pode entrar depois.",
+    noticeTitle: "Cadastro enxuto",
+    noticeCopy: "Nome, e-mail, senha e telefone resolvem o acesso inicial. O endereco fica para o momento do pedido ou perfil.",
+    submitLabel: "Criar conta",
+    switchLabel: "Ja tem uma conta?",
+    switchAction: "Entrar"
+  }
+};
+
 export function AuthScreen() {
   const { login, register } = useAuth();
+  const nameInputRef = useRef(null);
+  const emailInputRef = useRef(null);
+  const passwordInputRef = useRef(null);
+  const phoneInputRef = useRef(null);
   const [mode, setMode] = useState("login");
   const [form, setForm] = useState({
     name: "",
@@ -31,6 +56,10 @@ export function AuthScreen() {
   }
 
   async function handleSubmit() {
+    if (isSubmitting) {
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -55,20 +84,25 @@ export function AuthScreen() {
   }
 
   const isRegister = mode === "register";
+  const currentMode = authModes[mode];
 
   return (
     <LinearGradient colors={["#030814", "#05111f", "#0b1e38"]} style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={styles.keyboard}
-      >
-        <ScrollView contentContainerStyle={styles.content}>
-          <View style={styles.hero}>
-            <Text style={styles.eyebrow}>Seafood Experience</Text>
-            <Text style={styles.title}>Abyssal</Text>
-            <Text style={styles.subtitle}>
-              Reserva imersiva, menu bioluminescente e fluxo de delivery premium em um unico app.
+      <KeyboardScrollScreen contentContainerStyle={styles.content} extraKeyboardSpace={44}>
+        <View style={styles.shell}>
+          <View style={styles.heroCard}>
+            <Text style={styles.heroEyebrow}>Seafood Experience</Text>
+            <Text style={styles.brand}>Abyssal</Text>
+            <Text style={styles.heroTitle}>Reserva, delivery e perfil no mesmo acesso.</Text>
+            <Text style={styles.heroCopy}>
+              Um fluxo unico para voltar a sua mesa, repetir pedidos e ajustar dados
+              sem friccao.
             </Text>
+            <View style={styles.featureRow}>
+              <FeaturePill label="Reservas" />
+              <FeaturePill label="Delivery" />
+              <FeaturePill label="Perfil" />
+            </View>
           </View>
 
           <View style={styles.panel}>
@@ -94,44 +128,80 @@ export function AuthScreen() {
               ))}
             </View>
 
+            <View style={styles.panelHeader}>
+              <Text style={styles.panelEyebrow}>{currentMode.eyebrow}</Text>
+              <Text style={styles.panelTitle}>{currentMode.title}</Text>
+              <Text style={styles.panelCopy}>{currentMode.subtitle}</Text>
+            </View>
+
             {isRegister ? (
               <FormField
+                autoCapitalize="words"
+                autoComplete="name"
+                inputRef={nameInputRef}
                 label="Nome"
                 onChangeText={(value) => updateField("name", value)}
+                onSubmitEditing={() => emailInputRef.current?.focus()}
                 placeholder="Seu nome"
+                returnKeyType="next"
+                textContentType="name"
                 value={form.name}
               />
             ) : null}
             <FormField
               autoCapitalize="none"
+              autoComplete="email"
+              autoCorrect={false}
+              inputRef={emailInputRef}
               keyboardType="email-address"
               label="E-mail"
               onChangeText={(value) => updateField("email", value)}
+              onSubmitEditing={() => passwordInputRef.current?.focus()}
               placeholder="voce@abyssal.app"
+              returnKeyType="next"
+              textContentType="emailAddress"
               value={form.email}
             />
             <FormField
+              autoCapitalize="none"
+              autoComplete={isRegister ? "new-password" : "password"}
+              autoCorrect={false}
+              inputRef={passwordInputRef}
               label="Senha"
               onChangeText={(value) => updateField("password", value)}
+              onSubmitEditing={() => {
+                if (isRegister) {
+                  phoneInputRef.current?.focus();
+                  return;
+                }
+
+                handleSubmit();
+              }}
               placeholder="No minimo 8 caracteres"
+              returnKeyType={isRegister ? "next" : "go"}
               secureTextEntry
+              textContentType={isRegister ? "newPassword" : "password"}
               value={form.password}
             />
             {isRegister ? (
-              <>
-                <FormField
-                  keyboardType="phone-pad"
-                  label="Telefone"
-                  onChangeText={(value) => updateField("phone", value)}
-                  placeholder="Opcional, para contato"
-                  value={form.phone}
-                />
-                <Text style={styles.helperCopy}>
-                  O endereco fica para depois: voce pode cadastrar nas configuracoes ou no
-                  primeiro pedido de delivery.
-                </Text>
-              </>
+              <FormField
+                autoComplete="tel"
+                inputRef={phoneInputRef}
+                keyboardType="phone-pad"
+                label="Telefone"
+                onChangeText={(value) => updateField("phone", value)}
+                onSubmitEditing={handleSubmit}
+                placeholder="Opcional, para contato"
+                returnKeyType="go"
+                textContentType="telephoneNumber"
+                value={form.phone}
+              />
             ) : null}
+
+            <View style={styles.noticeCard}>
+              <Text style={styles.noticeTitle}>{currentMode.noticeTitle}</Text>
+              <Text style={styles.noticeCopy}>{currentMode.noticeCopy}</Text>
+            </View>
 
             <Pressable
               disabled={isSubmitting}
@@ -139,23 +209,41 @@ export function AuthScreen() {
               style={[styles.submitButton, isSubmitting && styles.buttonDisabled]}
             >
               <Text style={styles.submitButtonText}>
-                {isSubmitting ? "Processando..." : isRegister ? "Criar conta" : "Entrar"}
+                {isSubmitting ? "Processando..." : currentMode.submitLabel}
               </Text>
             </Pressable>
+
+            <Pressable
+              onPress={() => setMode(isRegister ? "login" : "register")}
+              style={styles.switchAction}
+            >
+              <Text style={styles.switchActionLabel}>{currentMode.switchLabel}</Text>
+              <Text style={styles.switchActionLink}>{currentMode.switchAction}</Text>
+            </Pressable>
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+        </View>
+      </KeyboardScrollScreen>
     </LinearGradient>
   );
 }
 
-function FormField({ label, ...inputProps }) {
+function FeaturePill({ label }) {
+  return (
+    <View style={styles.featurePill}>
+      <Text style={styles.featurePillText}>{label}</Text>
+    </View>
+  );
+}
+
+function FormField({ inputRef, label, ...inputProps }) {
   return (
     <View style={styles.field}>
       <Text style={styles.label}>{label}</Text>
       <TextInput
+        ref={inputRef}
         placeholderTextColor={theme.colors.textMuted}
-        style={[styles.input, inputProps.multiline && styles.textarea]}
+        selectionColor={theme.colors.accentSoft}
+        style={styles.input}
         {...inputProps}
       />
     </View>
@@ -166,46 +254,83 @@ const styles = StyleSheet.create({
   container: {
     flex: 1
   },
-  keyboard: {
-    flex: 1
-  },
   content: {
-    flexGrow: 1,
-    justifyContent: "center",
-    padding: theme.spacing.xl
+    paddingHorizontal: theme.spacing.xl,
+    paddingTop: theme.spacing.xl + 8,
+    paddingBottom: 56
   },
-  hero: {
-    marginBottom: 34
+  shell: {
+    alignSelf: "center",
+    maxWidth: 560,
+    width: "100%"
   },
-  eyebrow: {
+  heroCard: {
+    backgroundColor: "rgba(6, 17, 31, 0.76)",
+    borderColor: "rgba(141, 249, 255, 0.2)",
+    borderRadius: 30,
+    borderWidth: 1,
+    marginBottom: 18,
+    overflow: "hidden",
+    padding: 24
+  },
+  heroEyebrow: {
     color: theme.colors.accentSoft,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 13,
     letterSpacing: 2,
     textTransform: "uppercase"
   },
-  title: {
+  brand: {
     color: theme.colors.text,
     fontFamily: theme.fonts.display,
-    fontSize: 72,
+    fontSize: 60,
     marginBottom: 8
   },
-  subtitle: {
+  heroTitle: {
+    color: theme.colors.text,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 28,
+    lineHeight: 34,
+    marginBottom: 10
+  },
+  heroCopy: {
     color: theme.colors.textMuted,
     fontFamily: theme.fonts.body,
     fontSize: 15,
     lineHeight: 24
   },
+  featureRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    marginTop: 18
+  },
+  featurePill: {
+    backgroundColor: "rgba(49,231,255,0.12)",
+    borderColor: "rgba(49,231,255,0.16)",
+    borderRadius: theme.radius.pill,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 8
+  },
+  featurePillText: {
+    color: theme.colors.text,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 12
+  },
   panel: {
-    backgroundColor: "rgba(10, 22, 39, 0.94)",
+    backgroundColor: "rgba(10, 22, 39, 0.96)",
     borderColor: theme.colors.border,
-    borderRadius: theme.radius.lg,
+    borderRadius: 30,
     borderWidth: 1,
     padding: theme.spacing.lg
   },
   modeRow: {
+    backgroundColor: "rgba(255,255,255,0.04)",
+    borderRadius: theme.radius.pill,
     flexDirection: "row",
-    marginBottom: 22
+    marginBottom: 20,
+    padding: 6
   },
   modeButton: {
     alignItems: "center",
@@ -215,7 +340,7 @@ const styles = StyleSheet.create({
     justifyContent: "center"
   },
   modeButtonActive: {
-    backgroundColor: "rgba(49,231,255,0.15)"
+    backgroundColor: "rgba(49,231,255,0.16)"
   },
   modeButtonText: {
     color: theme.colors.textMuted,
@@ -225,14 +350,31 @@ const styles = StyleSheet.create({
   modeButtonTextActive: {
     color: theme.colors.text
   },
-  field: {
-    marginBottom: 14
+  panelHeader: {
+    marginBottom: 20
   },
-  helperCopy: {
+  panelEyebrow: {
+    color: theme.colors.accentWarm,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 12,
+    letterSpacing: 1.3,
+    marginBottom: 8,
+    textTransform: "uppercase"
+  },
+  panelTitle: {
+    color: theme.colors.text,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 24,
+    lineHeight: 30,
+    marginBottom: 8
+  },
+  panelCopy: {
     color: theme.colors.textMuted,
     fontFamily: theme.fonts.body,
-    fontSize: 13,
-    lineHeight: 20,
+    fontSize: 14,
+    lineHeight: 22
+  },
+  field: {
     marginBottom: 14
   },
   label: {
@@ -249,21 +391,37 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
     fontFamily: theme.fonts.body,
     fontSize: 15,
-    minHeight: 52,
+    minHeight: 54,
     paddingHorizontal: 16,
     paddingVertical: 14
   },
-  textarea: {
-    minHeight: 90,
-    textAlignVertical: "top"
+  noticeCard: {
+    backgroundColor: "rgba(7, 18, 33, 0.92)",
+    borderColor: "rgba(255,255,255,0.05)",
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    marginTop: 4,
+    padding: 16
+  },
+  noticeTitle: {
+    color: theme.colors.text,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 14,
+    marginBottom: 6
+  },
+  noticeCopy: {
+    color: theme.colors.textMuted,
+    fontFamily: theme.fonts.body,
+    fontSize: 13,
+    lineHeight: 20
   },
   submitButton: {
     alignItems: "center",
     backgroundColor: theme.colors.accent,
     borderRadius: theme.radius.pill,
     justifyContent: "center",
-    marginTop: 8,
-    minHeight: 52
+    marginTop: 18,
+    minHeight: 54
   },
   buttonDisabled: {
     opacity: 0.7
@@ -272,5 +430,21 @@ const styles = StyleSheet.create({
     color: theme.colors.background,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 15
+  },
+  switchAction: {
+    alignItems: "center",
+    gap: 4,
+    marginTop: 16,
+    paddingVertical: 4
+  },
+  switchActionLabel: {
+    color: theme.colors.textMuted,
+    fontFamily: theme.fonts.body,
+    fontSize: 13
+  },
+  switchActionLink: {
+    color: theme.colors.accentSoft,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 14
   }
 });

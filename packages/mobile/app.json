@@ -15,7 +15,8 @@
       "bundleIdentifier": "com.abyssal.seafood"
     },
     "android": {
-      "package": "com.abyssal.seafood"
+      "package": "com.abyssal.seafood",
+      "softwareKeyboardLayoutMode": "resize"
     },
     "web": {
       "bundler": "metro"

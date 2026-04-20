@@ -2,13 +2,13 @@ import React, { useEffect, useState } from "react";
 import {
   Alert,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   View
 } from "react-native";
 
 import { AddressFields } from "../components/AddressFields";
+import { KeyboardScrollScreen } from "../components/KeyboardScrollScreen";
 import { SectionHeader } from "../components/SectionHeader";
 import { useAuth } from "../context/AuthContext";
 import {
@@ -124,7 +124,7 @@ export function ProfileScreen() {
   const primaryAddress = user?.savedAddresses?.[0];
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+    <KeyboardScrollScreen style={styles.screen} contentContainerStyle={styles.content}>
       <View style={styles.hero}>
         <Text style={styles.name}>{user?.name}</Text>
         <Text style={styles.email}>{user?.email}</Text>
@@ -212,7 +212,7 @@ export function ProfileScreen() {
       <Pressable onPress={logout} style={styles.logoutButton}>
         <Text style={styles.logoutButtonText}>Encerrar sessao</Text>
       </Pressable>
-    </ScrollView>
+    </KeyboardScrollScreen>
   );
 }
 
