@@ -3,6 +3,8 @@ const path = require("path");
 
 const rootDir = path.resolve(__dirname, "..");
 const composeFile = path.join(rootDir, "packages/backend/docker-compose.yml");
+const useWebTarget = process.argv.includes("--web");
+const mobileScript = useWebTarget ? "dev:mobile:web" : "dev:mobile";
 
 let backendLogStream;
 let mobileProcess;
@@ -70,6 +72,8 @@ async function shutdown(exitCode = 0) {
 }
 
 async function main() {
+  process.stdout.write(`[dev] starting mobile target: ${useWebTarget ? "web" : "native"}\n`);
+
   const backendUp = spawnProcess(
     "docker",
     ["compose", "-f", composeFile, "up", "--build", "-d"],
@@ -97,7 +101,7 @@ async function main() {
     }
   });
 
-  mobileProcess = spawnProcess("npm", ["run", "dev:mobile"], {
+  mobileProcess = spawnProcess("npm", ["run", mobileScript], {
     stdio: "inherit"
   });
 
