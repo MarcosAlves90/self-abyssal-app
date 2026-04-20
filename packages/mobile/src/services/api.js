@@ -1,6 +1,8 @@
 import axios from "axios";
 import { Platform } from "react-native";
 
+import { formatPostalCode, normalizePostalCode } from "../utils/address";
+
 const fallbackBaseUrl = Platform.select({
   android: "http://10.0.2.2:3333/api",
   default: "http://localhost:3333/api"
@@ -41,6 +43,11 @@ export async function fetchMe() {
   return data.user;
 }
 
+export async function savePrimaryAddress(payload) {
+  const { data } = await api.put("/auth/me/address", payload);
+  return data.user;
+}
+
 export async function fetchBranches() {
   const { data } = await api.get("/branches");
   return data.branches;
@@ -69,4 +76,29 @@ export async function fetchOrders() {
 export async function createOrder(payload) {
   const { data } = await api.post("/orders", payload);
   return data.order;
+}
+
+export async function lookupPostalCode(postalCode) {
+  const normalizedPostalCode = normalizePostalCode(postalCode);
+
+  if (normalizedPostalCode.length !== 8) {
+    throw new Error("Informe um CEP com 8 digitos.");
+  }
+
+  const { data } = await axios.get(`https://viacep.com.br/ws/${normalizedPostalCode}/json/`, {
+    timeout: 8000
+  });
+
+  if (data.erro) {
+    throw new Error("CEP nao encontrado.");
+  }
+
+  return {
+    postalCode: formatPostalCode(normalizedPostalCode),
+    street: data.logradouro || "",
+    neighborhood: data.bairro || "",
+    city: data.localidade || "",
+    state: data.uf || "",
+    complement: data.complemento || ""
+  };
 }

@@ -22,8 +22,7 @@ export function AuthScreen() {
     name: "",
     email: "",
     password: "",
-    phone: "",
-    defaultAddress: ""
+    phone: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -41,7 +40,12 @@ export function AuthScreen() {
           password: form.password
         });
       } else {
-        await register(form);
+        await register({
+          name: form.name,
+          email: form.email,
+          password: form.password,
+          phone: form.phone.trim() || undefined
+        });
       }
     } catch (error) {
       Alert.alert("Nao foi possivel autenticar", error.message);
@@ -119,16 +123,13 @@ export function AuthScreen() {
                   keyboardType="phone-pad"
                   label="Telefone"
                   onChangeText={(value) => updateField("phone", value)}
-                  placeholder="Opcional"
+                  placeholder="Opcional, para contato"
                   value={form.phone}
                 />
-                <FormField
-                  label="Endereco principal"
-                  multiline
-                  onChangeText={(value) => updateField("defaultAddress", value)}
-                  placeholder="Opcional, para delivery"
-                  value={form.defaultAddress}
-                />
+                <Text style={styles.helperCopy}>
+                  O endereco fica para depois: voce pode cadastrar nas configuracoes ou no
+                  primeiro pedido de delivery.
+                </Text>
               </>
             ) : null}
 
@@ -225,6 +226,13 @@ const styles = StyleSheet.create({
     color: theme.colors.text
   },
   field: {
+    marginBottom: 14
+  },
+  helperCopy: {
+    color: theme.colors.textMuted,
+    fontFamily: theme.fonts.body,
+    fontSize: 13,
+    lineHeight: 20,
     marginBottom: 14
   },
   label: {

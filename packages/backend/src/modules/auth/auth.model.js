@@ -5,7 +5,14 @@ const { encryptedFieldSchema } = require("../../shared/security/fieldEncryption"
 const addressSchema = new mongoose.Schema(
   {
     label: { type: String, trim: true },
-    addressEncrypted: encryptedFieldSchema()
+    postalCodeEncrypted: encryptedFieldSchema(),
+    streetEncrypted: encryptedFieldSchema(),
+    numberEncrypted: encryptedFieldSchema(),
+    complementEncrypted: encryptedFieldSchema(),
+    neighborhoodEncrypted: encryptedFieldSchema(),
+    cityEncrypted: encryptedFieldSchema(),
+    stateEncrypted: encryptedFieldSchema(),
+    summaryEncrypted: encryptedFieldSchema()
   },
   { _id: false }
 );

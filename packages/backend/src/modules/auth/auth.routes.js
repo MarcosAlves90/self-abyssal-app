@@ -4,8 +4,17 @@ const rateLimit = require("express-rate-limit");
 const { authenticate } = require("../../middlewares/authenticate");
 const { validateRequest } = require("../../middlewares/validateRequest");
 const { asyncHandler } = require("../../shared/asyncHandler");
-const { loginSchema, registerSchema } = require("./auth.schema");
-const { getCurrentUser, loginUser, registerUser } = require("./auth.service");
+const {
+  loginSchema,
+  registerSchema,
+  upsertPrimaryAddressSchema
+} = require("./auth.schema");
+const {
+  getCurrentUser,
+  loginUser,
+  registerUser,
+  savePrimaryAddress
+} = require("./auth.service");
 
 const authRouter = express.Router();
 
@@ -42,6 +51,16 @@ authRouter.get(
   authenticate,
   asyncHandler(async (request, response) => {
     const user = await getCurrentUser(request.user.id);
+    response.json({ user });
+  })
+);
+
+authRouter.put(
+  "/me/address",
+  authenticate,
+  validateRequest(upsertPrimaryAddressSchema),
+  asyncHandler(async (request, response) => {
+    const user = await savePrimaryAddress(request.user.id, request.validated.body);
     response.json({ user });
   })
 );

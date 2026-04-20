@@ -73,7 +73,8 @@ O app Expo cobre os fluxos centrais da Sprint 1:
 - menu com categorias;
 - detalhes do prato;
 - reserva presencial;
-- delivery com carrinho;
+- delivery com carrinho e endereço preenchido por CEP;
+- configuração posterior de endereço principal no perfil;
 - perfil com histórico de reservas e pedidos.
 
 O consumo da API usa obrigatoriamente `axios@1.15.1`.
