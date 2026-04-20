@@ -6,7 +6,7 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "npm run dev:backend:detached && npm run dev:mobile",
+    "dev": "node scripts/dev.js",
     "dev:backend": "docker compose -f packages/backend/docker-compose.yml up --build",
     "dev:backend:detached": "docker compose -f packages/backend/docker-compose.yml up --build -d",
     "dev:backend:local": "npm --workspace @abyssal/backend run dev",
@@ -15,7 +15,6 @@
     "seed:backend": "npm --workspace @abyssal/backend run seed"
   },
   "devDependencies": {
-    "concurrently": "^9.2.1",
     "react-native-safe-area-context": "~5.6.0",
     "react-native-screens": "~4.16.0"
   }
