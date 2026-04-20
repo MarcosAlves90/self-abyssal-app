@@ -140,6 +140,8 @@ Rodar backend Docker + mobile em paralelo:
 npm run dev
 ```
 
+Esse fluxo sobe o backend Docker em segundo plano e mantém o Expo no terminal atual, preservando QR code e comandos interativos do Metro.
+
 Encerrar e limpar volumes do backend Docker:
 
 ```bash

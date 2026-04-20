@@ -6,8 +6,9 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "concurrently --kill-others-on-fail --names backend,mobile --prefix-colors cyan,magenta \"npm run dev:backend\" \"npm run dev:mobile\"",
+    "dev": "npm run dev:backend:detached && npm run dev:mobile",
     "dev:backend": "docker compose -f packages/backend/docker-compose.yml up --build",
+    "dev:backend:detached": "docker compose -f packages/backend/docker-compose.yml up --build -d",
     "dev:backend:local": "npm --workspace @abyssal/backend run dev",
     "dev:backend:down": "docker compose -f packages/backend/docker-compose.yml down -v",
     "dev:mobile": "npm --workspace @abyssal/mobile run start",
