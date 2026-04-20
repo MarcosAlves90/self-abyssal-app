@@ -4,30 +4,42 @@ import { LinearGradient } from "expo-linear-gradient";
 
 import { formatCurrency, getCategoryLabel, theme } from "../theme/tokens";
 
-export function MenuCard({ item, onAdd, onPress }) {
+export function MenuCard({ item, onAdd, onPress, compact = false, style }) {
   return (
-    <Pressable onPress={onPress} style={styles.card}>
+    <Pressable
+      accessibilityHint="Abre os detalhes do prato"
+      accessibilityLabel={`${item.name}, ${formatCurrency(item.priceCents)}`}
+      accessibilityRole="button"
+      onPress={onPress}
+      style={[styles.card, style]}
+    >
       <LinearGradient
-        colors={["rgba(49,231,255,0.12)", "rgba(13,26,47,0.96)"]}
+        colors={["rgba(49,231,255,0.14)", "rgba(13,26,47,0.98)"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={[styles.panel, { borderColor: item.accentColor || theme.colors.border }]}
       >
         <View style={styles.topRow}>
           <Text style={styles.category}>{getCategoryLabel(item.category)}</Text>
-          <View style={[styles.dot, { backgroundColor: item.accentColor || theme.colors.accent }]} />
+          <View style={styles.availabilityRow}>
+            {item.availableForDineIn ? <Text style={styles.availabilityTag}>Salao</Text> : null}
+            {item.availableForDelivery ? (
+              <Text style={styles.availabilityTag}>Delivery</Text>
+            ) : null}
+          </View>
         </View>
-        <Text style={styles.name}>{item.name}</Text>
-        <Text numberOfLines={3} style={styles.description}>
+        <Text style={[styles.name, compact && styles.nameCompact]}>{item.name}</Text>
+        <Text numberOfLines={compact ? 2 : 3} style={styles.description}>
           {item.description}
         </Text>
-        <View style={styles.badges}>
-          {item.availableForDineIn ? <Text style={styles.badge}>Salao</Text> : null}
-          {item.availableForDelivery ? <Text style={styles.badge}>Delivery</Text> : null}
-        </View>
         <View style={styles.footer}>
-          <Text style={styles.price}>{formatCurrency(item.priceCents)}</Text>
+          <View>
+            <Text style={styles.priceLabel}>A partir de</Text>
+            <Text style={styles.price}>{formatCurrency(item.priceCents)}</Text>
+          </View>
           <Pressable
+            accessibilityLabel={`Adicionar ${item.name} ao carrinho`}
+            accessibilityRole="button"
             onPress={(event) => {
               event.stopPropagation();
               onAdd();
@@ -44,15 +56,16 @@ export function MenuCard({ item, onAdd, onPress }) {
 
 const styles = StyleSheet.create({
   card: {
-    marginBottom: theme.spacing.md
+    marginBottom: 0
   },
   panel: {
     borderRadius: theme.radius.lg,
     borderWidth: 1,
+    minHeight: 244,
     padding: theme.spacing.lg
   },
   topRow: {
-    alignItems: "center",
+    alignItems: "flex-start",
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: theme.spacing.sm
@@ -64,16 +77,33 @@ const styles = StyleSheet.create({
     letterSpacing: 1.2,
     textTransform: "uppercase"
   },
-  dot: {
+  availabilityRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6,
+    justifyContent: "flex-end",
+    marginLeft: 12
+  },
+  availabilityTag: {
+    backgroundColor: "rgba(255,255,255,0.06)",
     borderRadius: theme.radius.pill,
-    height: 12,
-    width: 12
+    color: theme.colors.text,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 11,
+    overflow: "hidden",
+    paddingHorizontal: 10,
+    paddingVertical: 7
   },
   name: {
     color: theme.colors.text,
     fontFamily: theme.fonts.display,
     fontSize: 30,
+    lineHeight: 34,
     marginBottom: 8
+  },
+  nameCompact: {
+    fontSize: 26,
+    lineHeight: 30
   },
   description: {
     color: theme.colors.textMuted,
@@ -82,26 +112,17 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     minHeight: 66
   },
-  badges: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    marginTop: 14
-  },
-  badge: {
-    backgroundColor: "rgba(122,225,255,0.1)",
-    borderRadius: theme.radius.pill,
-    color: theme.colors.text,
-    fontFamily: theme.fonts.body,
-    overflow: "hidden",
-    paddingHorizontal: 12,
-    paddingVertical: 8
-  },
   footer: {
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: 18
+  },
+  priceLabel: {
+    color: theme.colors.textMuted,
+    fontFamily: theme.fonts.body,
+    fontSize: 12,
+    marginBottom: 4
   },
   price: {
     color: theme.colors.text,
@@ -114,6 +135,7 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.pill,
     justifyContent: "center",
     minHeight: 48,
+    minWidth: 122,
     paddingHorizontal: 18
   },
   addText: {

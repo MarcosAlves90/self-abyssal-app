@@ -4,8 +4,10 @@ import {
   Pressable,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
 import { AddressFields } from "../components/AddressFields";
 import { KeyboardScrollScreen } from "../components/KeyboardScrollScreen";
@@ -18,6 +20,7 @@ import {
   lookupPostalCode,
   savePrimaryAddress
 } from "../services/api";
+import { getResponsiveLayout } from "../theme/layout";
 import { formatCurrency, theme } from "../theme/tokens";
 import {
   createEmptyAddress,
@@ -28,6 +31,7 @@ import {
 
 export function ProfileScreen() {
   const { logout, refreshUser, user } = useAuth();
+  const { width } = useWindowDimensions();
   const [orders, setOrders] = useState([]);
   const [reservations, setReservations] = useState([]);
   const [addressForm, setAddressForm] = useState(createEmptyAddress());
@@ -121,98 +125,159 @@ export function ProfileScreen() {
     }
   }
 
+  const layout = getResponsiveLayout(width);
   const primaryAddress = user?.savedAddresses?.[0];
+  const initial = user?.name?.charAt(0)?.toUpperCase() || "A";
 
   return (
-    <KeyboardScrollScreen style={styles.screen} contentContainerStyle={styles.content}>
-      <View style={styles.hero}>
-        <Text style={styles.name}>{user?.name}</Text>
-        <Text style={styles.email}>{user?.email}</Text>
-        <Text style={styles.role}>{user?.role === "admin" ? "Administrador" : "Cliente"}</Text>
-      </View>
-
-      <SectionHeader
-        eyebrow="Conta"
-        title="Resumo"
-        actionLabel="Atualizar"
-        onActionPress={loadProfile}
-      />
-      <View style={styles.statsRow}>
-        <SummaryCard label="Reservas" value={String(reservations.length)} />
-        <SummaryCard label="Pedidos" value={String(orders.length)} />
-      </View>
-
-      <SectionHeader eyebrow="Configuracoes" title="Endereco principal" />
-      <Text style={styles.sectionCopy}>
-        O cadastro inicial nao pede endereco. Salve aqui quando quiser ou antes do
-        primeiro delivery.
-      </Text>
-      {primaryAddress ? (
-        <View style={styles.addressCard}>
-          <Text style={styles.addressCardTitle}>{primaryAddress.label || "Principal"}</Text>
-          <Text style={styles.addressCardCopy}>{primaryAddress.summary}</Text>
-        </View>
-      ) : (
-        <Text style={styles.emptyCopy}>Nenhum endereco salvo ainda.</Text>
-      )}
-      <View style={styles.addressPanel}>
-        <AddressFields
-          address={addressForm}
-          isLookingUpPostalCode={isLookingUpPostalCode}
-          onChangeField={updateAddressField}
-          onLookupPostalCode={handlePostalCodeLookup}
-        />
-        <Text style={styles.addressHint}>
-          O CEP preenche rua, bairro, cidade e UF automaticamente. Numero e complemento
-          continuam sob seu controle.
-        </Text>
-        <Pressable
-          disabled={isSavingAddress}
-          onPress={handleSavePrimaryAddress}
-          style={[styles.primaryButton, isSavingAddress && styles.buttonDisabled]}
+    <KeyboardScrollScreen
+      contentContainerStyle={styles.content}
+      extraKeyboardSpace={56}
+      style={styles.screen}
+    >
+      <View style={[styles.shell, { maxWidth: layout.contentMaxWidth }]}>
+        <LinearGradient
+          colors={["#08172c", "#0b203d", "#13345b"]}
+          end={{ x: 1, y: 1 }}
+          start={{ x: 0, y: 0 }}
+          style={styles.hero}
         >
-          <Text style={styles.primaryButtonText}>
-            {isSavingAddress ? "Salvando..." : "Salvar endereco principal"}
-          </Text>
-        </Pressable>
+          <View style={[styles.heroTop, layout.isWide && styles.heroTopWide]}>
+            <View style={styles.identityRow}>
+              <View style={styles.avatar}>
+                <Text style={styles.avatarText}>{initial}</Text>
+              </View>
+              <View style={styles.identityCopy}>
+                <Text style={styles.name}>{user?.name}</Text>
+                <Text style={styles.email}>{user?.email}</Text>
+                <Text style={styles.role}>
+                  {user?.role === "admin" ? "Administrador" : "Cliente"}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.heroActions}>
+              <ActionButton label="Atualizar" onPress={loadProfile} />
+              <ActionButton danger label="Encerrar sessao" onPress={logout} />
+            </View>
+          </View>
+
+          <View style={styles.statsRow}>
+            <SummaryCard label="Reservas" value={String(reservations.length)} />
+            <SummaryCard label="Pedidos" value={String(orders.length)} />
+            <SummaryCard
+              label="Endereco"
+              value={primaryAddress ? "Pronto" : "Pendente"}
+            />
+          </View>
+        </LinearGradient>
+
+        <View style={[styles.mainGrid, layout.isWide && styles.mainGridWide]}>
+          <View style={styles.primaryColumn}>
+            <SectionHeader
+              description="Cadastro e edicao do endereco principal com a mesma clareza de apps de conta e checkout."
+              eyebrow="Configuracoes"
+              title="Endereco principal"
+            />
+
+            {primaryAddress ? (
+              <View style={styles.addressSummaryCard}>
+                <Text style={styles.addressSummaryTitle}>
+                  {primaryAddress.label || "Principal"}
+                </Text>
+                <Text style={styles.addressSummaryCopy}>{primaryAddress.summary}</Text>
+              </View>
+            ) : (
+              <View style={styles.emptyCard}>
+                <Text style={styles.emptyTitle}>Nenhum endereco salvo ainda.</Text>
+                <Text style={styles.emptyCopy}>
+                  Salve aqui quando quiser ou antes do primeiro delivery.
+                </Text>
+              </View>
+            )}
+
+            <View style={styles.addressPanel}>
+              <AddressFields
+                address={addressForm}
+                isLookingUpPostalCode={isLookingUpPostalCode}
+                onChangeField={updateAddressField}
+                onLookupPostalCode={handlePostalCodeLookup}
+              />
+              <Text style={styles.addressHint}>
+                O CEP preenche rua, bairro, cidade e UF automaticamente. Numero e
+                complemento continuam sob seu controle.
+              </Text>
+              <Pressable
+                accessibilityRole="button"
+                disabled={isSavingAddress}
+                onPress={handleSavePrimaryAddress}
+                style={[styles.primaryButton, isSavingAddress && styles.buttonDisabled]}
+              >
+                <Text style={styles.primaryButtonText}>
+                  {isSavingAddress ? "Salvando..." : "Salvar endereco principal"}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+
+          <View style={[styles.secondaryColumn, layout.isWide && styles.secondaryColumnWide]}>
+            <SectionHeader
+              description="Historico em cards compactos, com leitura proxima de apps de mobilidade e conta."
+              eyebrow="Historico"
+              title="Pedidos recentes"
+            />
+            {orders.length ? (
+              orders.map((order) => (
+                <ActivityCard
+                  key={order.id}
+                  meta={new Date(order.createdAt).toLocaleString("pt-BR")}
+                  subtitle={formatCurrency(order.totalCents)}
+                  title={`${order.fulfillmentType === "delivery" ? "Delivery" : "Salao"} • ${order.status}`}
+                />
+              ))
+            ) : (
+              <View style={styles.emptyCard}>
+                <Text style={styles.emptyTitle}>Nenhum pedido registrado ainda.</Text>
+              </View>
+            )}
+
+            <SectionHeader
+              description="Sua agenda permanece visivel sem competir com os ajustes da conta."
+              eyebrow="Agenda"
+              title="Reservas"
+            />
+            {reservations.length ? (
+              reservations.map((reservation) => (
+                <ActivityCard
+                  key={reservation.id}
+                  meta={new Date(reservation.scheduledAt).toLocaleString("pt-BR")}
+                  subtitle={reservation.depthLevel}
+                  title={reservation.branchName}
+                />
+              ))
+            ) : (
+              <View style={styles.emptyCard}>
+                <Text style={styles.emptyTitle}>Nenhuma reserva confirmada.</Text>
+              </View>
+            )}
+          </View>
+        </View>
       </View>
-
-      <SectionHeader eyebrow="Historico" title="Pedidos recentes" />
-      {orders.length ? (
-        orders.map((order) => (
-          <View key={order.id} style={styles.itemCard}>
-            <Text style={styles.itemTitle}>
-              {order.fulfillmentType === "delivery" ? "Delivery" : "Salao"} • {order.status}
-            </Text>
-            <Text style={styles.itemCopy}>{formatCurrency(order.totalCents)}</Text>
-            <Text style={styles.itemMeta}>
-              {new Date(order.createdAt).toLocaleString("pt-BR")}
-            </Text>
-          </View>
-        ))
-      ) : (
-        <Text style={styles.emptyCopy}>Nenhum pedido registrado ainda.</Text>
-      )}
-
-      <SectionHeader eyebrow="Agenda" title="Reservas" />
-      {reservations.length ? (
-        reservations.map((reservation) => (
-          <View key={reservation.id} style={styles.itemCard}>
-            <Text style={styles.itemTitle}>{reservation.branchName}</Text>
-            <Text style={styles.itemCopy}>{reservation.depthLevel}</Text>
-            <Text style={styles.itemMeta}>
-              {new Date(reservation.scheduledAt).toLocaleString("pt-BR")}
-            </Text>
-          </View>
-        ))
-      ) : (
-        <Text style={styles.emptyCopy}>Nenhuma reserva confirmada.</Text>
-      )}
-
-      <Pressable onPress={logout} style={styles.logoutButton}>
-        <Text style={styles.logoutButtonText}>Encerrar sessao</Text>
-      </Pressable>
     </KeyboardScrollScreen>
+  );
+}
+
+function ActionButton({ danger = false, label, onPress }) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={[styles.actionButton, danger && styles.actionButtonDanger]}
+    >
+      <Text style={[styles.actionButtonText, danger && styles.actionButtonTextDanger]}>
+        {label}
+      </Text>
+    </Pressable>
   );
 }
 
@@ -225,26 +290,70 @@ function SummaryCard({ label, value }) {
   );
 }
 
+function ActivityCard({ meta, subtitle, title }) {
+  return (
+    <View style={styles.activityCard}>
+      <Text style={styles.activityTitle}>{title}</Text>
+      <Text style={styles.activitySubtitle}>{subtitle}</Text>
+      <Text style={styles.activityMeta}>{meta}</Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   screen: {
     backgroundColor: theme.colors.background
   },
   content: {
+    alignItems: "center",
     padding: theme.spacing.lg,
     paddingBottom: 120
   },
+  shell: {
+    width: "100%"
+  },
   hero: {
-    backgroundColor: theme.colors.surface,
-    borderColor: theme.colors.border,
     borderRadius: theme.radius.lg,
-    borderWidth: 1,
-    marginBottom: theme.spacing.xl,
+    marginBottom: theme.spacing.lg,
     padding: theme.spacing.xl
+  },
+  heroTop: {
+    gap: 20
+  },
+  heroTopWide: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-between"
+  },
+  identityRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 16
+  },
+  avatar: {
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.08)",
+    borderColor: "rgba(255,255,255,0.08)",
+    borderRadius: 34,
+    borderWidth: 1,
+    height: 68,
+    justifyContent: "center",
+    width: 68
+  },
+  avatarText: {
+    color: theme.colors.text,
+    fontFamily: theme.fonts.display,
+    fontSize: 36,
+    lineHeight: 38
+  },
+  identityCopy: {
+    flexShrink: 1
   },
   name: {
     color: theme.colors.text,
     fontFamily: theme.fonts.display,
-    fontSize: 44
+    fontSize: 46,
+    lineHeight: 48
   },
   email: {
     color: theme.colors.text,
@@ -256,51 +365,90 @@ const styles = StyleSheet.create({
     color: theme.colors.accentSoft,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 13,
-    marginTop: 16
+    marginTop: 12
+  },
+  heroActions: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10
+  },
+  actionButton: {
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.pill,
+    borderWidth: 1,
+    justifyContent: "center",
+    minHeight: 44,
+    paddingHorizontal: 16
+  },
+  actionButtonDanger: {
+    borderColor: "rgba(255,139,156,0.35)"
+  },
+  actionButtonText: {
+    color: theme.colors.text,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 13
+  },
+  actionButtonTextDanger: {
+    color: theme.colors.danger
   },
   statsRow: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: 12,
-    marginBottom: theme.spacing.xl
+    marginTop: 22
   },
   summaryCard: {
-    backgroundColor: theme.colors.surfaceRaised,
+    backgroundColor: "rgba(255,255,255,0.05)",
     borderRadius: theme.radius.md,
-    flex: 1,
-    minHeight: 104,
     justifyContent: "center",
-    padding: theme.spacing.lg
+    minHeight: 96,
+    minWidth: 160,
+    padding: 16
   },
   summaryValue: {
     color: theme.colors.text,
     fontFamily: theme.fonts.display,
-    fontSize: 36
+    fontSize: 34,
+    lineHeight: 38
   },
   summaryLabel: {
     color: theme.colors.textMuted,
     fontFamily: theme.fonts.body,
     fontSize: 13
   },
-  sectionCopy: {
-    color: theme.colors.textMuted,
-    fontFamily: theme.fonts.body,
-    fontSize: 14,
-    lineHeight: 22,
-    marginBottom: theme.spacing.md
+  mainGrid: {
+    gap: theme.spacing.lg
   },
-  addressCard: {
+  mainGridWide: {
+    alignItems: "flex-start",
+    flexDirection: "row"
+  },
+  primaryColumn: {
+    flex: 1
+  },
+  secondaryColumn: {
+    gap: theme.spacing.md
+  },
+  secondaryColumnWide: {
+    width: 340
+  },
+  addressSummaryCard: {
     backgroundColor: theme.colors.surfaceRaised,
+    borderColor: "rgba(255,255,255,0.05)",
     borderRadius: theme.radius.md,
+    borderWidth: 1,
     marginBottom: theme.spacing.md,
     padding: theme.spacing.lg
   },
-  addressCardTitle: {
+  addressSummaryTitle: {
     color: theme.colors.text,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 16,
     marginBottom: 8
   },
-  addressCardCopy: {
+  addressSummaryCopy: {
     color: theme.colors.textMuted,
     fontFamily: theme.fonts.body,
     fontSize: 14,
@@ -311,7 +459,6 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.border,
     borderRadius: theme.radius.lg,
     borderWidth: 1,
-    marginBottom: theme.spacing.xl,
     padding: theme.spacing.lg
   },
   addressHint: {
@@ -319,8 +466,8 @@ const styles = StyleSheet.create({
     fontFamily: theme.fonts.body,
     fontSize: 13,
     lineHeight: 20,
-    marginTop: theme.spacing.md,
-    marginBottom: theme.spacing.lg
+    marginBottom: theme.spacing.lg,
+    marginTop: theme.spacing.md
   },
   primaryButton: {
     alignItems: "center",
@@ -337,49 +484,49 @@ const styles = StyleSheet.create({
     fontFamily: theme.fonts.bodyBold,
     fontSize: 15
   },
-  itemCard: {
+  activityCard: {
     backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,
     borderRadius: theme.radius.md,
     borderWidth: 1,
-    marginBottom: 12,
     padding: theme.spacing.lg
   },
-  itemTitle: {
+  activityTitle: {
     color: theme.colors.text,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 16,
+    lineHeight: 22,
     marginBottom: 6
   },
-  itemCopy: {
+  activitySubtitle: {
     color: theme.colors.accentSoft,
     fontFamily: theme.fonts.body,
     fontSize: 14,
     marginBottom: 6
   },
-  itemMeta: {
+  activityMeta: {
     color: theme.colors.textMuted,
     fontFamily: theme.fonts.body,
-    fontSize: 13
+    fontSize: 13,
+    lineHeight: 20
+  },
+  emptyCard: {
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.lg,
+    borderWidth: 1,
+    padding: theme.spacing.lg
+  },
+  emptyTitle: {
+    color: theme.colors.text,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 16,
+    marginBottom: 8
   },
   emptyCopy: {
     color: theme.colors.textMuted,
     fontFamily: theme.fonts.body,
     fontSize: 14,
-    marginBottom: theme.spacing.lg
-  },
-  logoutButton: {
-    alignItems: "center",
-    borderColor: theme.colors.danger,
-    borderRadius: theme.radius.pill,
-    borderWidth: 1,
-    justifyContent: "center",
-    marginTop: theme.spacing.xl,
-    minHeight: 52
-  },
-  logoutButtonText: {
-    color: theme.colors.danger,
-    fontFamily: theme.fonts.bodyBold,
-    fontSize: 15
+    lineHeight: 22
   }
 });

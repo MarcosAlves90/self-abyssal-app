@@ -5,6 +5,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  useWindowDimensions,
   View
 } from "react-native";
 
@@ -17,6 +18,9 @@ export function AddressFields({
   onChangeField,
   onLookupPostalCode
 }) {
+  const { width } = useWindowDimensions();
+  const isCompact = width < 520;
+
   return (
     <View style={styles.container}>
       <Field label="CEP">
@@ -31,6 +35,7 @@ export function AddressFields({
             value={address.postalCode}
           />
           <Pressable
+            accessibilityRole="button"
             disabled={isLookingUpPostalCode}
             onPress={onLookupPostalCode}
             style={[styles.lookupButton, isLookingUpPostalCode && styles.lookupButtonDisabled]}
@@ -44,9 +49,10 @@ export function AddressFields({
         </View>
       </Field>
 
-      <View style={styles.row}>
+      <View style={[styles.row, isCompact && styles.rowStack]}>
         <Field label="Rua" style={styles.grow}>
           <TextInput
+            autoCapitalize="words"
             onChangeText={(value) => onChangeField("street", value)}
             placeholder="Logradouro"
             placeholderTextColor={theme.colors.textMuted}
@@ -54,8 +60,9 @@ export function AddressFields({
             value={address.street}
           />
         </Field>
-        <Field label="Numero" style={styles.numberField}>
+        <Field label="Numero" style={[styles.numberField, isCompact && styles.fullWidthField]}>
           <TextInput
+            keyboardType="number-pad"
             onChangeText={(value) => onChangeField("number", value)}
             placeholder="123"
             placeholderTextColor={theme.colors.textMuted}
@@ -67,6 +74,7 @@ export function AddressFields({
 
       <Field label="Complemento">
         <TextInput
+          autoCapitalize="words"
           onChangeText={(value) => onChangeField("complement", value)}
           placeholder="Apartamento, bloco, referencia"
           placeholderTextColor={theme.colors.textMuted}
@@ -77,6 +85,7 @@ export function AddressFields({
 
       <Field label="Bairro">
         <TextInput
+          autoCapitalize="words"
           onChangeText={(value) => onChangeField("neighborhood", value)}
           placeholder="Bairro"
           placeholderTextColor={theme.colors.textMuted}
@@ -85,9 +94,10 @@ export function AddressFields({
         />
       </Field>
 
-      <View style={styles.row}>
+      <View style={[styles.row, isCompact && styles.rowStack]}>
         <Field label="Cidade" style={styles.grow}>
           <TextInput
+            autoCapitalize="words"
             onChangeText={(value) => onChangeField("city", value)}
             placeholder="Cidade"
             placeholderTextColor={theme.colors.textMuted}
@@ -95,7 +105,7 @@ export function AddressFields({
             value={address.city}
           />
         </Field>
-        <Field label="UF" style={styles.stateField}>
+        <Field label="UF" style={[styles.stateField, isCompact && styles.fullWidthField]}>
           <TextInput
             autoCapitalize="characters"
             maxLength={2}
@@ -173,8 +183,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 12
   },
+  rowStack: {
+    flexDirection: "column"
+  },
   grow: {
     flex: 1
+  },
+  fullWidthField: {
+    maxWidth: "100%"
   },
   numberField: {
     maxWidth: 110

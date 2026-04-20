@@ -4,18 +4,28 @@ import { LinearGradient } from "expo-linear-gradient";
 
 import { theme } from "../theme/tokens";
 
-export function BranchCard({ branch }) {
+export function BranchCard({ branch, compact = false, style }) {
   return (
     <LinearGradient
-      colors={["rgba(7,18,38,0.94)", "rgba(17,35,64,0.96)"]}
-      style={styles.card}
+      colors={["rgba(7,18,38,0.98)", "rgba(17,35,64,0.98)"]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={[styles.card, compact && styles.cardCompact, style]}
     >
-      <Text style={styles.name}>{branch.name}</Text>
-      <Text style={styles.meta}>
-        {branch.city} • {branch.neighborhood}
-      </Text>
+      <View style={styles.topRow}>
+        <View style={styles.copy}>
+          <Text style={styles.eyebrow}>Experiencia presencial</Text>
+          <Text style={[styles.name, compact && styles.nameCompact]}>{branch.name}</Text>
+          <Text style={styles.meta}>
+            {branch.city} • {branch.neighborhood}
+          </Text>
+        </View>
+        <View style={styles.hoursBadge}>
+          <Text style={styles.hoursBadgeText}>{branch.openHours}</Text>
+        </View>
+      </View>
       <Text style={styles.address}>{branch.addressLine}</Text>
-      <Text style={styles.openHours}>{branch.openHours}</Text>
+      <Text style={styles.sectionLabel}>Profundidades disponiveis</Text>
       <View style={styles.depths}>
         {branch.reservationDepths.map((depth) => (
           <Text key={depth} style={styles.depthTag}>
@@ -32,32 +42,74 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.border,
     borderRadius: theme.radius.lg,
     borderWidth: 1,
-    marginBottom: theme.spacing.md,
+    minHeight: 228,
     padding: theme.spacing.lg
+  },
+  cardCompact: {
+    minHeight: 210
+  },
+  topRow: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    gap: 12,
+    justifyContent: "space-between",
+    marginBottom: 12
+  },
+  copy: {
+    flex: 1
+  },
+  eyebrow: {
+    color: theme.colors.accentSoft,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 11,
+    letterSpacing: 1.4,
+    marginBottom: 8,
+    textTransform: "uppercase"
   },
   name: {
     color: theme.colors.text,
-    fontFamily: theme.fonts.bodyBold,
-    fontSize: 18,
+    fontFamily: theme.fonts.display,
+    fontSize: 34,
+    lineHeight: 38,
     marginBottom: 6
+  },
+  nameCompact: {
+    fontSize: 30,
+    lineHeight: 34
   },
   meta: {
     color: theme.colors.accentSoft,
     fontFamily: theme.fonts.body,
     fontSize: 13,
-    marginBottom: 8
+    lineHeight: 18
+  },
+  hoursBadge: {
+    backgroundColor: "rgba(49,231,255,0.12)",
+    borderColor: "rgba(49,231,255,0.18)",
+    borderRadius: theme.radius.pill,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 8
+  },
+  hoursBadgeText: {
+    color: theme.colors.text,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 12
   },
   address: {
     color: theme.colors.text,
     fontFamily: theme.fonts.body,
     fontSize: 14,
-    marginBottom: 4
+    lineHeight: 22,
+    marginBottom: 16
   },
-  openHours: {
+  sectionLabel: {
     color: theme.colors.textMuted,
-    fontFamily: theme.fonts.body,
-    fontSize: 14,
-    marginBottom: 14
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 12,
+    letterSpacing: 1.1,
+    marginBottom: 14,
+    textTransform: "uppercase"
   },
   depths: {
     flexDirection: "row",
@@ -66,7 +118,9 @@ const styles = StyleSheet.create({
   },
   depthTag: {
     backgroundColor: "rgba(49,231,255,0.1)",
+    borderColor: "rgba(49,231,255,0.1)",
     borderRadius: theme.radius.pill,
+    borderWidth: 1,
     color: theme.colors.text,
     fontFamily: theme.fonts.body,
     overflow: "hidden",
