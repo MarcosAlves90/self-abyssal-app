@@ -5,11 +5,31 @@ import { formatPostalCode, normalizePostalCode } from "../utils/address";
 
 const fallbackBaseUrl = Platform.select({
   android: "http://10.0.2.2:3333/api",
+  web: "http://127.0.0.1:3333/api",
   default: "http://localhost:3333/api"
 });
 
+function normalizeWebBaseUrl(baseUrl) {
+  if (!baseUrl || Platform.OS !== "web") {
+    return baseUrl;
+  }
+
+  try {
+    const url = new URL(baseUrl);
+
+    if (url.hostname === "localhost") {
+      url.hostname = "127.0.0.1";
+      return url.toString().replace(/\/$/, "");
+    }
+  } catch {
+    return baseUrl;
+  }
+
+  return baseUrl;
+}
+
 export const api = axios.create({
-  baseURL: process.env.EXPO_PUBLIC_API_BASE_URL || fallbackBaseUrl,
+  baseURL: normalizeWebBaseUrl(process.env.EXPO_PUBLIC_API_BASE_URL) || fallbackBaseUrl,
   timeout: 12000
 });
 
