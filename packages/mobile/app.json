@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "Abyssal Seafood Experience",
+    "slug": "abyssal-seafood-experience",
+    "scheme": "abyssal",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "backgroundColor": "#040b17"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.abyssal.seafood"
+    },
+    "android": {
+      "package": "com.abyssal.seafood"
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}

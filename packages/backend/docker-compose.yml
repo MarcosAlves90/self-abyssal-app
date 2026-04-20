@@ -1,0 +1,40 @@
+services:
+  api:
+    build:
+      context: .
+    container_name: abyssal-api
+    command: npm run dev
+    environment:
+      PORT: 3333
+      MONGO_URI: mongodb://mongo:27017/abyssal_app
+      CORS_ORIGIN: "*"
+      AUTO_SEED: "true"
+      JWT_SECRET: 3e82f77875293dd4226fb5271e5e28ee71bb4b3655d907eb418d5b4dfa7b29c5
+      ENCRYPTION_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+    ports:
+      - "3333:3333"
+    volumes:
+      - .:/app
+      - backend_node_modules:/app/node_modules
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  mongo:
+    image: mongo:8.0
+    container_name: abyssal-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  mongo_data:
+  backend_node_modules:
