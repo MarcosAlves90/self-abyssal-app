@@ -11,29 +11,25 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 
 import { KeyboardScrollScreen } from "../components/KeyboardScrollScreen";
-import { SeaShellIcon } from "../components/icons/SeaShellIcon";
+import { AnglerfishIcon } from "../components/icons/AnglerfishIcon";
 import { useAuth } from "../context/AuthContext";
 import { theme } from "../theme/tokens";
 
 const authModes = {
   login: {
-    eyebrow: "Acesso",
-    title: "Entre para continuar.",
-    subtitle: "Acesse reservas, pedidos e seu perfil com uma única conta.",
-    noticeTitle: "Tudo em um só acesso",
-    noticeCopy: "Use seu login para consultar reservas, acompanhar pedidos e atualizar seus dados.",
+    eyebrow: "Bem-vindo",
+    title: "Acesse sua conta.",
+    subtitle: "Rápido, seguro e sem ruído.",
     submitLabel: "Entrar",
     switchLabel: "Ainda não tem conta?",
     switchAction: "Criar agora"
   },
   register: {
-    eyebrow: "Cadastro",
+    eyebrow: "Comece agora",
     title: "Crie sua conta.",
-    subtitle: "Comece com seus dados principais. O endereço pode ser preenchido depois.",
-    noticeTitle: "Cadastro rápido",
-    noticeCopy: "Nome, e-mail, senha e telefone são suficientes para criar o acesso inicial.",
+    subtitle: "Leva menos de um minuto.",
     submitLabel: "Criar conta",
-    switchLabel: "Já tem uma conta?",
+    switchLabel: "Já tem conta?",
     switchAction: "Entrar"
   }
 };
@@ -94,7 +90,7 @@ export function AuthScreen() {
         <View style={styles.shell}>
           <View style={styles.brandRow}>
             <Text style={styles.brand}>Abyssal</Text>
-            <SeaShellIcon color={theme.colors.accentSoft} size={52} style={styles.brandIcon} />
+            <AnglerfishIcon color={theme.colors.accentSoft} size={78} style={styles.brandIcon} />
           </View>
 
           <View style={styles.modeRow}>
@@ -189,11 +185,6 @@ export function AuthScreen() {
             />
           ) : null}
 
-          <View style={styles.noticeCard}>
-            <Text style={styles.noticeTitle}>{currentMode.noticeTitle}</Text>
-            <Text style={styles.noticeCopy}>{currentMode.noticeCopy}</Text>
-          </View>
-
           <Pressable
             disabled={isSubmitting}
             onPress={handleSubmit}
@@ -211,23 +202,13 @@ export function AuthScreen() {
             <Text style={styles.switchActionLabel}>{currentMode.switchLabel}</Text>
             <Text style={styles.switchActionLink}>{currentMode.switchAction}</Text>
           </Pressable>
+
+          <Text style={styles.supportCopy}>Sem spam. Seus dados ficam protegidos.</Text>
         </View>
       </KeyboardScrollScreen>
     </LinearGradient>
   );
 }
-
-function FeaturePill({ label }) {
-  return (
-    <View style={styles.featurePill}>
-      <Text style={styles.featurePillText}>{label}</Text>
-    </View>
-  );
-}
-
-FeaturePill.propTypes = {
-  label: PropTypes.string.isRequired
-};
 
 function FormField({ inputRef, label, ...inputProps }) {
   return (
@@ -270,7 +251,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     alignSelf: "center",
     flexDirection: "row",
-    gap: 10,
+    gap: 0,
     marginBottom: 18
   },
   brand: {
@@ -281,18 +262,6 @@ const styles = StyleSheet.create({
   },
   brandIcon: {
     marginTop: 6
-  },
-  featurePill: {
-    backgroundColor: "rgba(49,231,255,0.12)",
-    borderColor: "rgba(49,231,255,0.16)",
-    borderWidth: 1,
-    paddingHorizontal: 14,
-    paddingVertical: 8
-  },
-  featurePillText: {
-    color: theme.colors.text,
-    fontFamily: theme.fonts.bodyBold,
-    fontSize: 12
   },
   modeRow: {
     backgroundColor: "rgba(255,255,255,0.04)",
@@ -361,25 +330,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14
   },
-  noticeCard: {
-    backgroundColor: "rgba(7, 18, 33, 0.92)",
-    borderColor: "rgba(255,255,255,0.05)",
-    borderWidth: 1,
-    marginTop: 4,
-    padding: 16
-  },
-  noticeTitle: {
-    color: theme.colors.text,
-    fontFamily: theme.fonts.bodyBold,
-    fontSize: 14,
-    marginBottom: 6
-  },
-  noticeCopy: {
-    color: theme.colors.textMuted,
-    fontFamily: theme.fonts.body,
-    fontSize: 13,
-    lineHeight: 20
-  },
   submitButton: {
     alignItems: "center",
     backgroundColor: theme.colors.accent,
@@ -410,5 +360,12 @@ const styles = StyleSheet.create({
     color: theme.colors.accentSoft,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 14
+  },
+  supportCopy: {
+    color: theme.colors.textMuted,
+    fontFamily: theme.fonts.body,
+    fontSize: 12,
+    marginTop: 12,
+    textAlign: "center"
   }
 });
