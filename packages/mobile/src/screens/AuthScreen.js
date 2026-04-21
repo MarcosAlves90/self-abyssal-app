@@ -11,6 +11,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 
 import { KeyboardScrollScreen } from "../components/KeyboardScrollScreen";
+import { SeaShellIcon } from "../components/icons/SeaShellIcon";
 import { useAuth } from "../context/AuthContext";
 import { theme } from "../theme/tokens";
 
@@ -91,137 +92,125 @@ export function AuthScreen() {
     <LinearGradient colors={["#030814", "#05111f", "#0b1e38"]} style={styles.container}>
       <KeyboardScrollScreen contentContainerStyle={styles.content} extraKeyboardSpace={44}>
         <View style={styles.shell}>
-          <View style={styles.heroCard}>
-            <Text style={styles.heroEyebrow}>Acesso do cliente</Text>
+          <View style={styles.brandRow}>
             <Text style={styles.brand}>Abyssal</Text>
-            <Text style={styles.heroTitle}>Reservas, pedidos e perfil no mesmo lugar.</Text>
-            <Text style={styles.heroCopy}>
-              Acesse sua conta para acompanhar reservas, pedir novamente e atualizar
-              seus dados.
-            </Text>
-            <View style={styles.featureRow}>
-              <FeaturePill label="Reservas" />
-              <FeaturePill label="Delivery" />
-              <FeaturePill label="Perfil" />
-            </View>
+            <SeaShellIcon color={theme.colors.accentSoft} size={52} style={styles.brandIcon} />
           </View>
 
-          <View style={styles.panel}>
-            <View style={styles.modeRow}>
-              {["login", "register"].map((value) => (
-                <Pressable
-                  key={value}
-                  onPress={() => setMode(value)}
+          <View style={styles.modeRow}>
+            {['login', 'register'].map((value) => (
+              <Pressable
+                key={value}
+                onPress={() => setMode(value)}
+                style={[
+                  styles.modeButton,
+                  mode === value && styles.modeButtonActive
+                ]}
+              >
+                <Text
                   style={[
-                    styles.modeButton,
-                    mode === value && styles.modeButtonActive
+                    styles.modeButtonText,
+                    mode === value && styles.modeButtonTextActive
                   ]}
                 >
-                  <Text
-                    style={[
-                      styles.modeButtonText,
-                      mode === value && styles.modeButtonTextActive
-                    ]}
-                  >
-                    {value === "login" ? "Entrar" : "Criar conta"}
-                  </Text>
-                </Pressable>
-              ))}
-            </View>
-
-            <View style={styles.panelHeader}>
-              <Text style={styles.panelEyebrow}>{currentMode.eyebrow}</Text>
-              <Text style={styles.panelTitle}>{currentMode.title}</Text>
-              <Text style={styles.panelCopy}>{currentMode.subtitle}</Text>
-            </View>
-
-            {isRegister ? (
-              <FormField
-                autoCapitalize="words"
-                autoComplete="name"
-                inputRef={nameInputRef}
-                label="Nome"
-                onChangeText={(value) => updateField("name", value)}
-                onSubmitEditing={() => emailInputRef.current?.focus()}
-                placeholder="Seu nome"
-                returnKeyType="next"
-                textContentType="name"
-                value={form.name}
-              />
-            ) : null}
-            <FormField
-              autoCapitalize="none"
-              autoComplete="email"
-              autoCorrect={false}
-              inputRef={emailInputRef}
-              keyboardType="email-address"
-              label="E-mail"
-              onChangeText={(value) => updateField("email", value)}
-              onSubmitEditing={() => passwordInputRef.current?.focus()}
-                placeholder="voce@abyssal.app"
-              returnKeyType="next"
-              textContentType="emailAddress"
-              value={form.email}
-            />
-            <FormField
-              autoCapitalize="none"
-              autoComplete={isRegister ? "new-password" : "password"}
-              autoCorrect={false}
-              inputRef={passwordInputRef}
-              label="Senha"
-              onChangeText={(value) => updateField("password", value)}
-              onSubmitEditing={() => {
-                if (isRegister) {
-                  phoneInputRef.current?.focus();
-                  return;
-                }
-
-                handleSubmit();
-              }}
-              placeholder="No mínimo 8 caracteres"
-              returnKeyType={isRegister ? "next" : "go"}
-              secureTextEntry
-              textContentType={isRegister ? "newPassword" : "password"}
-              value={form.password}
-            />
-            {isRegister ? (
-              <FormField
-                autoComplete="tel"
-                inputRef={phoneInputRef}
-                keyboardType="phone-pad"
-                label="Telefone"
-                onChangeText={(value) => updateField("phone", value)}
-                onSubmitEditing={handleSubmit}
-                placeholder="Opcional, para contato"
-                returnKeyType="go"
-                textContentType="telephoneNumber"
-                value={form.phone}
-              />
-            ) : null}
-
-            <View style={styles.noticeCard}>
-              <Text style={styles.noticeTitle}>{currentMode.noticeTitle}</Text>
-              <Text style={styles.noticeCopy}>{currentMode.noticeCopy}</Text>
-            </View>
-
-            <Pressable
-              disabled={isSubmitting}
-              onPress={handleSubmit}
-              style={[styles.submitButton, isSubmitting && styles.buttonDisabled]}
-            >
-              <Text style={styles.submitButtonText}>
-                {isSubmitting ? "Processando..." : currentMode.submitLabel}
-              </Text>
-            </Pressable>
-
-            <Pressable
-              onPress={() => setMode(isRegister ? "login" : "register")}
-              style={styles.switchAction}
-            >
-              <Text style={styles.switchActionLabel}>{currentMode.switchLabel}</Text>
-              <Text style={styles.switchActionLink}>{currentMode.switchAction}</Text>
-            </Pressable>
+                  {value === "login" ? "Entrar" : "Criar conta"}
+                </Text>
+              </Pressable>
+            ))}
           </View>
+
+          <View style={styles.panelHeader}>
+            <Text style={styles.panelEyebrow}>{currentMode.eyebrow}</Text>
+            <Text style={styles.panelTitle}>{currentMode.title}</Text>
+            <Text style={styles.panelCopy}>{currentMode.subtitle}</Text>
+          </View>
+
+          {isRegister ? (
+            <FormField
+              autoCapitalize="words"
+              autoComplete="name"
+              inputRef={nameInputRef}
+              label="Nome"
+              onChangeText={(value) => updateField("name", value)}
+              onSubmitEditing={() => emailInputRef.current?.focus()}
+              placeholder="Seu nome"
+              returnKeyType="next"
+              textContentType="name"
+              value={form.name}
+            />
+          ) : null}
+          <FormField
+            autoCapitalize="none"
+            autoComplete="email"
+            autoCorrect={false}
+            inputRef={emailInputRef}
+            keyboardType="email-address"
+            label="E-mail"
+            onChangeText={(value) => updateField("email", value)}
+            onSubmitEditing={() => passwordInputRef.current?.focus()}
+            placeholder="voce@abyssal.app"
+            returnKeyType="next"
+            textContentType="emailAddress"
+            value={form.email}
+          />
+          <FormField
+            autoCapitalize="none"
+            autoComplete={isRegister ? "new-password" : "password"}
+            autoCorrect={false}
+            inputRef={passwordInputRef}
+            label="Senha"
+            onChangeText={(value) => updateField("password", value)}
+            onSubmitEditing={() => {
+              if (isRegister) {
+                phoneInputRef.current?.focus();
+                return;
+              }
+
+              handleSubmit();
+            }}
+            placeholder="No mínimo 8 caracteres"
+            returnKeyType={isRegister ? "next" : "go"}
+            secureTextEntry
+            textContentType={isRegister ? "newPassword" : "password"}
+            value={form.password}
+          />
+          {isRegister ? (
+            <FormField
+              autoComplete="tel"
+              inputRef={phoneInputRef}
+              keyboardType="phone-pad"
+              label="Telefone"
+              onChangeText={(value) => updateField("phone", value)}
+              onSubmitEditing={handleSubmit}
+              placeholder="Opcional, para contato"
+              returnKeyType="go"
+              textContentType="telephoneNumber"
+              value={form.phone}
+            />
+          ) : null}
+
+          <View style={styles.noticeCard}>
+            <Text style={styles.noticeTitle}>{currentMode.noticeTitle}</Text>
+            <Text style={styles.noticeCopy}>{currentMode.noticeCopy}</Text>
+          </View>
+
+          <Pressable
+            disabled={isSubmitting}
+            onPress={handleSubmit}
+            style={[styles.submitButton, isSubmitting && styles.buttonDisabled]}
+          >
+            <Text style={styles.submitButtonText}>
+              {isSubmitting ? "Processando..." : currentMode.submitLabel}
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => setMode(isRegister ? "login" : "register")}
+            style={styles.switchAction}
+          >
+            <Text style={styles.switchActionLabel}>{currentMode.switchLabel}</Text>
+            <Text style={styles.switchActionLink}>{currentMode.switchAction}</Text>
+          </Pressable>
         </View>
       </KeyboardScrollScreen>
     </LinearGradient>
@@ -277,45 +266,21 @@ const styles = StyleSheet.create({
     maxWidth: 560,
     width: "100%"
   },
-  heroCard: {
-    backgroundColor: "rgba(6, 17, 31, 0.76)",
-    borderColor: "rgba(141, 249, 255, 0.2)",
-    borderWidth: 1,
-    marginBottom: 18,
-    overflow: "hidden",
-    padding: 24
-  },
-  heroEyebrow: {
-    color: theme.colors.accentSoft,
-    fontFamily: theme.fonts.bodyBold,
-    fontSize: 13,
-    letterSpacing: 2,
-    textTransform: "uppercase"
+  brandRow: {
+    alignItems: "center",
+    alignSelf: "center",
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 18
   },
   brand: {
     color: theme.colors.text,
     fontFamily: theme.fonts.display,
     fontSize: 60,
-    marginBottom: 8
+    textAlign: "center"
   },
-  heroTitle: {
-    color: theme.colors.text,
-    fontFamily: theme.fonts.bodyBold,
-    fontSize: 28,
-    lineHeight: 34,
-    marginBottom: 10
-  },
-  heroCopy: {
-    color: theme.colors.textMuted,
-    fontFamily: theme.fonts.body,
-    fontSize: 15,
-    lineHeight: 24
-  },
-  featureRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-    marginTop: 18
+  brandIcon: {
+    marginTop: 6
   },
   featurePill: {
     backgroundColor: "rgba(49,231,255,0.12)",
@@ -328,12 +293,6 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 12
-  },
-  panel: {
-    backgroundColor: "rgba(10, 22, 39, 0.96)",
-    borderColor: theme.colors.border,
-    borderWidth: 1,
-    padding: theme.spacing.lg
   },
   modeRow: {
     backgroundColor: "rgba(255,255,255,0.04)",
