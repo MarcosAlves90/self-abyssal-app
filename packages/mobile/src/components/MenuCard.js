@@ -1,11 +1,11 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 
 import { getResponsiveLayout } from "../theme/layout";
 import { formatCurrency, getCategoryLabel, theme } from "../theme/tokens";
 
-export function MenuCard({ item, onAdd, onPress, compact = false, style }) {
+export function MenuCard({ item, onAdd, onPress, showAddButton = false, style }) {
   const { width } = useWindowDimensions();
   const layout = getResponsiveLayout(width);
 
@@ -17,45 +17,26 @@ export function MenuCard({ item, onAdd, onPress, compact = false, style }) {
       onPress={onPress}
       style={[styles.card, style]}
     >
-      <LinearGradient
-        colors={["rgba(49,231,255,0.14)", "rgba(13,26,47,0.98)"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={[
-          styles.panel,
-          layout.isCompact && styles.panelCompact,
-          { borderColor: item.accentColor || theme.colors.border }
-        ]}
-      >
-        <View style={[styles.topRow, layout.isCompact && styles.topRowStack]}>
+      <View style={styles.panel}>
+        <View style={[styles.topRow, layout.isTiny && styles.topRowStack]}>
           <Text style={styles.category}>{getCategoryLabel(item.category)}</Text>
-          <View style={[styles.availabilityRow, layout.isCompact && styles.availabilityRowCompact]}>
-            {item.availableForDineIn ? <Text style={styles.availabilityTag}>Salao</Text> : null}
-            {item.availableForDelivery ? (
-              <Text style={styles.availabilityTag}>Delivery</Text>
-            ) : null}
-          </View>
+          <Text style={styles.price}>{formatCurrency(item.priceCents)}</Text>
         </View>
         <Text
           style={[
             styles.name,
-            compact && styles.nameCompact,
             {
-              fontSize: layout.isTiny ? 24 : layout.isCompact ? 27 : compact ? 26 : 30,
-              lineHeight: layout.isTiny ? 30 : layout.isCompact ? 31 : compact ? 30 : 34
+              fontSize: layout.featureTitleSize,
+              lineHeight: layout.featureTitleLineHeight
             }
           ]}
         >
           {item.name}
         </Text>
-        <Text numberOfLines={layout.isCompact || compact ? 2 : 3} style={styles.description}>
+        <Text numberOfLines={3} style={styles.description}>
           {item.description}
         </Text>
-        <View style={[styles.footer, layout.isCompact && styles.footerStack]}>
-          <View>
-            <Text style={styles.priceLabel}>A partir de</Text>
-            <Text style={styles.price}>{formatCurrency(item.priceCents)}</Text>
-          </View>
+        {showAddButton && onAdd ? (
           <Pressable
             accessibilityLabel={`Adicionar ${item.name} ao carrinho`}
             accessibilityRole="button"
@@ -67,35 +48,55 @@ export function MenuCard({ item, onAdd, onPress, compact = false, style }) {
           >
             <Text style={styles.addText}>Adicionar</Text>
           </Pressable>
-        </View>
-      </LinearGradient>
+        ) : null}
+      </View>
     </Pressable>
   );
 }
 
+MenuCard.propTypes = {
+  item: PropTypes.shape({
+    accentColor: PropTypes.string,
+    availableForDineIn: PropTypes.bool,
+    availableForDelivery: PropTypes.bool,
+    category: PropTypes.string.isRequired,
+    description: PropTypes.string.isRequired,
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    name: PropTypes.string.isRequired,
+    priceCents: PropTypes.number.isRequired
+  }).isRequired,
+  onAdd: PropTypes.func,
+  onPress: PropTypes.func.isRequired,
+  showAddButton: PropTypes.bool,
+  style: PropTypes.any
+};
+
 const styles = StyleSheet.create({
   card: {
-    marginBottom: 0
+    minWidth: 0,
+    width: "100%"
   },
   panel: {
-    borderRadius: theme.radius.lg,
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.border,
     borderWidth: 1,
-    minHeight: 244,
-    padding: theme.spacing.lg
-  },
-  panelCompact: {
-    minHeight: 0,
-    padding: theme.spacing.md
+    minHeight: 190,
+    minWidth: 0,
+    padding: theme.spacing.lg,
+    width: "100%"
   },
   topRow: {
-    alignItems: "flex-start",
+    alignItems: "center",
     flexDirection: "row",
+    gap: 12,
     justifyContent: "space-between",
-    marginBottom: theme.spacing.sm
+    marginBottom: 14,
+    width: "100%"
   },
   topRowStack: {
+    alignItems: "flex-start",
     flexDirection: "column",
-    gap: 10
+    gap: 6
   },
   category: {
     color: theme.colors.accentSoft,
@@ -104,35 +105,10 @@ const styles = StyleSheet.create({
     letterSpacing: 1.2,
     textTransform: "uppercase"
   },
-  availabilityRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 6,
-    justifyContent: "flex-end",
-    marginLeft: 12
-  },
-  availabilityRowCompact: {
-    justifyContent: "flex-start",
-    marginLeft: 0
-  },
-  availabilityTag: {
-    backgroundColor: "rgba(255,255,255,0.06)",
-    borderRadius: theme.radius.pill,
-    color: theme.colors.text,
-    fontFamily: theme.fonts.bodyBold,
-    fontSize: 11,
-    overflow: "hidden",
-    paddingHorizontal: 10,
-    paddingVertical: 7
-  },
   name: {
     color: theme.colors.text,
     fontFamily: theme.fonts.display,
     marginBottom: 8
-  },
-  nameCompact: {
-    fontSize: 26,
-    lineHeight: 30
   },
   description: {
     color: theme.colors.textMuted,
@@ -141,37 +117,23 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     minHeight: 66
   },
-  footer: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 18
-  },
-  footerStack: {
-    alignItems: "stretch",
-    flexDirection: "column",
-    gap: 12
-  },
-  priceLabel: {
-    color: theme.colors.textMuted,
-    fontFamily: theme.fonts.body,
-    fontSize: 12,
-    marginBottom: 4
-  },
   price: {
     color: theme.colors.text,
     fontFamily: theme.fonts.bodyBold,
-    fontSize: 20
+    fontSize: 15
   },
   addButton: {
     alignItems: "center",
+    alignSelf: "flex-start",
     backgroundColor: theme.colors.accent,
     justifyContent: "center",
-    minHeight: 48,
-    minWidth: 122,
+    marginTop: 18,
+    minHeight: 46,
+    minWidth: 140,
     paddingHorizontal: 18
   },
   addButtonCompact: {
+    alignSelf: "stretch",
     minWidth: 0,
     width: "100%"
   },

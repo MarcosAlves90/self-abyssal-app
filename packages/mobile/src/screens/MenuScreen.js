@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import PropTypes from "prop-types";
 import {
   Alert,
   Pressable,
@@ -156,12 +157,12 @@ export function MenuScreen({ navigation }) {
           <View style={styles.menuGrid}>
             {visibleItems.map((item) => (
               <MenuCard
-                compact={layout.isWide}
                 item={item}
                 key={item.id}
                 onAdd={() => addItem(item)}
                 onPress={() => navigation.navigate("DishDetails", { item })}
-                style={layout.isWide ? styles.menuCardWide : null}
+                showAddButton
+                style={layout.isTablet ? styles.menuCardWide : null}
               />
             ))}
           </View>
@@ -178,6 +179,12 @@ export function MenuScreen({ navigation }) {
   );
 }
 
+MenuScreen.propTypes = {
+  navigation: PropTypes.shape({
+    navigate: PropTypes.func.isRequired
+  }).isRequired
+};
+
 const styles = StyleSheet.create({
   screen: {
     backgroundColor: theme.colors.background
@@ -191,7 +198,6 @@ const styles = StyleSheet.create({
     width: "100%"
   },
   hero: {
-    borderRadius: theme.radius.lg,
     marginBottom: theme.spacing.xl,
     padding: theme.spacing.xl
   },
@@ -232,7 +238,6 @@ const styles = StyleSheet.create({
   heroAside: {
     backgroundColor: "rgba(255,255,255,0.05)",
     borderColor: "rgba(255,255,255,0.06)",
-    borderRadius: theme.radius.lg,
     borderWidth: 1,
     minWidth: 250,
     padding: theme.spacing.lg
@@ -316,7 +321,8 @@ const styles = StyleSheet.create({
   menuGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 16
+    gap: 16,
+    width: "100%"
   },
   menuCardWide: {
     width: "48.9%"
@@ -324,7 +330,6 @@ const styles = StyleSheet.create({
   emptyState: {
     backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,
-    borderRadius: theme.radius.lg,
     borderWidth: 1,
     padding: theme.spacing.xl
   },

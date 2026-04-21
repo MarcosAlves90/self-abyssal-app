@@ -13,6 +13,7 @@ import { LinearGradient } from "expo-linear-gradient";
 
 import { BranchCard } from "../components/BranchCard";
 import { LoadingOverlay } from "../components/LoadingOverlay";
+import { MenuCard } from "../components/MenuCard";
 import { SectionHeader } from "../components/SectionHeader";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
@@ -23,7 +24,7 @@ import {
   getApiErrorMessage
 } from "../services/api";
 import { getResponsiveLayout } from "../theme/layout";
-import { formatCurrency, getCategoryLabel, theme } from "../theme/tokens";
+import { theme } from "../theme/tokens";
 
 export function HomeScreen({ navigation }) {
   const { user } = useAuth();
@@ -162,33 +163,12 @@ export function HomeScreen({ navigation }) {
         />
         <View style={styles.featuredGrid}>
           {featuredItems.map((item) => (
-            <Pressable
-              accessibilityHint="Abre os detalhes do prato"
-              accessibilityLabel={`${item.name}, ${formatCurrency(item.priceCents)}`}
-              accessibilityRole="button"
+            <MenuCard
+              item={item}
               key={item.id}
               onPress={() => navigation.navigate("DishDetails", { item })}
-              style={[styles.featuredCard, layout.isTablet && styles.featuredCardWide]}
-            >
-              <View style={[styles.featuredTopRow, layout.isTiny && styles.featuredTopRowStack]}>
-                <Text style={styles.featuredCategory}>{getCategoryLabel(item.category)}</Text>
-                <Text style={styles.featuredPrice}>{formatCurrency(item.priceCents)}</Text>
-              </View>
-              <Text
-                style={[
-                  styles.featuredName,
-                  {
-                    fontSize: layout.featureTitleSize,
-                    lineHeight: layout.featureTitleLineHeight
-                  }
-                ]}
-              >
-                {item.name}
-              </Text>
-              <Text numberOfLines={3} style={styles.featuredCopy}>
-                {item.description}
-              </Text>
-            </Pressable>
+              style={layout.isTablet ? styles.featuredCardWide : null}
+            />
           ))}
         </View>
 
@@ -438,49 +418,8 @@ const styles = StyleSheet.create({
     gap: 16,
     marginBottom: theme.spacing.xl
   },
-  featuredCard: {
-    backgroundColor: theme.colors.surface,
-    borderColor: theme.colors.border,
-    borderWidth: 1,
-    minHeight: 190,
-    padding: theme.spacing.lg,
-    width: "100%"
-  },
   featuredCardWide: {
     width: "48.9%"
-  },
-  featuredTopRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 14
-  },
-  featuredTopRowStack: {
-    alignItems: "flex-start",
-    gap: 6
-  },
-  featuredCategory: {
-    color: theme.colors.accentSoft,
-    fontFamily: theme.fonts.bodyBold,
-    fontSize: 12,
-    letterSpacing: 1.2,
-    textTransform: "uppercase"
-  },
-  featuredName: {
-    color: theme.colors.text,
-    fontFamily: theme.fonts.display,
-    marginBottom: 8
-  },
-  featuredCopy: {
-    color: theme.colors.textMuted,
-    fontFamily: theme.fonts.body,
-    fontSize: 14,
-    lineHeight: 22
-  },
-  featuredPrice: {
-    color: theme.colors.text,
-    fontFamily: theme.fonts.bodyBold,
-    fontSize: 15
   },
   branchGrid: {
     flexDirection: "row",
