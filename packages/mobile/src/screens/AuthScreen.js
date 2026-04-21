@@ -280,7 +280,6 @@ const styles = StyleSheet.create({
   heroCard: {
     backgroundColor: "rgba(6, 17, 31, 0.76)",
     borderColor: "rgba(141, 249, 255, 0.2)",
-    borderRadius: 30,
     borderWidth: 1,
     marginBottom: 18,
     overflow: "hidden",
@@ -321,7 +320,6 @@ const styles = StyleSheet.create({
   featurePill: {
     backgroundColor: "rgba(49,231,255,0.12)",
     borderColor: "rgba(49,231,255,0.16)",
-    borderRadius: theme.radius.pill,
     borderWidth: 1,
     paddingHorizontal: 14,
     paddingVertical: 8
@@ -334,13 +332,11 @@ const styles = StyleSheet.create({
   panel: {
     backgroundColor: "rgba(10, 22, 39, 0.96)",
     borderColor: theme.colors.border,
-    borderRadius: 30,
     borderWidth: 1,
     padding: theme.spacing.lg
   },
   modeRow: {
     backgroundColor: "rgba(255,255,255,0.04)",
-    borderRadius: theme.radius.pill,
     flexDirection: "row",
     marginBottom: 20,
     padding: 6
@@ -409,7 +405,6 @@ const styles = StyleSheet.create({
   noticeCard: {
     backgroundColor: "rgba(7, 18, 33, 0.92)",
     borderColor: "rgba(255,255,255,0.05)",
-    borderRadius: theme.radius.md,
     borderWidth: 1,
     marginTop: 4,
     padding: 16
