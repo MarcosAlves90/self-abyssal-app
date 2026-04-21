@@ -263,7 +263,6 @@ const styles = StyleSheet.create({
   heroAction: {
     alignItems: "center",
     backgroundColor: theme.colors.accent,
-    borderRadius: theme.radius.pill,
     justifyContent: "center",
     marginTop: 16,
     minHeight: 46,
@@ -287,7 +286,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "rgba(255,255,255,0.03)",
     borderColor: theme.colors.border,
-    borderRadius: theme.radius.pill,
     borderWidth: 1,
     flexDirection: "row",
     gap: 8,

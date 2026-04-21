@@ -334,7 +334,6 @@ const styles = StyleSheet.create({
   },
   modeButton: {
     alignItems: "center",
-    borderRadius: theme.radius.pill,
     flex: 1,
     minHeight: 46,
     justifyContent: "center"
@@ -418,7 +417,6 @@ const styles = StyleSheet.create({
   submitButton: {
     alignItems: "center",
     backgroundColor: theme.colors.accent,
-    borderRadius: theme.radius.pill,
     justifyContent: "center",
     marginTop: 18,
     minHeight: 54

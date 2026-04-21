@@ -432,7 +432,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "rgba(255,255,255,0.05)",
     borderColor: theme.colors.border,
-    borderRadius: theme.radius.pill,
     borderWidth: 1,
     justifyContent: "center",
     minHeight: 44,
@@ -539,7 +538,6 @@ const styles = StyleSheet.create({
   primaryButton: {
     alignItems: "center",
     backgroundColor: theme.colors.accent,
-    borderRadius: theme.radius.pill,
     justifyContent: "center",
     minHeight: 52
   },

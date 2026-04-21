@@ -182,7 +182,6 @@ const styles = StyleSheet.create({
   lookupButton: {
     alignItems: "center",
     backgroundColor: theme.colors.accent,
-    borderRadius: theme.radius.md,
     justifyContent: "center",
     minHeight: 52,
     minWidth: 116,

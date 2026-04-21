@@ -108,7 +108,6 @@ const styles = StyleSheet.create({
   primaryButton: {
     alignItems: "center",
     backgroundColor: theme.colors.accent,
-    borderRadius: theme.radius.pill,
     justifyContent: "center",
     marginTop: theme.spacing.xl,
     minHeight: 54

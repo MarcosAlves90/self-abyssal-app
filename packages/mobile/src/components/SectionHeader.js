@@ -97,7 +97,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "rgba(255,255,255,0.04)",
     borderColor: theme.colors.border,
-    borderRadius: theme.radius.pill,
     borderWidth: 1,
     justifyContent: "center",
     minHeight: 44,

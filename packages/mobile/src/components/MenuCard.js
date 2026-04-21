@@ -166,7 +166,6 @@ const styles = StyleSheet.create({
   addButton: {
     alignItems: "center",
     backgroundColor: theme.colors.accent,
-    borderRadius: theme.radius.pill,
     justifyContent: "center",
     minHeight: 48,
     minWidth: 122,

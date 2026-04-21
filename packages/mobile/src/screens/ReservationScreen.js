@@ -813,7 +813,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,
-    borderRadius: theme.radius.pill,
     borderWidth: 1,
     flex: 1,
     justifyContent: "center",
@@ -907,7 +906,6 @@ const styles = StyleSheet.create({
   selectionChip: {
     backgroundColor: "rgba(255,255,255,0.02)",
     borderColor: theme.colors.border,
-    borderRadius: theme.radius.pill,
     borderWidth: 1,
     justifyContent: "center",
     minHeight: 42,
@@ -944,7 +942,6 @@ const styles = StyleSheet.create({
   primaryButton: {
     alignItems: "center",
     backgroundColor: theme.colors.accent,
-    borderRadius: theme.radius.pill,
     justifyContent: "center",
     minHeight: 52
   },
@@ -996,7 +993,6 @@ const styles = StyleSheet.create({
   quantityButton: {
     alignItems: "center",
     backgroundColor: "rgba(255,255,255,0.05)",
-    borderRadius: theme.radius.pill,
     height: 34,
     justifyContent: "center",
     width: 34
@@ -1034,7 +1030,6 @@ const styles = StyleSheet.create({
   secondaryButton: {
     alignItems: "center",
     borderColor: theme.colors.border,
-    borderRadius: theme.radius.pill,
     borderWidth: 1,
     justifyContent: "center",
     marginTop: 14,
