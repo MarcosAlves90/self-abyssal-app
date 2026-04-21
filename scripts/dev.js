@@ -1,8 +1,10 @@
-const { spawn, spawnSync } = require("child_process");
-const path = require("path");
+const { spawn, spawnSync } = require("node:child_process");
+const path = require("node:path");
 
 const rootDir = path.resolve(__dirname, "..");
 const composeFile = path.join(rootDir, "packages/backend/docker-compose.yml");
+const composeBaseArgs = ["compose", "-f", composeFile];
+const backendServices = ["identity-service", "catalog-service", "operations-service"];
 const useWebTarget = process.argv.includes("--web");
 const mobileScript = useWebTarget ? "dev:mobile:web" : "dev:mobile";
 
@@ -30,7 +32,7 @@ function pipeWithPrefix(stream, prefix, target) {
   let buffer = "";
 
   stream.on("data", (chunk) => {
-    buffer += chunk.toString().replace(/\r/g, "");
+    buffer += chunk.toString().replaceAll("\r", "");
     const lines = buffer.split("\n");
     buffer = lines.pop();
 
@@ -55,15 +57,15 @@ async function shutdown(exitCode = 0) {
 
   isShuttingDown = true;
 
-  if (backendLogStream && backendLogStream.exitCode === null) {
+  if (backendLogStream?.exitCode === null) {
     backendLogStream.kill("SIGINT");
   }
 
-  if (mobileProcess && mobileProcess.exitCode === null) {
+  if (mobileProcess?.exitCode === null) {
     mobileProcess.kill("SIGINT");
   }
 
-  spawnSync("docker", ["compose", "-f", composeFile, "down"], {
+  spawnSync("docker", [...composeBaseArgs, "down"], {
     cwd: rootDir,
     stdio: "inherit"
   });
@@ -74,11 +76,9 @@ async function shutdown(exitCode = 0) {
 async function main() {
   process.stdout.write(`[dev] starting mobile target: ${useWebTarget ? "web" : "native"}\n`);
 
-  const backendUp = spawnProcess(
-    "docker",
-    ["compose", "-f", composeFile, "up", "--build", "-d"],
-    { stdio: "inherit" }
-  );
+  const backendUp = spawnProcess("docker", [...composeBaseArgs, "up", "--build", "-d"], {
+    stdio: "inherit"
+  });
 
   const backendUpResult = await waitForExit(backendUp);
 
@@ -88,7 +88,7 @@ async function main() {
 
   backendLogStream = spawnProcess(
     "docker",
-    ["compose", "-f", composeFile, "logs", "-f", "--tail=20", "--no-log-prefix", "api"],
+    [...composeBaseArgs, "logs", "-f", "--tail=20", "--no-log-prefix", ...backendServices],
     { stdio: ["ignore", "pipe", "pipe"] }
   );
 
@@ -106,7 +106,14 @@ async function main() {
   });
 
   mobileProcess.on("exit", (code, signal) => {
-    const nextCode = typeof code === "number" ? code : signal ? 130 : 0;
+    let nextCode = 0;
+
+    if (typeof code === "number") {
+      nextCode = code;
+    } else if (signal) {
+      nextCode = 130;
+    }
+
     shutdown(nextCode);
   });
 
