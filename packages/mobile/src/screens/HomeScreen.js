@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import PropTypes from "prop-types";
 import {
   Alert,
   Pressable,
@@ -77,7 +78,7 @@ export function HomeScreen({ navigation }) {
         >
           <View style={[styles.heroTop, layout.isWide && styles.heroTopWide]}>
             <View style={styles.heroCopyBlock}>
-              <Text style={styles.heroEyebrow}>Inicio</Text>
+              <Text style={styles.heroEyebrow}>Início</Text>
               <Text
                 style={[
                   styles.heroTitle,
@@ -113,7 +114,7 @@ export function HomeScreen({ navigation }) {
           onPress={() => navigation.navigate("Reserva")}
           style={styles.highlightCard}
         >
-          <Text style={styles.highlightEyebrow}>Proxima experiencia</Text>
+          <Text style={styles.highlightEyebrow}>Próxima experiência</Text>
           {nextReservation ? (
             <>
               <Text
@@ -146,7 +147,7 @@ export function HomeScreen({ navigation }) {
                 Nenhuma reserva no radar.
               </Text>
               <Text style={styles.highlightCopy}>
-                Abra a aba Reserva e monte sua proxima jornada presencial.
+                Abra a aba Reserva e monte sua próxima jornada presencial.
               </Text>
             </>
           )}
@@ -154,7 +155,7 @@ export function HomeScreen({ navigation }) {
 
         <SectionHeader
           actionLabel="Ver menu"
-          description="Cards hero inspirados em discovery feeds de apps como Uber Eats: leitura rapida e decisao direta."
+          description="Cards hero inspirados em discovery feeds de apps como Uber Eats: leitura rápida e decisão direta."
           eyebrow="Curadoria"
           onActionPress={() => navigation.navigate("Menu")}
           title="Destaques do oceano"
@@ -192,7 +193,7 @@ export function HomeScreen({ navigation }) {
         </View>
 
         <SectionHeader
-          description="Cada casa agora aparece com mais presenca visual, profundidades evidentes e horario logo no topo."
+          description="Cada casa agora aparece com mais presença visual, profundidades evidentes e horário logo no topo."
           eyebrow="Presencial"
           title="Filiais e atmosferas"
         />
@@ -208,9 +209,9 @@ export function HomeScreen({ navigation }) {
         </View>
 
         <SectionHeader
-          description="Seu historico imediato sobe de importancia e ajuda voce a continuar a jornada."
+          description="Seu histórico imediato sobe de importância e ajuda você a continuar a jornada."
           eyebrow="Agenda"
-          title="Sua proxima imersao"
+          title="Sua próxima imersão"
         />
         <View style={styles.reservationGrid}>
           {reservations.length ? (
@@ -273,6 +274,26 @@ function QuickActionCard({ description, label, onPress, wide }) {
     </Pressable>
   );
 }
+
+HomeScreen.propTypes = {
+  navigation: PropTypes.shape({
+    navigate: PropTypes.func.isRequired
+  }).isRequired
+};
+
+MetricCard.propTypes = {
+  compact: PropTypes.bool,
+  label: PropTypes.string.isRequired,
+  minWidth: PropTypes.number.isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired
+};
+
+QuickActionCard.propTypes = {
+  description: PropTypes.string.isRequired,
+  label: PropTypes.string.isRequired,
+  onPress: PropTypes.func.isRequired,
+  wide: PropTypes.bool
+};
 
 const styles = StyleSheet.create({
   screen: {
