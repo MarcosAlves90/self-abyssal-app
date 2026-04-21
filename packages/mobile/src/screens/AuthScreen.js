@@ -398,7 +398,6 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: "#0f1d35",
     borderColor: theme.colors.border,
-    borderRadius: theme.radius.md,
     borderWidth: 1,
     color: theme.colors.text,
     fontFamily: theme.fonts.body,

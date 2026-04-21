@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import {
   ActivityIndicator,
   Pressable,
@@ -135,6 +136,21 @@ export function AddressFields({
   );
 }
 
+AddressFields.propTypes = {
+  address: PropTypes.shape({
+    city: PropTypes.string.isRequired,
+    complement: PropTypes.string,
+    neighborhood: PropTypes.string.isRequired,
+    number: PropTypes.string.isRequired,
+    postalCode: PropTypes.string.isRequired,
+    state: PropTypes.string.isRequired,
+    street: PropTypes.string.isRequired
+  }).isRequired,
+  isLookingUpPostalCode: PropTypes.bool.isRequired,
+  onChangeField: PropTypes.func.isRequired,
+  onLookupPostalCode: PropTypes.func.isRequired
+};
+
 function Field({ children, label, style }) {
   return (
     <View style={[styles.field, style]}>
@@ -143,6 +159,12 @@ function Field({ children, label, style }) {
     </View>
   );
 }
+
+Field.propTypes = {
+  children: PropTypes.node.isRequired,
+  label: PropTypes.string.isRequired,
+  style: PropTypes.any
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -160,7 +182,6 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: theme.colors.backgroundAlt,
     borderColor: theme.colors.border,
-    borderRadius: theme.radius.md,
     borderWidth: 1,
     color: theme.colors.text,
     fontFamily: theme.fonts.body,

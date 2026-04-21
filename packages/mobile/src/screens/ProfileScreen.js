@@ -356,7 +356,6 @@ const styles = StyleSheet.create({
     width: "100%"
   },
   hero: {
-    borderRadius: theme.radius.lg,
     marginBottom: theme.spacing.lg,
     padding: theme.spacing.xl
   },
@@ -384,7 +383,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "rgba(255,255,255,0.08)",
     borderColor: "rgba(255,255,255,0.08)",
-    borderRadius: 34,
     borderWidth: 1,
     height: 68,
     justifyContent: "center",
@@ -459,7 +457,6 @@ const styles = StyleSheet.create({
   },
   summaryCard: {
     backgroundColor: "rgba(255,255,255,0.05)",
-    borderRadius: theme.radius.md,
     justifyContent: "center",
     minHeight: 96,
     minWidth: 160,
@@ -503,7 +500,6 @@ const styles = StyleSheet.create({
   addressSummaryCard: {
     backgroundColor: theme.colors.surfaceRaised,
     borderColor: "rgba(255,255,255,0.05)",
-    borderRadius: theme.radius.md,
     borderWidth: 1,
     marginBottom: theme.spacing.md,
     padding: theme.spacing.lg
@@ -523,7 +519,6 @@ const styles = StyleSheet.create({
   addressPanel: {
     backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,
-    borderRadius: theme.radius.lg,
     borderWidth: 1,
     padding: theme.spacing.lg
   },
@@ -552,7 +547,6 @@ const styles = StyleSheet.create({
   activityCard: {
     backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,
-    borderRadius: theme.radius.md,
     borderWidth: 1,
     padding: theme.spacing.lg
   },
@@ -578,7 +572,6 @@ const styles = StyleSheet.create({
   emptyCard: {
     backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,
-    borderRadius: theme.radius.lg,
     borderWidth: 1,
     padding: theme.spacing.lg
   },
