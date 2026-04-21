@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import PropTypes from "prop-types";
 import {
   Alert,
   Pressable,
@@ -45,6 +46,7 @@ function nextDate() {
   return date.toISOString().slice(0, 10);
 }
 
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export function ReservationScreen({ navigation }) {
   const { user } = useAuth();
   const {
@@ -119,6 +121,9 @@ export function ReservationScreen({ navigation }) {
   const selectedPaymentLabel =
     paymentOptions.find(([value]) => value === deliveryForm.paymentMethod)?.[1] ||
     paymentOptions[0][1];
+  const reservationSummaryText = itemCount
+    ? `${itemCount} itens prontos`
+    : "Carrinho vazio";
 
   function updateDeliveryAddressField(field, value) {
     setDeliveryForm((current) => ({
@@ -132,7 +137,7 @@ export function ReservationScreen({ navigation }) {
 
   async function handleDeliveryPostalCodeLookup() {
     if (normalizePostalCode(deliveryForm.address.postalCode).length !== 8) {
-      Alert.alert("CEP invalido", "Informe um CEP com 8 digitos.");
+      Alert.alert("CEP inválido", "Informe um CEP com 8 dígitos.");
       return;
     }
 
@@ -176,9 +181,9 @@ export function ReservationScreen({ navigation }) {
       });
 
       setReservations((current) => [createdReservation, ...current]);
-      Alert.alert("Reserva confirmada", "Sua mesa foi registrada com sucesso.");
+      Alert.alert("Reserva confirmada", "Sua reserva foi registrada com sucesso.");
     } catch (error) {
-      Alert.alert("Nao foi possivel reservar", getApiErrorMessage(error));
+      Alert.alert("Não foi possível reservar", getApiErrorMessage(error));
     } finally {
       setIsSubmitting(false);
     }
@@ -186,19 +191,19 @@ export function ReservationScreen({ navigation }) {
 
   async function submitDeliveryOrder() {
     if (!items.length) {
-      Alert.alert("Carrinho vazio", "Adicione itens do menu antes de enviar o delivery.");
+      Alert.alert("Carrinho vazio", "Adicione itens do menu antes de enviar o pedido.");
       return;
     }
 
     if (!deliveryForm.contactName.trim()) {
-      Alert.alert("Nome obrigatorio", "Informe quem vai receber o pedido.");
+      Alert.alert("Nome obrigatório", "Informe quem vai receber o pedido.");
       return;
     }
 
     if (!isAddressComplete(deliveryForm.address)) {
       Alert.alert(
-        "Endereco incompleto",
-        "Preencha CEP, rua, numero, bairro, cidade e UF para concluir o delivery."
+        "Endereço incompleto",
+        "Preencha CEP, rua, número, bairro, cidade e UF para concluir o pedido."
       );
       return;
     }
@@ -219,7 +224,7 @@ export function ReservationScreen({ navigation }) {
       });
 
       clearCart();
-      Alert.alert("Pedido enviado", "O delivery premium entrou na fila da cozinha.");
+      Alert.alert("Pedido enviado", "Seu pedido foi enviado para a cozinha.");
     } catch (error) {
       Alert.alert("Falha ao enviar pedido", getApiErrorMessage(error));
     } finally {
@@ -253,12 +258,11 @@ export function ReservationScreen({ navigation }) {
                 ]}
               >
                 {mode === "reservation"
-                  ? "Planeje sua noite em um fluxo de booking."
-                  : "Feche seu delivery com leitura de checkout."}
+                  ? "Reserve sua mesa em poucos passos."
+                  : "Finalize seu pedido de entrega."}
               </Text>
               <Text style={styles.heroSubtitle}>
-                Painel inspirado em apps de reserva e entrega: contexto no topo, form no
-                centro e resumo sempre por perto.
+                Preencha os dados principais e acompanhe o resumo no lado direito.
               </Text>
             </View>
 
@@ -317,8 +321,7 @@ export function ReservationScreen({ navigation }) {
                   Monte sua noite em poucos blocos.
                 </Text>
                 <Text style={styles.panelCopy}>
-                  Filial, horario, convidados e profundidade aparecem como etapas claras,
-                  em vez de um formulario compacto demais.
+                  Filial, horário, convidados e nível aparecem de forma simples.
                 </Text>
 
                 <Field label="Filial">
@@ -350,7 +353,7 @@ export function ReservationScreen({ navigation }) {
                       value={reservationForm.date}
                     />
                   </Field>
-                  <Field label="Horario">
+                  <Field label="Horário">
                     <StyledInput
                       onChangeText={(value) =>
                         setReservationForm((current) => ({ ...current, time: value }))
@@ -371,7 +374,7 @@ export function ReservationScreen({ navigation }) {
                   />
                 </Field>
 
-                <Field label="Nivel de profundidade">
+                <Field label="Nível">
                   <View style={styles.chipWrap}>
                     {(selectedBranch?.reservationDepths || []).map((depth) => (
                       <SelectionChip
@@ -386,7 +389,7 @@ export function ReservationScreen({ navigation }) {
                   </View>
                 </Field>
 
-                <Field label="Observacoes">
+                <Field label="Observações">
                   <StyledInput
                     multiline
                     onChangeText={(value) =>
@@ -395,7 +398,7 @@ export function ReservationScreen({ navigation }) {
                         specialRequest: value
                       }))
                     }
-                    placeholder="Restricoes ou pedidos especiais"
+                    placeholder="Restrições ou pedidos especiais"
                     value={reservationForm.specialRequest}
                   />
                 </Field>
@@ -418,7 +421,7 @@ export function ReservationScreen({ navigation }) {
                     }
                   ]}
                 >
-                  Feche seu pedido com menos friccao.
+                  Feche seu pedido com menos etapas.
                 </Text>
                 <Text style={styles.panelCopy}>
                   A logica ficou mais proxima de apps de checkout: carrinho, contato,
@@ -453,7 +456,7 @@ export function ReservationScreen({ navigation }) {
                       </View>
                       <StyledInput
                         onChangeText={(value) => updateItemNote(item.id, value)}
-                        placeholder="Observacao opcional do item"
+                        placeholder="Observação opcional do item"
                         value={item.note}
                       />
                     </View>
@@ -462,7 +465,7 @@ export function ReservationScreen({ navigation }) {
                   <View style={styles.emptyState}>
                     <Text style={styles.emptyTitle}>Seu carrinho esta vazio.</Text>
                     <Text style={styles.emptyCopy}>
-                      Adicione pratos pela aba Menu antes de concluir o delivery.
+                      Adicione pratos pela aba Menu antes de enviar o pedido.
                     </Text>
                     <Pressable
                       accessibilityRole="button"
@@ -485,11 +488,11 @@ export function ReservationScreen({ navigation }) {
                 </Field>
 
                 <View style={styles.infoCard}>
-                  <Text style={styles.infoCardTitle}>Endereco principal</Text>
+                  <Text style={styles.infoCardTitle}>Endereço principal</Text>
                   <Text style={styles.infoCardCopy}>
                     {user?.savedAddresses?.[0]?.summary
-                      ? "Endereco principal carregado das configuracoes. Ajuste se necessario."
-                      : "Use o CEP para preencher mais rapido e concluir o delivery com menos atrito."}
+                      ? "Endereço principal carregado das configurações. Ajuste se necessário."
+                      : "Use o CEP para preencher mais rápido e concluir o pedido."}
                   </Text>
                 </View>
 
@@ -530,7 +533,7 @@ export function ReservationScreen({ navigation }) {
                   </Text>
                   <Text style={styles.summaryAddress}>
                     {deliverySummary ||
-                      "Complete o endereco para visualizar o resumo do delivery."}
+                      "Complete o endereço para visualizar o resumo do pedido."}
                   </Text>
                 </View>
 
@@ -549,9 +552,7 @@ export function ReservationScreen({ navigation }) {
               <Text style={styles.railTitle}>
                 {mode === "reservation"
                   ? selectedBranch?.name || "Escolha uma filial"
-                  : itemCount
-                    ? `${itemCount} itens prontos`
-                    : "Carrinho vazio"}
+                  : reservationSummaryText}
               </Text>
 
               {mode === "reservation" ? (
@@ -562,8 +563,8 @@ export function ReservationScreen({ navigation }) {
                   />
                   <SideDetail label="Convidados" value={`${reservationForm.guests} pessoas`} />
                   <SideDetail
-                    label="Profundidade"
-                    value={reservationForm.depthLevel || "Selecione um nivel"}
+                    label="Nível"
+                    value={reservationForm.depthLevel || "Selecione um nível"}
                   />
                 </>
               ) : (
@@ -579,22 +580,22 @@ export function ReservationScreen({ navigation }) {
             </View>
 
             <View style={styles.railCard}>
-              <Text style={styles.railEyebrow}>Continuacao</Text>
+              <Text style={styles.railEyebrow}>Acompanhar</Text>
               <Text style={styles.railTitle}>
-                {nextReservationItem ? "Proxima reserva confirmada" : "Nenhuma reserva futura"}
+                {nextReservationItem ? "Próxima reserva confirmada" : "Nenhuma reserva futura"}
               </Text>
               <Text style={styles.railCopy}>
                 {nextReservationItem
                   ? `${nextReservationItem.branchName} em ${new Date(
                       nextReservationItem.scheduledAt
                     ).toLocaleString("pt-BR")}.`
-                  : "Quando voce confirmar uma mesa, o resumo vai aparecer aqui."}
+                  : "Quando você confirmar uma mesa, o resumo vai aparecer aqui."}
               </Text>
             </View>
 
             <SectionHeader
-              description="O historico sobe para uma coluna lateral quando ha espaco, como em dashboards de booking."
-              eyebrow="Historico"
+              description="As reservas recentes aparecem na lateral quando houver espaço."
+              eyebrow="Histórico"
               title="Reservas registradas"
             />
             {reservations.length ? (
@@ -608,7 +609,7 @@ export function ReservationScreen({ navigation }) {
               ))
             ) : (
               <View style={styles.emptyState}>
-                <Text style={styles.emptyTitle}>Suas proximas reservas aparecerao aqui.</Text>
+                <Text style={styles.emptyTitle}>Suas próximas reservas aparecerão aqui.</Text>
               </View>
             )}
           </View>
@@ -716,6 +717,58 @@ function HistoryCard({ meta, subtitle, title }) {
     </View>
   );
 }
+
+ReservationScreen.propTypes = {
+  navigation: PropTypes.shape({
+    navigate: PropTypes.func.isRequired
+  }).isRequired
+};
+
+HeroStat.propTypes = {
+  compact: PropTypes.bool,
+  label: PropTypes.string.isRequired,
+  minWidth: PropTypes.number.isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired
+};
+
+ModeButton.propTypes = {
+  active: PropTypes.bool.isRequired,
+  fullWidth: PropTypes.bool,
+  label: PropTypes.string.isRequired,
+  onPress: PropTypes.func.isRequired
+};
+
+Field.propTypes = {
+  children: PropTypes.node.isRequired,
+  label: PropTypes.string.isRequired
+};
+
+SelectionChip.propTypes = {
+  active: PropTypes.bool.isRequired,
+  label: PropTypes.string.isRequired,
+  onPress: PropTypes.func.isRequired
+};
+
+SideDetail.propTypes = {
+  label: PropTypes.string.isRequired,
+  value: PropTypes.string.isRequired
+};
+
+StyledInput.propTypes = {
+  multiline: PropTypes.bool
+};
+
+PrimaryButton.propTypes = {
+  disabled: PropTypes.bool,
+  label: PropTypes.string.isRequired,
+  onPress: PropTypes.func.isRequired
+};
+
+HistoryCard.propTypes = {
+  meta: PropTypes.string.isRequired,
+  subtitle: PropTypes.string.isRequired,
+  title: PropTypes.string.isRequired
+};
 
 const styles = StyleSheet.create({
   screen: {

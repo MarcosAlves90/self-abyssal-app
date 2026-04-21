@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import PropTypes from "prop-types";
 import {
   Alert,
   Pressable,
@@ -15,23 +16,23 @@ import { theme } from "../theme/tokens";
 
 const authModes = {
   login: {
-    eyebrow: "Boas-vindas de volta",
-    title: "Entre para continuar sua experiencia.",
-    subtitle: "Acompanhe reservas, pedidos e endereco no mesmo fluxo.",
-    noticeTitle: "Mesmo acesso para tudo",
-    noticeCopy: "Use seu login para reservar mesa, pedir delivery e ajustar seu perfil sem repetir cadastro.",
+    eyebrow: "Acesso",
+    title: "Entre para continuar.",
+    subtitle: "Acesse reservas, pedidos e seu perfil com uma única conta.",
+    noticeTitle: "Tudo em um só acesso",
+    noticeCopy: "Use seu login para consultar reservas, acompanhar pedidos e atualizar seus dados.",
     submitLabel: "Entrar",
-    switchLabel: "Ainda nao tem conta?",
+    switchLabel: "Ainda não tem conta?",
     switchAction: "Criar agora"
   },
   register: {
-    eyebrow: "Nova conta",
-    title: "Crie seu acesso em poucos campos.",
-    subtitle: "Comece com seus dados principais. O endereco pode entrar depois.",
-    noticeTitle: "Cadastro enxuto",
-    noticeCopy: "Nome, e-mail, senha e telefone resolvem o acesso inicial. O endereco fica para o momento do pedido ou perfil.",
+    eyebrow: "Cadastro",
+    title: "Crie sua conta.",
+    subtitle: "Comece com seus dados principais. O endereço pode ser preenchido depois.",
+    noticeTitle: "Cadastro rápido",
+    noticeCopy: "Nome, e-mail, senha e telefone são suficientes para criar o acesso inicial.",
     submitLabel: "Criar conta",
-    switchLabel: "Ja tem uma conta?",
+    switchLabel: "Já tem uma conta?",
     switchAction: "Entrar"
   }
 };
@@ -77,7 +78,7 @@ export function AuthScreen() {
         });
       }
     } catch (error) {
-      Alert.alert("Nao foi possivel autenticar", error.message);
+      Alert.alert("Não foi possível autenticar", error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -91,12 +92,12 @@ export function AuthScreen() {
       <KeyboardScrollScreen contentContainerStyle={styles.content} extraKeyboardSpace={44}>
         <View style={styles.shell}>
           <View style={styles.heroCard}>
-            <Text style={styles.heroEyebrow}>Seafood Experience</Text>
+            <Text style={styles.heroEyebrow}>Acesso do cliente</Text>
             <Text style={styles.brand}>Abyssal</Text>
-            <Text style={styles.heroTitle}>Reserva, delivery e perfil no mesmo acesso.</Text>
+            <Text style={styles.heroTitle}>Reservas, pedidos e perfil no mesmo lugar.</Text>
             <Text style={styles.heroCopy}>
-              Um fluxo unico para voltar a sua mesa, repetir pedidos e ajustar dados
-              sem friccao.
+              Acesse sua conta para acompanhar reservas, pedir novamente e atualizar
+              seus dados.
             </Text>
             <View style={styles.featureRow}>
               <FeaturePill label="Reservas" />
@@ -157,7 +158,7 @@ export function AuthScreen() {
               label="E-mail"
               onChangeText={(value) => updateField("email", value)}
               onSubmitEditing={() => passwordInputRef.current?.focus()}
-              placeholder="voce@abyssal.app"
+                placeholder="voce@abyssal.app"
               returnKeyType="next"
               textContentType="emailAddress"
               value={form.email}
@@ -177,7 +178,7 @@ export function AuthScreen() {
 
                 handleSubmit();
               }}
-              placeholder="No minimo 8 caracteres"
+              placeholder="No mínimo 8 caracteres"
               returnKeyType={isRegister ? "next" : "go"}
               secureTextEntry
               textContentType={isRegister ? "newPassword" : "password"}
@@ -235,6 +236,10 @@ function FeaturePill({ label }) {
   );
 }
 
+FeaturePill.propTypes = {
+  label: PropTypes.string.isRequired
+};
+
 function FormField({ inputRef, label, ...inputProps }) {
   return (
     <View style={styles.field}>
@@ -249,6 +254,14 @@ function FormField({ inputRef, label, ...inputProps }) {
     </View>
   );
 }
+
+FormField.propTypes = {
+  inputRef: PropTypes.oneOfType([
+    PropTypes.func,
+    PropTypes.shape({ current: PropTypes.instanceOf(TextInput) })
+  ]),
+  label: PropTypes.string.isRequired
+};
 
 const styles = StyleSheet.create({
   container: {

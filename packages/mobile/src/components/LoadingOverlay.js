@@ -1,10 +1,11 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { theme } from "../theme/tokens";
 
-export function LoadingOverlay({ label = "Carregando..." }) {
+export function LoadingOverlay({ label = "Carregando conteúdo..." }) {
   return (
     <LinearGradient
       colors={["#02060f", "#071226", "#0b1f39"]}
@@ -17,6 +18,10 @@ export function LoadingOverlay({ label = "Carregando..." }) {
     </LinearGradient>
   );
 }
+
+LoadingOverlay.propTypes = {
+  label: PropTypes.string
+};
 
 const styles = StyleSheet.create({
   container: {

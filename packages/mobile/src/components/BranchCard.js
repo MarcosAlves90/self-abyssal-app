@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -35,7 +36,7 @@ export function BranchCard({ branch, compact = false, style }) {
     >
       <View style={[styles.topRow, layout.isCompact && styles.topRowStack]}>
         <View style={styles.copy}>
-          <Text style={styles.eyebrow}>Experiencia presencial</Text>
+          <Text style={styles.eyebrow}>Atendimento presencial</Text>
           <Text
             style={[
               styles.name,
@@ -57,7 +58,7 @@ export function BranchCard({ branch, compact = false, style }) {
         </View>
       </View>
       <Text style={styles.address}>{branch.addressLine}</Text>
-      <Text style={styles.sectionLabel}>Profundidades disponiveis</Text>
+      <Text style={styles.sectionLabel}>Opções de reserva</Text>
       <View style={styles.depths}>
         {branch.reservationDepths.map((depth) => (
           <Text key={depth} style={styles.depthTag}>
@@ -68,6 +69,19 @@ export function BranchCard({ branch, compact = false, style }) {
     </LinearGradient>
   );
 }
+
+BranchCard.propTypes = {
+  branch: PropTypes.shape({
+    addressLine: PropTypes.string.isRequired,
+    city: PropTypes.string.isRequired,
+    neighborhood: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    openHours: PropTypes.string.isRequired,
+    reservationDepths: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired
+  }).isRequired,
+  compact: PropTypes.bool,
+  style: PropTypes.any
+};
 
 const styles = StyleSheet.create({
   card: {

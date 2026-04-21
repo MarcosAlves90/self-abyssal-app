@@ -58,7 +58,7 @@ export function HomeScreen({ navigation }) {
   }, []);
 
   if (isLoading) {
-    return <LoadingOverlay label="Mapeando rotas de profundidade..." />;
+    return <LoadingOverlay label="Carregando conteúdo..." />;
   }
 
   const layout = getResponsiveLayout(width);
@@ -89,7 +89,7 @@ export function HomeScreen({ navigation }) {
                   }
                 ]}
               >
-                Mergulhe, {firstName}.
+                Olá, {firstName}.
               </Text>
             </View>
 
@@ -115,7 +115,7 @@ export function HomeScreen({ navigation }) {
           onPress={() => navigation.navigate("Reserva")}
           style={styles.highlightCard}
         >
-          <Text style={styles.highlightEyebrow}>Próxima experiência</Text>
+          <Text style={styles.highlightEyebrow}>Próxima reserva</Text>
           {nextReservation ? (
             <>
               <Text
@@ -145,10 +145,10 @@ export function HomeScreen({ navigation }) {
                   }
                 ]}
               >
-                Nenhuma reserva no radar.
+                Nenhuma reserva agendada.
               </Text>
               <Text style={styles.highlightCopy}>
-                Abra a aba Reserva e monte sua próxima jornada presencial.
+                Acesse a aba Reserva para escolher data, horário e unidade.
               </Text>
             </>
           )}
@@ -156,10 +156,10 @@ export function HomeScreen({ navigation }) {
 
         <SectionHeader
           actionLabel="Ver menu"
-          description="Cards hero inspirados em discovery feeds de apps como Uber Eats: leitura rápida e decisão direta."
+          description="Veja os pratos em destaque e siga para o cardápio completo quando quiser."
           eyebrow="Curadoria"
           onActionPress={() => navigation.navigate("Menu")}
-          title="Destaques do oceano"
+          title="Pratos em destaque"
         />
         <View style={styles.featuredGrid}>
           {featuredItems.map((item) => (
@@ -173,9 +173,9 @@ export function HomeScreen({ navigation }) {
         </View>
 
         <SectionHeader
-          description="Cada casa agora aparece com mais presença visual, profundidades evidentes e horário logo no topo."
+          description="Confira endereço, horário de funcionamento e áreas de atendimento de cada unidade."
           eyebrow="Presencial"
-          title="Filiais e atmosferas"
+          title="Unidades e horários"
         />
         <View style={styles.branchGrid}>
           {branches.map((branch) => (
@@ -189,9 +189,9 @@ export function HomeScreen({ navigation }) {
         </View>
 
         <SectionHeader
-          description="Seu histórico imediato sobe de importância e ajuda você a continuar a jornada."
+          description="Veja as próximas reservas registradas na sua conta."
           eyebrow="Agenda"
-          title="Sua próxima imersão"
+          title="Suas próximas reservas"
         />
         <View style={styles.reservationGrid}>
           {reservations.length ? (

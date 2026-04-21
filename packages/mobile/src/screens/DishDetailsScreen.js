@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -24,10 +25,10 @@ export function DishDetailsScreen({ route, navigation }) {
       <View style={styles.panel}>
         <Text style={styles.sectionTitle}>Disponibilidade</Text>
         <Text style={styles.sectionCopy}>
-          {item.availableForDineIn ? "Atendimento em salao habilitado." : "Nao disponivel em salao."}
+          {item.availableForDineIn ? "Atendimento no salão disponível." : "Não disponível para salão."}
         </Text>
         <Text style={styles.sectionCopy}>
-          {item.availableForDelivery ? "Pronto para delivery premium." : "Disponivel apenas para consumo local."}
+          {item.availableForDelivery ? "Disponível para delivery." : "Disponível apenas para consumo no local."}
         </Text>
       </View>
 
@@ -45,6 +46,26 @@ export function DishDetailsScreen({ route, navigation }) {
     </ScrollView>
   );
 }
+
+DishDetailsScreen.propTypes = {
+  navigation: PropTypes.shape({
+    navigate: PropTypes.func.isRequired
+  }).isRequired,
+  route: PropTypes.shape({
+    params: PropTypes.shape({
+      item: PropTypes.shape({
+        accentColor: PropTypes.string,
+        availableForDelivery: PropTypes.bool,
+        availableForDineIn: PropTypes.bool,
+        category: PropTypes.string.isRequired,
+        description: PropTypes.string.isRequired,
+        id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+        name: PropTypes.string.isRequired,
+        priceCents: PropTypes.number.isRequired
+      }).isRequired
+    }).isRequired
+  }).isRequired
+};
 
 const styles = StyleSheet.create({
   screen: {

@@ -44,7 +44,7 @@ export function MenuScreen({ navigation }) {
   }, []);
 
   if (isLoading) {
-    return <LoadingOverlay label="Iluminando o cardapio..." />;
+    return <LoadingOverlay label="Carregando cardápio..." />;
   }
 
   const visibleItems =
@@ -53,6 +53,46 @@ export function MenuScreen({ navigation }) {
       : items.filter((item) => item.category === activeFilter);
 
   const layout = getResponsiveLayout(width);
+  const heroAsideLabel = itemCount ? "Itens no carrinho" : "Carrinho vazio";
+  const heroAsideValue = itemCount ? `${itemCount} itens` : `${items.length} pratos`;
+  const heroAsideCopy = itemCount
+    ? `${itemCount} itens somando ${formatCurrency(totalCents)} estão prontos para finalizar na aba Reserva.`
+    : "Filtre por categoria e encontre algo para pedir.";
+  const filterActionLabel = itemCount ? `Carrinho • ${itemCount}` : undefined;
+  const menuHeaderDescription = `Mostrando ${visibleItems.length} itens neste filtro.`;
+  const filterButtons = filters.map((filter) => {
+    const isActive = activeFilter === filter;
+    const itemTotal =
+      filter === "todos"
+        ? items.length
+        : items.filter((item) => item.category === filter).length;
+
+    return (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityState={{ selected: isActive }}
+        key={filter}
+        onPress={() => setActiveFilter(filter)}
+        style={[styles.filterChip, isActive && styles.filterChipActive]}
+      >
+        <Text style={[styles.filterText, isActive && styles.filterTextActive]}>
+          {filter === "todos" ? "Todos" : getCategoryLabel(filter)}
+        </Text>
+        <Text style={[styles.filterCount, isActive && styles.filterCountActive]}>
+          {itemTotal}
+        </Text>
+      </Pressable>
+    );
+  });
+  const menuCards = visibleItems.map((item) => (
+    <MenuCard
+      item={item}
+      key={item.id}
+      onAdd={() => addItem(item)}
+      onPress={() => navigation.navigate("DishDetails", { item })}
+      style={layout.isTablet ? styles.menuCardWide : null}
+    />
+  ));
 
   return (
     <ScrollView
@@ -68,7 +108,7 @@ export function MenuScreen({ navigation }) {
         >
           <View style={[styles.heroTop, layout.isWide && styles.heroTopWide]}>
             <View style={styles.heroCopy}>
-              <Text style={styles.heroEyebrow}>Cardapio</Text>
+              <Text style={styles.heroEyebrow}>Cardápio</Text>
               <Text
                 style={[
                   styles.heroTitle,
@@ -78,18 +118,15 @@ export function MenuScreen({ navigation }) {
                   }
                 ]}
               >
-                Escolha como em apps de delivery premium.
+                Escolha o que pedir agora.
               </Text>
               <Text style={styles.heroSubtitle}>
-                Filtros evidentes, leitura editorial dos pratos e grid responsivo para
-                mobile e web.
+                Filtre por categoria e encontre pratos, entradas, sobremesas e bebidas.
               </Text>
             </View>
 
             <View style={[styles.heroAside, layout.isCompact && styles.heroAsideCompact]}>
-              <Text style={styles.heroAsideEyebrow}>
-                {itemCount ? "Carrinho ativo" : "Pronto para descobrir"}
-              </Text>
+              <Text style={styles.heroAsideEyebrow}>{heroAsideLabel}</Text>
               <Text
                 style={[
                   styles.heroAsideValue,
@@ -99,13 +136,9 @@ export function MenuScreen({ navigation }) {
                   }
                 ]}
               >
-                {itemCount ? `${itemCount} itens` : `${items.length} pratos`}
+                {heroAsideValue}
               </Text>
-              <Text style={styles.heroAsideCopy}>
-                {itemCount
-                  ? `${itemCount} itens somando ${formatCurrency(totalCents)} aguardam finalizacao na aba Reserva.`
-                  : "Filtre por categoria e encontre pratos para salao ou delivery."}
-              </Text>
+              <Text style={styles.heroAsideCopy}>{heroAsideCopy}</Text>
               {itemCount ? (
                 <Pressable
                   accessibilityRole="button"
@@ -120,57 +153,25 @@ export function MenuScreen({ navigation }) {
         </LinearGradient>
 
         <SectionHeader
-          actionLabel={itemCount ? `Carrinho • ${itemCount}` : undefined}
-          description={`Mostrando ${visibleItems.length} pratos no filtro atual.`}
+          actionLabel={filterActionLabel}
+          description={menuHeaderDescription}
           eyebrow="Filtros"
           onActionPress={() => navigation.navigate("Reserva")}
-          title="Encontre no seu ritmo"
+          title="Cardápio"
         />
         <View style={styles.filters}>
-          {filters.map((filter) => {
-            const isActive = activeFilter === filter;
-            const itemTotal =
-              filter === "todos"
-                ? items.length
-                : items.filter((item) => item.category === filter).length;
-
-            return (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityState={{ selected: isActive }}
-                key={filter}
-                onPress={() => setActiveFilter(filter)}
-                style={[styles.filterChip, isActive && styles.filterChipActive]}
-              >
-                <Text style={[styles.filterText, isActive && styles.filterTextActive]}>
-                  {filter === "todos" ? "Todos" : getCategoryLabel(filter)}
-                </Text>
-                <Text style={[styles.filterCount, isActive && styles.filterCountActive]}>
-                  {itemTotal}
-                </Text>
-              </Pressable>
-            );
-          })}
+          {filterButtons}
         </View>
 
         {visibleItems.length ? (
           <View style={styles.menuGrid}>
-            {visibleItems.map((item) => (
-              <MenuCard
-                item={item}
-                key={item.id}
-                onAdd={() => addItem(item)}
-                onPress={() => navigation.navigate("DishDetails", { item })}
-                showAddButton
-                style={layout.isTablet ? styles.menuCardWide : null}
-              />
-            ))}
+            {menuCards}
           </View>
         ) : (
           <View style={styles.emptyState}>
             <Text style={styles.emptyTitle}>Nenhum prato nesse filtro.</Text>
             <Text style={styles.emptyCopy}>
-              Troque a categoria para continuar explorando o cardapio.
+              Troque a categoria para continuar explorando o cardápio.
             </Text>
           </View>
         )}
