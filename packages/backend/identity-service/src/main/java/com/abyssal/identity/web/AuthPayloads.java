@@ -14,7 +14,7 @@ public final class AuthPayloads {
     @NotBlank @Size(min = 3, max = 80) String name,
     @NotBlank @Email @Size(max = 120) String email,
     @NotBlank @Size(min = 8, max = 128) String password,
-    @Size(min = 8, max = 20) String phone
+    @NotBlank @Pattern(regexp = "^\\d{10,11}$", message = "phone must contain 10 or 11 digits.") String phone
   ) {
   }
 

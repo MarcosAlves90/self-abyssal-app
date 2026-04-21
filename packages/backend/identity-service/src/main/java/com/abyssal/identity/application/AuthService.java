@@ -54,7 +54,7 @@ public class AuthService {
     user.setEmailHash(emailHash);
     user.setEmailEncrypted(textCrypto.encrypt(normalizedEmail));
     user.setPasswordHash(passwordEncoder.encode(request.password()));
-    user.setPhoneEncrypted(textCrypto.encrypt(normalizeOptional(request.phone())));
+    user.setPhoneEncrypted(textCrypto.encrypt(request.phone().trim()));
     user.setRole(UserRole.CUSTOMER);
 
     UserEntity persistedUser = userRepository.save(user);

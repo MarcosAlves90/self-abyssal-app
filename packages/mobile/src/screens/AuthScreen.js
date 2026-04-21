@@ -16,6 +16,7 @@ import { KeyboardScrollScreen } from "../components/KeyboardScrollScreen";
 import { SeaShellIcon } from "../components/icons/SeaShellIcon";
 import { useAuth } from "../context/AuthContext";
 import { theme } from "../theme/tokens";
+import { formatPhoneNumber, normalizePhoneNumber } from "../utils/phone";
 
 const AUTH_BACKGROUND_ASPECT_RATIO = 2500 / 1667;
 const AUTH_BACKGROUND_IMAGE = require("../../assets/images/auth/login-hero.png");
@@ -71,6 +72,20 @@ export function AuthScreen() {
       return;
     }
 
+    let normalizedPhone = "";
+
+    if (mode === "register") {
+      normalizedPhone = normalizePhoneNumber(form.phone);
+
+      if (normalizedPhone.length !== 10 && normalizedPhone.length !== 11) {
+        Alert.alert(
+          "Telefone obrigatório",
+          "Informe um telefone válido para concluir o cadastro."
+        );
+        return;
+      }
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -84,7 +99,7 @@ export function AuthScreen() {
           name: form.name,
           email: form.email,
           password: form.password,
-          phone: form.phone.trim() || undefined
+          phone: normalizedPhone
         });
       }
     } catch (error) {
@@ -198,9 +213,10 @@ export function AuthScreen() {
                 inputRef={phoneInputRef}
                 keyboardType="phone-pad"
                 label="Telefone"
-                onChangeText={(value) => updateField("phone", value)}
+                maxLength={15}
+                onChangeText={(value) => updateField("phone", formatPhoneNumber(value))}
                 onSubmitEditing={handleSubmit}
-                placeholder="Opcional, para contato"
+                placeholder="Ex.: (11) 98765-4321"
                 returnKeyType="go"
                 textContentType="telephoneNumber"
                 value={form.phone}

@@ -6,6 +6,7 @@ npm-debug.log*
 .expo
 dist
 coverage
+**/target/
 packages/backend/.env
 packages/mobile/.env
 packages/backend/node_modules
