@@ -1,0 +1,17 @@
+com/abyssal/identity/web/AuthPayloads$AddressResponse.class
+com/abyssal/identity/web/AuthPayloads$UserResponse.class
+com/abyssal/identity/IdentityServiceApplication.class
+com/abyssal/identity/web/AuthPayloads$RegisterRequest.class
+com/abyssal/identity/config/SeedProperties.class
+com/abyssal/identity/domain/UserRole.class
+com/abyssal/identity/application/AuthService.class
+com/abyssal/identity/domain/UserEntity.class
+com/abyssal/identity/domain/UserAddressEntity.class
+com/abyssal/identity/web/AuthPayloads$LoginRequest.class
+com/abyssal/identity/web/AuthController.class
+com/abyssal/identity/web/AuthPayloads$AuthResponse.class
+com/abyssal/identity/repository/UserRepository.class
+com/abyssal/identity/web/AuthPayloads$AddressUpsertRequest.class
+com/abyssal/identity/config/SecurityConfig.class
+com/abyssal/identity/application/IdentitySeeder.class
+com/abyssal/identity/web/AuthPayloads.class

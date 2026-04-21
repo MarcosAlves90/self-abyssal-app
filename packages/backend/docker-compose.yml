@@ -1,40 +1,97 @@
 services:
-  api:
-    build:
-      context: .
-    container_name: abyssal-api
-    command: npm run dev
-    environment:
-      PORT: 3333
-      MONGO_URI: mongodb://mongo:27017/abyssal_app
-      CORS_ORIGIN: "*"
-      AUTO_SEED: "true"
-      JWT_SECRET: 3e82f77875293dd4226fb5271e5e28ee71bb4b3655d907eb418d5b4dfa7b29c5
-      ENCRYPTION_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
-    ports:
-      - "3333:3333"
-    volumes:
-      - .:/app
-      - backend_node_modules:/app/node_modules
-    depends_on:
-      mongo:
-        condition: service_healthy
-
-  mongo:
-    image: mongo:8.0
-    container_name: abyssal-mongo
+  postgres:
+    image: postgres:16-alpine
     restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-abyssal}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-abyssal}
+      POSTGRES_DB: postgres
     ports:
-      - "27017:27017"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
-      - mongo_data:/data/db
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d postgres"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
       start_period: 10s
 
+  identity-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: identity-service
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/abyssal_identity
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-abyssal}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-abyssal}
+      APP_SECURITY_JWT_SECRET: ${JWT_SECRET:-dev-only-change-me-please-32-characters-minimum}
+      APP_SECURITY_ENCRYPTION_KEY: ${ENCRYPTION_KEY:-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
+      APP_SECURITY_REQUIRE_HTTPS_IN_PRODUCTION: ${REQUIRE_HTTPS_IN_PRODUCTION:-true}
+      APP_SEED_ENABLED: ${APP_SEED_ENABLED:-true}
+      APP_SEED_ADMIN_NAME: ${APP_SEED_ADMIN_NAME:-Abyssal Admin}
+      APP_SEED_ADMIN_EMAIL: ${APP_SEED_ADMIN_EMAIL:-admin@abyssal.local}
+      APP_SEED_ADMIN_PASSWORD: ${APP_SEED_ADMIN_PASSWORD:-Admin123!}
+
+  catalog-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: catalog-service
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/abyssal_catalog
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-abyssal}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-abyssal}
+      APP_SECURITY_JWT_SECRET: ${JWT_SECRET:-dev-only-change-me-please-32-characters-minimum}
+      APP_SECURITY_ENCRYPTION_KEY: ${ENCRYPTION_KEY:-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
+      APP_SECURITY_REQUIRE_HTTPS_IN_PRODUCTION: ${REQUIRE_HTTPS_IN_PRODUCTION:-true}
+      APP_SEED_ENABLED: ${APP_SEED_ENABLED:-true}
+
+  operations-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: operations-service
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      catalog-service:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/abyssal_operations
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-abyssal}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-abyssal}
+      APP_SECURITY_JWT_SECRET: ${JWT_SECRET:-dev-only-change-me-please-32-characters-minimum}
+      APP_SECURITY_ENCRYPTION_KEY: ${ENCRYPTION_KEY:-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
+      APP_SECURITY_REQUIRE_HTTPS_IN_PRODUCTION: ${REQUIRE_HTTPS_IN_PRODUCTION:-true}
+      APP_CATALOG_BASE_URL: http://catalog-service:8080
+
+  nginx:
+    build:
+      context: ./nginx
+    restart: unless-stopped
+    depends_on:
+      - identity-service
+      - catalog-service
+      - operations-service
+    environment:
+      CORS_ALLOWED_ORIGIN: ${CORS_ALLOWED_ORIGIN:-*}
+    ports:
+      - "${NGINX_PORT:-3333}:443"
+
 volumes:
-  mongo_data:
-  backend_node_modules:
+  postgres_data:

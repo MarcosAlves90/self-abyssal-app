@@ -1,0 +1,13 @@
+com/abyssal/shared/error/ApiError.class
+com/abyssal/shared/error/RestExceptionHandler.class
+com/abyssal/shared/crypto/TextCrypto.class
+com/abyssal/shared/security/JsonAccessDeniedHandler.class
+com/abyssal/shared/crypto/HashingService.class
+com/abyssal/shared/security/JsonAuthenticationEntryPoint.class
+com/abyssal/shared/error/ApiException.class
+com/abyssal/shared/security/JwtAuthenticationFilter.class
+com/abyssal/shared/security/JwtService.class
+com/abyssal/shared/security/SecurityJsonWriter.class
+com/abyssal/shared/security/HttpsEnforcementFilter.class
+com/abyssal/shared/security/SecurityProperties.class
+com/abyssal/shared/security/AuthenticatedUser.class
