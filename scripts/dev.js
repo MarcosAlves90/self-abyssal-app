@@ -4,11 +4,16 @@ const path = require("node:path");
 const rootDir = path.resolve(__dirname, "..");
 const composeFile = path.join(rootDir, "packages/backend/docker-compose.yml");
 const composeBaseArgs = ["compose", "-f", composeFile];
-const backendServices = ["identity-service", "catalog-service", "operations-service"];
+const backendServices = [
+  { name: "identity", service: "identity-service", style: "\u001b[38;2;220;138;120m" },
+  { name: "catalog", service: "catalog-service", style: "\u001b[38;2;108;170;116m" },
+  { name: "operations", service: "operations-service", style: "\u001b[38;2;214;157;82m" }
+];
+const frontLogger = { name: "front", style: "\u001b[38;2;156;134;206m" };
 const useWebTarget = process.argv.includes("--web");
 const mobileScript = useWebTarget ? "dev:mobile:web" : "dev:mobile";
 
-let backendLogStream;
+let backendLogStreams = [];
 let mobileProcess;
 let isShuttingDown = false;
 
@@ -28,26 +33,60 @@ function waitForExit(child) {
   });
 }
 
-function pipeWithPrefix(stream, prefix, target) {
-  let buffer = "";
+function formatLine({ name, style }, message) {
+  const line = `[${name}] ${message}`;
 
-  stream.on("data", (chunk) => {
-    buffer += chunk.toString().replaceAll("\r", "");
-    const lines = buffer.split("\n");
-    buffer = lines.pop();
+  return `${style}${line}\u001b[0m`;
+}
 
-    for (const line of lines) {
-      if (line) {
-        target.write(`${prefix}${line}\n`);
-      }
+function attachPrefixedLogs(childProcess, logger) {
+  const writeLine = (target, message) => {
+    target.write(`${formatLine(logger, message)}\n`);
+  };
+
+  childProcess.stdout.on("data", (chunk) => {
+    writeLines(chunk, process.stdout, writeLine);
+  });
+
+  childProcess.stderr.on("data", (chunk) => {
+    writeLines(chunk, process.stderr, writeLine);
+  });
+}
+
+function writeLines(chunk, target, writeLine) {
+  const normalized = chunk.toString().replaceAll("\r", "");
+  const lines = normalized.split("\n");
+  const trailingLine = lines.pop();
+
+  for (const line of lines) {
+    if (line) {
+      writeLine(target, line);
+    }
+  }
+
+  if (trailingLine) {
+    writeLine(target, trailingLine);
+  }
+}
+
+function startServiceLogStream(service) {
+  const childProcess = spawnProcess(
+    "docker",
+    [...composeBaseArgs, "logs", "-f", "--tail=20", service.service],
+    { stdio: ["ignore", "pipe", "pipe"] }
+  );
+
+  attachPrefixedLogs(childProcess, service);
+
+  childProcess.on("exit", (code) => {
+    if (!isShuttingDown && code && code !== 0) {
+      const message = `log stream exited with code ${code}`;
+
+      process.stderr.write(`${formatLine(service, message)}\n`);
     }
   });
 
-  stream.on("end", () => {
-    if (buffer) {
-      target.write(`${prefix}${buffer}\n`);
-    }
-  });
+  return childProcess;
 }
 
 async function shutdown(exitCode = 0) {
@@ -57,8 +96,10 @@ async function shutdown(exitCode = 0) {
 
   isShuttingDown = true;
 
-  if (backendLogStream?.exitCode === null) {
-    backendLogStream.kill("SIGINT");
+  for (const backendLogStream of backendLogStreams) {
+    if (backendLogStream?.exitCode === null) {
+      backendLogStream.kill("SIGINT");
+    }
   }
 
   if (mobileProcess?.exitCode === null) {
@@ -74,7 +115,9 @@ async function shutdown(exitCode = 0) {
 }
 
 async function main() {
-  process.stdout.write(`[dev] starting mobile target: ${useWebTarget ? "web" : "native"}\n`);
+  const targetLabel = useWebTarget ? "web" : "native";
+
+  process.stdout.write(formatLine(frontLogger, "starting mobile target: " + targetLabel) + "\n");
 
   const backendUp = spawnProcess("docker", [...composeBaseArgs, "up", "--build", "-d"], {
     stdio: "inherit"
@@ -86,24 +129,13 @@ async function main() {
     process.exit(backendUpResult.code || 1);
   }
 
-  backendLogStream = spawnProcess(
-    "docker",
-    [...composeBaseArgs, "logs", "-f", "--tail=20", "--no-log-prefix", ...backendServices],
-    { stdio: ["ignore", "pipe", "pipe"] }
-  );
-
-  pipeWithPrefix(backendLogStream.stdout, "[backend] ", process.stdout);
-  pipeWithPrefix(backendLogStream.stderr, "[backend] ", process.stderr);
-
-  backendLogStream.on("exit", (code) => {
-    if (!isShuttingDown && code && code !== 0) {
-      process.stderr.write(`[backend] log stream exited with code ${code}\n`);
-    }
-  });
+  backendLogStreams = backendServices.map((service) => startServiceLogStream(service));
 
   mobileProcess = spawnProcess("npm", ["run", mobileScript], {
-    stdio: "inherit"
+    stdio: ["ignore", "pipe", "pipe"]
   });
+
+  attachPrefixedLogs(mobileProcess, frontLogger);
 
   mobileProcess.on("exit", (code, signal) => {
     let nextCode = 0;
@@ -127,6 +159,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error("[dev]", error.message);
+  console.error(formatLine(frontLogger, error.message));
   shutdown(1);
 });
