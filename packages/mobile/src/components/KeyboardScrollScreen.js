@@ -87,7 +87,7 @@ export const KeyboardScrollScreen = forwardRef(function KeyboardScrollScreen({
       keyboardVerticalOffset={
         Platform.OS === "ios" ? insets.top + keyboardVerticalOffset : 0
       }
-      style={styles.flex}
+      style={styles.container}
     >
       <ScrollView
         ref={scrollRef}
@@ -102,7 +102,7 @@ export const KeyboardScrollScreen = forwardRef(function KeyboardScrollScreen({
         keyboardShouldPersistTaps="handled"
         onFocusCapture={handleFocusCapture}
         showsVerticalScrollIndicator={false}
-        style={[styles.flex, style]}
+        style={[styles.scrollView, style]}
       >
         {children}
       </ScrollView>
@@ -111,11 +111,16 @@ export const KeyboardScrollScreen = forwardRef(function KeyboardScrollScreen({
 });
 
 const styles = StyleSheet.create({
-  flex: {
+  container: {
     flex: 1
   },
+  scrollView: {
+    flex: 1,
+    backgroundColor: "transparent"
+  },
   content: {
-    flexGrow: 1
+    flexGrow: 1,
+    backgroundColor: "transparent"
   },
   centerContent: {
     justifyContent: "center"

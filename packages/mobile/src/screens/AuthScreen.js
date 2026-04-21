@@ -2,10 +2,12 @@ import React, { useRef, useState } from "react";
 import PropTypes from "prop-types";
 import {
   Alert,
+  Image,
   Pressable,
   StyleSheet,
   Text,
   TextInput,
+  useWindowDimensions,
   View
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -15,7 +17,10 @@ import { SeaShellIcon } from "../components/icons/SeaShellIcon";
 import { useAuth } from "../context/AuthContext";
 import { theme } from "../theme/tokens";
 
-const authModes = {
+const AUTH_BACKGROUND_ASPECT_RATIO = 2500 / 1667;
+const AUTH_BACKGROUND_IMAGE = require("../../assets/images/auth/login-hero.png");
+
+const AUTH_MODES = {
   login: {
     eyebrow: "Bem-vindo",
     title: "Acesse sua conta.",
@@ -34,8 +39,16 @@ const authModes = {
   }
 };
 
+function getBackgroundImageStyle(windowHeight) {
+  return {
+    height: windowHeight,
+    width: windowHeight * AUTH_BACKGROUND_ASPECT_RATIO
+  };
+}
+
 export function AuthScreen() {
   const { login, register } = useAuth();
+  const { height: windowHeight } = useWindowDimensions();
   const nameInputRef = useRef(null);
   const emailInputRef = useRef(null);
   const passwordInputRef = useRef(null);
@@ -82,131 +95,141 @@ export function AuthScreen() {
   }
 
   const isRegister = mode === "register";
-  const currentMode = authModes[mode];
+  const currentMode = AUTH_MODES[mode];
 
   return (
-    <LinearGradient colors={["#030814", "#05111f", "#0b1e38"]} style={styles.container}>
-      <KeyboardScrollScreen contentContainerStyle={styles.content} extraKeyboardSpace={44}>
-        <View style={styles.shell}>
-          <View style={styles.brandRow}>
-            <Text style={styles.brand}>Abyssal</Text>
-            <SeaShellIcon color={theme.colors.accentSoft} size={70} style={styles.brandIcon} />
-          </View>
+    <View style={styles.container}>
+      <Image
+        source={AUTH_BACKGROUND_IMAGE}
+        style={[styles.backgroundImage, getBackgroundImageStyle(windowHeight)]}
+        resizeMode="contain"
+      />
+      <LinearGradient
+        colors={["rgba(3, 8, 20, 0.88)", "rgba(5, 17, 31, 0.88)", "rgba(11, 30, 56, 0.9)"]}
+        style={styles.overlay}
+      >
+        <KeyboardScrollScreen contentContainerStyle={styles.content} extraKeyboardSpace={44}>
+          <View style={styles.shell}>
+            <View style={styles.brandRow}>
+              <Text style={styles.brand}>Abyssal</Text>
+              <SeaShellIcon color={theme.colors.text} size={70} style={styles.brandIcon} />
+            </View>
 
-          <View style={styles.modeRow}>
-            {['login', 'register'].map((value) => (
-              <Pressable
-                key={value}
-                onPress={() => setMode(value)}
-                style={[
-                  styles.modeButton,
-                  mode === value && styles.modeButtonActive
-                ]}
-              >
-                <Text
+            <View style={styles.modeRow}>
+              {["login", "register"].map((value) => (
+                <Pressable
+                  key={value}
+                  onPress={() => setMode(value)}
                   style={[
-                    styles.modeButtonText,
-                    mode === value && styles.modeButtonTextActive
+                    styles.modeButton,
+                    mode === value && styles.modeButtonActive
                   ]}
                 >
-                  {value === "login" ? "Entrar" : "Criar conta"}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
+                  <Text
+                    style={[
+                      styles.modeButtonText,
+                      mode === value && styles.modeButtonTextActive
+                    ]}
+                  >
+                    {value === "login" ? "Entrar" : "Criar conta"}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
 
-          <View style={styles.panelHeader}>
-            <Text style={styles.panelEyebrow}>{currentMode.eyebrow}</Text>
-            <Text style={styles.panelTitle}>{currentMode.title}</Text>
-            <Text style={styles.panelCopy}>{currentMode.subtitle}</Text>
-          </View>
+            <View style={styles.panelHeader}>
+              <Text style={styles.panelEyebrow}>{currentMode.eyebrow}</Text>
+              <Text style={styles.panelTitle}>{currentMode.title}</Text>
+              <Text style={styles.panelCopy}>{currentMode.subtitle}</Text>
+            </View>
 
-          {isRegister ? (
+            {isRegister ? (
+              <FormField
+                autoCapitalize="words"
+                autoComplete="name"
+                inputRef={nameInputRef}
+                label="Nome"
+                onChangeText={(value) => updateField("name", value)}
+                onSubmitEditing={() => emailInputRef.current?.focus()}
+                placeholder="Seu nome"
+                returnKeyType="next"
+                textContentType="name"
+                value={form.name}
+              />
+            ) : null}
             <FormField
-              autoCapitalize="words"
-              autoComplete="name"
-              inputRef={nameInputRef}
-              label="Nome"
-              onChangeText={(value) => updateField("name", value)}
-              onSubmitEditing={() => emailInputRef.current?.focus()}
-              placeholder="Seu nome"
+              autoCapitalize="none"
+              autoComplete="email"
+              autoCorrect={false}
+              inputRef={emailInputRef}
+              keyboardType="email-address"
+              label="E-mail"
+              onChangeText={(value) => updateField("email", value)}
+              onSubmitEditing={() => passwordInputRef.current?.focus()}
+              placeholder="voce@abyssal.app"
               returnKeyType="next"
-              textContentType="name"
-              value={form.name}
+              textContentType="emailAddress"
+              value={form.email}
             />
-          ) : null}
-          <FormField
-            autoCapitalize="none"
-            autoComplete="email"
-            autoCorrect={false}
-            inputRef={emailInputRef}
-            keyboardType="email-address"
-            label="E-mail"
-            onChangeText={(value) => updateField("email", value)}
-            onSubmitEditing={() => passwordInputRef.current?.focus()}
-            placeholder="voce@abyssal.app"
-            returnKeyType="next"
-            textContentType="emailAddress"
-            value={form.email}
-          />
-          <FormField
-            autoCapitalize="none"
-            autoComplete={isRegister ? "new-password" : "password"}
-            autoCorrect={false}
-            inputRef={passwordInputRef}
-            label="Senha"
-            onChangeText={(value) => updateField("password", value)}
-            onSubmitEditing={() => {
-              if (isRegister) {
-                phoneInputRef.current?.focus();
-                return;
-              }
-
-              handleSubmit();
-            }}
-            placeholder="No mínimo 8 caracteres"
-            returnKeyType={isRegister ? "next" : "go"}
-            secureTextEntry
-            textContentType={isRegister ? "newPassword" : "password"}
-            value={form.password}
-          />
-          {isRegister ? (
             <FormField
-              autoComplete="tel"
-              inputRef={phoneInputRef}
-              keyboardType="phone-pad"
-              label="Telefone"
-              onChangeText={(value) => updateField("phone", value)}
-              onSubmitEditing={handleSubmit}
-              placeholder="Opcional, para contato"
-              returnKeyType="go"
-              textContentType="telephoneNumber"
-              value={form.phone}
+              autoCapitalize="none"
+              autoComplete={isRegister ? "new-password" : "password"}
+              autoCorrect={false}
+              inputRef={passwordInputRef}
+              label="Senha"
+              onChangeText={(value) => updateField("password", value)}
+              onSubmitEditing={() => {
+                if (isRegister) {
+                  phoneInputRef.current?.focus();
+                  return;
+                }
+
+                handleSubmit();
+              }}
+              placeholder="No mínimo 8 caracteres"
+              returnKeyType={isRegister ? "next" : "go"}
+              secureTextEntry
+              textContentType={isRegister ? "newPassword" : "password"}
+              value={form.password}
             />
-          ) : null}
+            {isRegister ? (
+              <FormField
+                autoComplete="tel"
+                inputRef={phoneInputRef}
+                keyboardType="phone-pad"
+                label="Telefone"
+                onChangeText={(value) => updateField("phone", value)}
+                onSubmitEditing={handleSubmit}
+                placeholder="Opcional, para contato"
+                returnKeyType="go"
+                textContentType="telephoneNumber"
+                value={form.phone}
+              />
+            ) : null}
 
-          <Pressable
-            disabled={isSubmitting}
-            onPress={handleSubmit}
-            style={[styles.submitButton, isSubmitting && styles.buttonDisabled]}
-          >
-            <Text style={styles.submitButtonText}>
-              {isSubmitting ? "Processando..." : currentMode.submitLabel}
-            </Text>
-          </Pressable>
+            <Pressable
+              disabled={isSubmitting}
+              onPress={handleSubmit}
+              style={[styles.submitButton, isSubmitting && styles.buttonDisabled]}
+            >
+              <Text style={styles.submitButtonText}>
+                {isSubmitting ? "Processando..." : currentMode.submitLabel}
+              </Text>
+            </Pressable>
 
-          <Pressable
-            onPress={() => setMode(isRegister ? "login" : "register")}
-            style={styles.switchAction}
-          >
-            <Text style={styles.switchActionLabel}>{currentMode.switchLabel}</Text>
-            <Text style={styles.switchActionLink}>{currentMode.switchAction}</Text>
-          </Pressable>
+            <Pressable
+              onPress={() => setMode(isRegister ? "login" : "register")}
+              style={styles.switchAction}
+            >
+              <Text style={styles.switchActionLabel}>{currentMode.switchLabel}</Text>
+              <Text style={styles.switchActionLink}>{currentMode.switchAction}</Text>
+            </Pressable>
 
-          <Text style={styles.supportCopy}>Sem spam. Seus dados ficam protegidos.</Text>
-        </View>
-      </KeyboardScrollScreen>
-    </LinearGradient>
+            <Text style={styles.supportCopy}>Sem spam. Seus dados ficam protegidos.</Text>
+          </View>
+        </KeyboardScrollScreen>
+      </LinearGradient>
+    </View>
   );
 }
 
@@ -235,7 +258,17 @@ FormField.propTypes = {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+    overflow: "hidden"
+  },
+  overlay: {
     flex: 1
+  },
+  backgroundImage: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    opacity: 0.92,
   },
   content: {
     paddingHorizontal: theme.spacing.xl,
