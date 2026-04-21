@@ -11,7 +11,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 
 import { KeyboardScrollScreen } from "../components/KeyboardScrollScreen";
-import { AnglerfishIcon } from "../components/icons/AnglerfishIcon";
+import { SeaShellIcon } from "../components/icons/SeaShellIcon";
 import { useAuth } from "../context/AuthContext";
 import { theme } from "../theme/tokens";
 
@@ -90,7 +90,7 @@ export function AuthScreen() {
         <View style={styles.shell}>
           <View style={styles.brandRow}>
             <Text style={styles.brand}>Abyssal</Text>
-            <AnglerfishIcon color={theme.colors.accentSoft} size={78} style={styles.brandIcon} />
+            <SeaShellIcon color={theme.colors.accentSoft} size={70} style={styles.brandIcon} />
           </View>
 
           <View style={styles.modeRow}>
