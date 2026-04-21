@@ -783,7 +783,6 @@ const styles = StyleSheet.create({
     width: "100%"
   },
   hero: {
-    borderRadius: theme.radius.lg,
     marginBottom: theme.spacing.lg,
     padding: theme.spacing.xl
   },
@@ -831,7 +830,6 @@ const styles = StyleSheet.create({
   },
   heroStat: {
     backgroundColor: "rgba(255,255,255,0.05)",
-    borderRadius: theme.radius.md,
     minHeight: 96,
     justifyContent: "center",
     minWidth: 136,
@@ -907,7 +905,6 @@ const styles = StyleSheet.create({
   panel: {
     backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,
-    borderRadius: theme.radius.lg,
     borderWidth: 1,
     padding: theme.spacing.lg
   },
@@ -979,7 +976,6 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: theme.colors.backgroundAlt,
     borderColor: theme.colors.border,
-    borderRadius: theme.radius.md,
     borderWidth: 1,
     color: theme.colors.text,
     fontFamily: theme.fonts.body,
@@ -1008,7 +1004,6 @@ const styles = StyleSheet.create({
   },
   cartItem: {
     backgroundColor: theme.colors.backgroundAlt,
-    borderRadius: theme.radius.md,
     marginBottom: 14,
     padding: theme.spacing.md
   },
@@ -1063,7 +1058,6 @@ const styles = StyleSheet.create({
   emptyState: {
     backgroundColor: theme.colors.backgroundAlt,
     borderColor: "rgba(255,255,255,0.05)",
-    borderRadius: theme.radius.md,
     borderWidth: 1,
     marginBottom: theme.spacing.lg,
     padding: theme.spacing.lg
@@ -1097,7 +1091,6 @@ const styles = StyleSheet.create({
   infoCard: {
     backgroundColor: "rgba(255,255,255,0.03)",
     borderColor: "rgba(255,255,255,0.05)",
-    borderRadius: theme.radius.md,
     borderWidth: 1,
     marginBottom: 16,
     padding: 16
@@ -1116,7 +1109,6 @@ const styles = StyleSheet.create({
   },
   summaryCard: {
     backgroundColor: theme.colors.backgroundAlt,
-    borderRadius: theme.radius.md,
     marginBottom: 16,
     marginTop: 4,
     padding: theme.spacing.lg
@@ -1145,7 +1137,6 @@ const styles = StyleSheet.create({
   railCard: {
     backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,
-    borderRadius: theme.radius.lg,
     borderWidth: 1,
     padding: theme.spacing.lg
   },
@@ -1190,7 +1181,6 @@ const styles = StyleSheet.create({
   historyCard: {
     backgroundColor: theme.colors.surfaceRaised,
     borderColor: "rgba(255,255,255,0.04)",
-    borderRadius: theme.radius.md,
     borderWidth: 1,
     marginBottom: 12,
     padding: theme.spacing.lg
