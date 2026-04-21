@@ -5,9 +5,26 @@ import { LinearGradient } from "expo-linear-gradient";
 import { getResponsiveLayout } from "../theme/layout";
 import { theme } from "../theme/tokens";
 
+function getNameTextDimensions(layout, compact) {
+  if (layout.isTiny) {
+    return { fontSize: 24, lineHeight: 30 };
+  }
+
+  if (layout.isCompact) {
+    return { fontSize: 28, lineHeight: 32 };
+  }
+
+  if (compact) {
+    return { fontSize: 30, lineHeight: 34 };
+  }
+
+  return { fontSize: 34, lineHeight: 38 };
+}
+
 export function BranchCard({ branch, compact = false, style }) {
   const { width } = useWindowDimensions();
   const layout = getResponsiveLayout(width);
+  const { fontSize: nameFontSize, lineHeight: nameLineHeight } = getNameTextDimensions(layout, compact);
 
   return (
     <LinearGradient
@@ -24,8 +41,8 @@ export function BranchCard({ branch, compact = false, style }) {
               styles.name,
               compact && styles.nameCompact,
               {
-                fontSize: layout.isTiny ? 24 : layout.isCompact ? 28 : compact ? 30 : 34,
-                lineHeight: layout.isTiny ? 30 : layout.isCompact ? 32 : compact ? 34 : 38
+                fontSize: nameFontSize,
+                lineHeight: nameLineHeight
               }
             ]}
           >
@@ -55,10 +72,11 @@ export function BranchCard({ branch, compact = false, style }) {
 const styles = StyleSheet.create({
   card: {
     borderColor: theme.colors.border,
-    borderRadius: theme.radius.lg,
     borderWidth: 1,
     minHeight: 228,
-    padding: theme.spacing.lg
+    minWidth: 0,
+    padding: theme.spacing.lg,
+    width: "100%"
   },
   cardCompact: {
     minHeight: 210
@@ -68,13 +86,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 12,
     justifyContent: "space-between",
-    marginBottom: 12
+    marginBottom: 12,
+    width: "100%"
   },
   topRowStack: {
     flexDirection: "column"
   },
   copy: {
-    flex: 1
+    flex: 1,
+    minWidth: 0
   },
   eyebrow: {
     color: theme.colors.accentSoft,
@@ -102,7 +122,6 @@ const styles = StyleSheet.create({
   hoursBadge: {
     backgroundColor: "rgba(49,231,255,0.12)",
     borderColor: "rgba(49,231,255,0.18)",
-    borderRadius: theme.radius.pill,
     borderWidth: 1,
     paddingHorizontal: 12,
     paddingVertical: 8
@@ -133,15 +152,17 @@ const styles = StyleSheet.create({
   depths: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8
+    gap: 8,
+    width: "100%"
   },
   depthTag: {
     backgroundColor: "rgba(49,231,255,0.1)",
     borderColor: "rgba(49,231,255,0.1)",
-    borderRadius: theme.radius.pill,
     borderWidth: 1,
     color: theme.colors.text,
+    flexShrink: 1,
     fontFamily: theme.fonts.body,
+    maxWidth: "100%",
     overflow: "hidden",
     paddingHorizontal: 12,
     paddingVertical: 8

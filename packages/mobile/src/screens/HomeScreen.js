@@ -89,25 +89,9 @@ export function HomeScreen({ navigation }) {
               >
                 Mergulhe, {firstName}.
               </Text>
-              <Text style={styles.heroSubtitle}>
-                Uma landing inspirada em discovery apps: contexto rapido, hierarquia
-                forte e caminhos claros para menu, reserva e perfil.
-              </Text>
             </View>
 
             <View style={[styles.heroMetrics, layout.isCompact && styles.heroMetricsCompact]}>
-              <MetricCard
-                compact={layout.isCompact}
-                label="Filiais"
-                minWidth={layout.statCardMinWidth}
-                value={String(branches.length)}
-              />
-              <MetricCard
-                compact={layout.isCompact}
-                label="Destaques"
-                minWidth={layout.statCardMinWidth}
-                value={String(featuredItems.length)}
-              />
               <MetricCard
                 compact={layout.isCompact}
                 label="Carrinho"
@@ -121,27 +105,6 @@ export function HomeScreen({ navigation }) {
                 value={String(reservations.length)}
               />
             </View>
-          </View>
-
-          <View style={styles.actionGrid}>
-            <QuickActionCard
-              description="Entre no cardapio com filtros e cards mais editoriais."
-              label="Explorar menu"
-              onPress={() => navigation.navigate("Menu")}
-              wide={layout.isTablet}
-            />
-            <QuickActionCard
-              description="Agende uma mesa ou feche seu delivery em menos passos."
-              label="Abrir reserva"
-              onPress={() => navigation.navigate("Reserva")}
-              wide={layout.isTablet}
-            />
-            <QuickActionCard
-              description="Revise endereco, pedidos e agenda em um dashboard so."
-              label="Ver perfil"
-              onPress={() => navigation.navigate("Perfil")}
-              wide={layout.isTablet}
-            />
           </View>
         </LinearGradient>
 
@@ -324,7 +287,6 @@ const styles = StyleSheet.create({
     width: "100%"
   },
   hero: {
-    borderRadius: theme.radius.lg,
     marginBottom: theme.spacing.xl,
     padding: theme.spacing.xl
   },
@@ -372,7 +334,6 @@ const styles = StyleSheet.create({
   },
   metricCard: {
     backgroundColor: "rgba(255,255,255,0.04)",
-    borderRadius: theme.radius.md,
     minHeight: 92,
     justifyContent: "center",
     minWidth: 138,
@@ -404,7 +365,6 @@ const styles = StyleSheet.create({
   quickActionCard: {
     backgroundColor: "rgba(255,255,255,0.06)",
     borderColor: "rgba(255,255,255,0.07)",
-    borderRadius: theme.radius.md,
     borderWidth: 1,
     minHeight: 114,
     padding: 16,
@@ -428,7 +388,6 @@ const styles = StyleSheet.create({
   highlightCard: {
     backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,
-    borderRadius: theme.radius.lg,
     borderWidth: 1,
     marginBottom: theme.spacing.xl,
     padding: theme.spacing.lg
@@ -461,7 +420,6 @@ const styles = StyleSheet.create({
   featuredCard: {
     backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,
-    borderRadius: theme.radius.lg,
     borderWidth: 1,
     minHeight: 190,
     padding: theme.spacing.lg,
@@ -520,7 +478,6 @@ const styles = StyleSheet.create({
   reservationCard: {
     backgroundColor: theme.colors.surfaceRaised,
     borderColor: "rgba(255,255,255,0.04)",
-    borderRadius: theme.radius.md,
     borderWidth: 1,
     padding: theme.spacing.lg,
     width: "100%"
@@ -543,7 +500,6 @@ const styles = StyleSheet.create({
   emptyCard: {
     backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,
-    borderRadius: theme.radius.lg,
     borderWidth: 1,
     padding: theme.spacing.lg,
     width: "100%"
