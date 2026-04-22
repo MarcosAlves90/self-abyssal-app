@@ -15,7 +15,6 @@ import { BranchCard } from "../components/BranchCard";
 import { LoadingOverlay } from "../components/LoadingOverlay";
 import { MenuCard } from "../components/MenuCard";
 import { SectionHeader } from "../components/SectionHeader";
-import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import {
   fetchBranches,
@@ -27,7 +26,6 @@ import { getResponsiveLayout } from "../theme/layout";
 import { theme } from "../theme/tokens";
 
 export function HomeScreen({ navigation }) {
-  const { user } = useAuth();
   const { itemCount } = useCart();
   const { width } = useWindowDimensions();
   const [isLoading, setIsLoading] = useState(true);
@@ -62,8 +60,26 @@ export function HomeScreen({ navigation }) {
   }
 
   const layout = getResponsiveLayout(width);
-  const firstName = user?.name?.split(" ")[0] || "Explorador";
   const nextReservation = reservations[0];
+  const quickActions = [
+    {
+      description: itemCount
+        ? `${itemCount} itens prontos para finalizar.`
+        : "Veja os pratos em destaque e monte o carrinho.",
+      label: itemCount ? "Finalizar pedido" : "Explorar cardápio",
+      onPress: () => navigation.navigate(itemCount ? "Reserva" : "Menu")
+    },
+    {
+      description: "Escolha data, horário e unidade em poucos passos.",
+      label: "Reservar mesa",
+      onPress: () => navigation.navigate("Reserva")
+    },
+    {
+      description: "Confira endereço, horários e opções de atendimento.",
+      label: "Ver unidades",
+      onPress: () => navigation.navigate("Reserva")
+    }
+  ];
 
   return (
     <ScrollView
@@ -89,7 +105,7 @@ export function HomeScreen({ navigation }) {
                   }
                 ]}
               >
-                Olá, {firstName}.
+                Sua próxima escolha começa aqui.
               </Text>
             </View>
 
@@ -110,12 +126,31 @@ export function HomeScreen({ navigation }) {
           </View>
         </LinearGradient>
 
+        <SectionHeader
+          actionLabel={itemCount ? `Carrinho • ${itemCount}` : undefined}
+          description="Atalhos rápidos para decidir e seguir sem perder tempo."
+          eyebrow="Acesso rápido"
+          onActionPress={() => navigation.navigate("Reserva")}
+          title="Comece por aqui"
+        />
+        <View style={styles.actionGrid}>
+          {quickActions.map((action, index) => (
+            <QuickActionCard
+              key={action.label}
+              description={action.description}
+              label={action.label}
+              onPress={action.onPress}
+              wide={layout.isTablet && index === 0}
+            />
+          ))}
+        </View>
+
         <Pressable
           accessibilityRole="button"
           onPress={() => navigation.navigate("Reserva")}
           style={styles.highlightCard}
         >
-          <Text style={styles.highlightEyebrow}>Próxima reserva</Text>
+          <Text style={styles.highlightEyebrow}>Próxima ação</Text>
           {nextReservation ? (
             <>
               <Text
@@ -145,10 +180,10 @@ export function HomeScreen({ navigation }) {
                   }
                 ]}
               >
-                Nenhuma reserva agendada.
+                Sem reservas agendadas.
               </Text>
               <Text style={styles.highlightCopy}>
-                Acesse a aba Reserva para escolher data, horário e unidade.
+                Toque em Reservar mesa para fechar sua próxima visita.
               </Text>
             </>
           )}
@@ -156,7 +191,7 @@ export function HomeScreen({ navigation }) {
 
         <SectionHeader
           actionLabel="Ver menu"
-          description="Veja os pratos em destaque e siga para o cardápio completo quando quiser."
+          description="Pratos em destaque para decidir rápido e sem excesso de texto."
           eyebrow="Curadoria"
           onActionPress={() => navigation.navigate("Menu")}
           title="Pratos em destaque"
@@ -173,7 +208,7 @@ export function HomeScreen({ navigation }) {
         </View>
 
         <SectionHeader
-          description="Confira endereço, horário de funcionamento e áreas de atendimento de cada unidade."
+          description="Unidades organizadas de forma simples para você escolher mais rápido."
           eyebrow="Presencial"
           title="Unidades e horários"
         />
@@ -189,7 +224,7 @@ export function HomeScreen({ navigation }) {
         </View>
 
         <SectionHeader
-          description="Veja as próximas reservas registradas na sua conta."
+          description="As próximas reservas aparecem em formato resumido."
           eyebrow="Agenda"
           title="Suas próximas reservas"
         />
@@ -205,7 +240,7 @@ export function HomeScreen({ navigation }) {
                   {new Date(reservation.scheduledAt).toLocaleString("pt-BR")}
                 </Text>
                 <Text style={styles.reservationMeta}>
-                  {reservation.depthLevel} • {reservation.guests} pessoas
+                    {reservation.depthLevel} • {reservation.guests} pessoas
                 </Text>
               </View>
             ))
@@ -361,7 +396,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 12,
-    marginTop: 22
+    marginBottom: theme.spacing.xl,
+    marginTop: 4
   },
   quickActionCard: {
     backgroundColor: "rgba(255,255,255,0.06)",
