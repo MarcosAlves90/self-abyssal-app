@@ -57,9 +57,9 @@ export function MenuScreen({ navigation }) {
   const heroAsideValue = itemCount ? `${itemCount} itens` : `${items.length} pratos`;
   const heroAsideCopy = itemCount
     ? `${itemCount} itens somando ${formatCurrency(totalCents)} estão prontos para finalizar na aba Reserva.`
-    : "Filtre por categoria e encontre algo para pedir.";
+    : "Filtre por categoria e descubra os pratos mais fortes do cardápio.";
   const filterActionLabel = itemCount ? `Carrinho • ${itemCount}` : undefined;
-  const menuHeaderDescription = `Mostrando ${visibleItems.length} itens neste filtro.`;
+  const menuHeaderDescription = `Mostrando ${visibleItems.length} itens neste filtro. Adicione sem sair da tela.`;
   const filterButtons = filters.map((filter) => {
     const isActive = activeFilter === filter;
     const itemTotal =
@@ -90,6 +90,7 @@ export function MenuScreen({ navigation }) {
       key={item.id}
       onAdd={() => addItem(item)}
       onPress={() => navigation.navigate("DishDetails", { item })}
+      showAddButton
       style={layout.isTablet ? styles.menuCardWide : null}
     />
   ));
@@ -121,7 +122,7 @@ export function MenuScreen({ navigation }) {
                 Escolha o que pedir agora.
               </Text>
               <Text style={styles.heroSubtitle}>
-                Filtre por categoria e encontre pratos, entradas, sobremesas e bebidas.
+                Filtre rápido e adicione os pratos mais atrativos em poucos toques.
               </Text>
             </View>
 
@@ -140,13 +141,18 @@ export function MenuScreen({ navigation }) {
               </Text>
               <Text style={styles.heroAsideCopy}>{heroAsideCopy}</Text>
               {itemCount ? (
-                <Pressable
-                  accessibilityRole="button"
-                  onPress={() => navigation.navigate("Reserva")}
-                  style={[styles.heroAction, layout.isCompact && styles.heroActionCompact]}
-                >
-                  <Text style={styles.heroActionText}>Abrir carrinho e entrega</Text>
-                </Pressable>
+                <View style={styles.heroActionStack}>
+                  <Pressable
+                    accessibilityRole="button"
+                    onPress={() => navigation.navigate("Reserva")}
+                    style={[styles.heroAction, layout.isCompact && styles.heroActionCompact]}
+                  >
+                    <Text style={styles.heroActionText}>Ir para finalizar</Text>
+                  </Pressable>
+                  <Text style={styles.heroActionHint}>
+                    Seu carrinho já pode virar um pedido ou uma reserva.
+                  </Text>
+                </View>
               ) : null}
             </View>
           </View>
@@ -281,6 +287,16 @@ const styles = StyleSheet.create({
     color: theme.colors.background,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 13
+  },
+  heroActionStack: {
+    gap: 8,
+    marginTop: 16
+  },
+  heroActionHint: {
+    color: theme.colors.textMuted,
+    fontFamily: theme.fonts.body,
+    fontSize: 12,
+    lineHeight: 18
   },
   filters: {
     flexDirection: "row",
