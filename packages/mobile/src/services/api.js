@@ -3,29 +3,36 @@ import { Platform } from "react-native";
 
 import { formatPostalCode, normalizePostalCode } from "../utils/address";
 
-const fallbackBaseUrl = Platform.select({
-  android: "http://10.0.2.2:3333/api",
-  web: "http://127.0.0.1:3333/api",
-  default: "http://localhost:3333/api"
-});
+const isDevelopment = __DEV__;
+
+const fallbackBaseUrl = isDevelopment
+  ? Platform.select({
+      android: "http://10.0.2.2:3333/api",
+      web: "https://127.0.0.1:3333/api",
+      default: "http://localhost:3333/api"
+    })
+  : undefined;
 
 function normalizeWebBaseUrl(baseUrl) {
-  if (!baseUrl || Platform.OS !== "web") {
+  if (!baseUrl || Platform.OS !== "web" || !isDevelopment) {
     return baseUrl;
   }
 
   try {
     const url = new URL(baseUrl);
 
+    if (url.protocol === "http:" && (url.hostname === "localhost" || url.hostname === "127.0.0.1")) {
+      url.protocol = "https:";
+    }
+
     if (url.hostname === "localhost") {
       url.hostname = "127.0.0.1";
-      return url.toString().replace(/\/$/, "");
     }
+
+    return url.toString().replace(/\/$/, "");
   } catch {
     return baseUrl;
   }
-
-  return baseUrl;
 }
 
 export const api = axios.create({
