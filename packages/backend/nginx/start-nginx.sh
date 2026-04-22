@@ -20,8 +20,31 @@ if [ ! -s "$CERT_FILE" ] || [ ! -s "$KEY_FILE" ]; then
     -addext "subjectAltName=DNS:localhost,IP:127.0.0.1"
 fi
 
-envsubst '$CORS_ALLOWED_ORIGIN' \
-  < /etc/nginx/templates/default.conf.template \
-  > /etc/nginx/conf.d/default.conf
+allowed_origins="${CORS_ALLOWED_ORIGINS:-http://localhost:19006,http://127.0.0.1:19006}"
+allow_localhost="${CORS_ALLOW_LOCALHOST:-true}"
+
+{
+  printf 'map $http_origin $cors_allowed_origin {\n'
+  printf '  default "";\n'
+
+  if [ "$allow_localhost" = "true" ]; then
+    printf '  ~^http://(localhost|127\\.0\\.0\\.1)(:[0-9]+)?$ $http_origin;\n'
+  fi
+
+  old_ifs="$IFS"
+  IFS=,
+  for origin in $allowed_origins; do
+    origin=$(printf '%s' "$origin" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+
+    if [ -n "$origin" ]; then
+      printf '  "%s" $http_origin;\n' "$origin"
+    fi
+  done
+  IFS="$old_ifs"
+
+  printf '}\n'
+} > /etc/nginx/conf.d/00-cors-map.conf
+
+cp /etc/nginx/templates/default.conf.template /etc/nginx/conf.d/default.conf
 
 exec nginx -g 'daemon off;'

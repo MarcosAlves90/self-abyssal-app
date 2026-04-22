@@ -34,9 +34,11 @@ cp packages/backend/.env.example packages/backend/.env
 cp packages/mobile/.env.example packages/mobile/.env
 ```
 
-O gateway local do backend expõe TLS em `https://localhost:3333`. No modo web, o app normaliza URLs locais de desenvolvimento para esse gateway HTTPS automaticamente.
+O gateway local do backend expõe HTTP em `http://localhost:3334` para o fluxo de desenvolvimento e mantém HTTPS em `https://localhost:3333` para smoke test direto. No modo web, o app normaliza URLs locais de desenvolvimento para o gateway HTTP automaticamente.
 
-Se estiver testando em Android ou iOS físico, ajuste `EXPO_PUBLIC_API_BASE_URL` para um host alcançável no seu ambiente.
+Por padrão, a stack local fica presa em `127.0.0.1` e o CORS aceita as origens locais do Expo web em `localhost` e `127.0.0.1`, além de qualquer porta local enquanto `CORS_ALLOW_LOCALHOST=true`. Para expor a API em outra máquina ou em produção, ajuste `BIND_ADDRESS`, `CORS_ALLOWED_ORIGINS` e `CORS_ALLOW_LOCALHOST=false` explicitamente.
+
+Se estiver testando em Android, iOS ou em um dispositivo físico, ajuste `EXPO_PUBLIC_API_BASE_URL` para um host alcançável no seu ambiente.
 
 ## Como Rodar
 
@@ -103,5 +105,5 @@ Os detalhes do backend, da configuração de segurança e do gateway estão em [
 
 - PII sensível fica criptografada em repouso.
 - O gateway encerra TLS no Nginx.
-- CORS e o bypass de URL local ficam ativos apenas em modo dev.
-- Em produção, mantenha `REQUIRE_HTTPS_IN_PRODUCTION=true` e restrinja `CORS_ALLOWED_ORIGIN`.
+- CORS e o bypass de URL local ficam ativos apenas em modo de desenvolvimento.
+- Em produção, mantenha `REQUIRE_HTTPS_IN_PRODUCTION=true`, use `EXPO_PUBLIC_API_BASE_URL` com HTTPS, defina `CORS_ALLOW_LOCALHOST=false` e restrinja `CORS_ALLOWED_ORIGINS` para a origem exata do frontend.

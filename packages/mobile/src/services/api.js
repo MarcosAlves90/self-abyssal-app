@@ -4,39 +4,73 @@ import { Platform } from "react-native";
 import { formatPostalCode, normalizePostalCode } from "../utils/address";
 
 const isDevelopment = __DEV__;
+const configuredBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL;
 
 const fallbackBaseUrl = isDevelopment
   ? Platform.select({
-      android: "http://10.0.2.2:3333/api",
-      web: "https://127.0.0.1:3333/api",
-      default: "http://localhost:3333/api"
+      android: "http://10.0.2.2:3334/api",
+      web: "http://127.0.0.1:3334/api",
+      default: "http://localhost:3334/api"
     })
   : undefined;
 
-function normalizeWebBaseUrl(baseUrl) {
-  if (!baseUrl || Platform.OS !== "web" || !isDevelopment) {
+function resolveDevelopmentBaseUrl(baseUrl) {
+  if (!baseUrl || !isDevelopment) {
     return baseUrl;
   }
 
   try {
     const url = new URL(baseUrl);
+    const isLocalHost = url.hostname === "localhost" || url.hostname === "127.0.0.1";
 
-    if (url.protocol === "http:" && (url.hostname === "localhost" || url.hostname === "127.0.0.1")) {
-      url.protocol = "https:";
+    if (!isLocalHost) {
+      return baseUrl;
     }
 
-    if (url.hostname === "localhost") {
+    if (Platform.OS === "web") {
+      url.protocol = "http:";
       url.hostname = "127.0.0.1";
+      url.port = "3334";
+
+      return url.toString().replace(/\/$/, "");
     }
 
-    return url.toString().replace(/\/$/, "");
+    return undefined;
   } catch {
     return baseUrl;
   }
 }
 
+function normalizeProductionBaseUrl(baseUrl) {
+  if (!baseUrl) {
+    throw new Error("EXPO_PUBLIC_API_BASE_URL e obrigatoria em producao.");
+  }
+
+  let url;
+
+  try {
+    url = new URL(baseUrl);
+  } catch {
+    throw new Error("EXPO_PUBLIC_API_BASE_URL deve ser uma URL HTTPS valida em producao.");
+  }
+
+  if (url.protocol !== "https:") {
+    throw new Error("EXPO_PUBLIC_API_BASE_URL deve usar HTTPS em producao.");
+  }
+
+  if (url.hostname === "localhost" || url.hostname === "127.0.0.1") {
+    throw new Error("EXPO_PUBLIC_API_BASE_URL nao pode apontar para localhost em producao.");
+  }
+
+  return url.toString().replace(/\/$/, "");
+}
+
+const baseURL = isDevelopment
+  ? resolveDevelopmentBaseUrl(configuredBaseUrl) || fallbackBaseUrl
+  : normalizeProductionBaseUrl(configuredBaseUrl);
+
 export const api = axios.create({
-  baseURL: normalizeWebBaseUrl(process.env.EXPO_PUBLIC_API_BASE_URL) || fallbackBaseUrl,
+  baseURL,
   timeout: 12000
 });
 

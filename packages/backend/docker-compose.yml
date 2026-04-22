@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-abyssal}
       POSTGRES_DB: postgres
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "${BIND_ADDRESS:-127.0.0.1}:${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./postgres/init:/docker-entrypoint-initdb.d:ro
@@ -89,9 +89,11 @@ services:
       - catalog-service
       - operations-service
     environment:
-      CORS_ALLOWED_ORIGIN: ${CORS_ALLOWED_ORIGIN:-*}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:19006,http://127.0.0.1:19006}
+      CORS_ALLOW_LOCALHOST: ${CORS_ALLOW_LOCALHOST:-true}
     ports:
-      - "${NGINX_PORT:-3333}:443"
+      - "${BIND_ADDRESS:-127.0.0.1}:${NGINX_HTTP_PORT:-3334}:80"
+      - "${BIND_ADDRESS:-127.0.0.1}:${NGINX_PORT:-3333}:443"
 
 volumes:
   postgres_data:
