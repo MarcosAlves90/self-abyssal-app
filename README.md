@@ -1,195 +1,105 @@
 # Abyssal App Monorepo
 
-Monorepo com backend `Node.js + Express + MongoDB` em arquitetura de monólito modular e app mobile `React Native + Expo` para a experiência `APP ABYSSAL - Seafood Experience`.
+Monorepo com backend Spring Boot em microservicos, gateway Nginx com TLS e app mobile React Native + Expo.
 
-## Estrutura
+## Visao Geral
 
-```text
-.
-├── package.json
-├── .env.example
-├── packages
-│   ├── backend
-│   │   ├── docker-compose.yml
-│   │   ├── Dockerfile
-│   │   ├── package.json
-│   │   └── src
-│   │       ├── app.js
-│   │       ├── server.js
-│   │       ├── config/env.js
-│   │       ├── database
-│   │       │   ├── mongoose.js
-│   │       │   ├── runSeed.js
-│   │       │   └── seed.js
-│   │       ├── middlewares
-│   │       ├── modules
-│   │       │   ├── auth
-│   │       │   ├── branches
-│   │       │   ├── menu
-│   │       │   ├── orders
-│   │       │   └── reservations
-│   │       └── shared
-│   └── mobile
-│       ├── App.js
-│       ├── index.js
-│       ├── app.json
-│       ├── package.json
-│       └── src
-│           ├── components
-│           ├── context
-│           ├── navigation
-│           ├── screens
-│           ├── services
-│           └── theme
-└── package-lock.json
-```
+- `packages/backend`: `identity-service`, `catalog-service`, `operations-service`, `nginx` e `postgres`.
+- `packages/mobile`: app Expo com autenticacao, menu, detalhes de prato, reservas, pedidos, endereco principal e perfil.
 
-## Backend
+## Fluxos Principais
 
-O backend foi separado por domínios independentes:
-
-- `auth`: cadastro, login, JWT e recuperação do perfil autenticado.
-- `branches`: CRUD de filiais e níveis de profundidade para reservas.
-- `menu`: CRUD de pratos e bebidas com categorias e destaques.
-- `reservations`: CRUD de reservas com vínculo ao usuário autenticado.
-- `orders`: CRUD de pedidos de delivery/salão com snapshot dos itens.
-
-Cada módulo contém `model`, `schema`, `service` e `routes`.
-
-### Privacidade e segurança
-
-- Senhas armazenadas com `bcrypt`.
-- Dados pessoais sensíveis criptografados em repouso com `AES-256-GCM`.
-- Nenhum dado bruto de cartão é persistido; apenas método de pagamento tokenizado/status.
-- Logs evitam corpo das requisições.
-- Em produção, a API rejeita tráfego sem `HTTPS`.
-
-## Mobile
-
-O app Expo cobre os fluxos centrais da Sprint 1:
-
-- autenticação de usuário;
-- home com destaques e filiais;
+- autenticacao de usuario;
+- home com filiais e destaques;
 - menu com categorias;
 - detalhes do prato;
 - reserva presencial;
-- delivery com carrinho e endereço preenchido por CEP;
-- configuração posterior de endereço principal no perfil;
-- perfil com histórico de reservas e pedidos.
+- delivery com carrinho e endereco por CEP;
+- endereco principal no perfil;
+- historico de reservas e pedidos.
 
-O consumo da API usa obrigatoriamente `axios@1.15.1`.
+## Requisitos
 
-## Variáveis de ambiente
+- Node.js 20+
+- Java 21
+- Maven 3.9+
+- Docker e Docker Compose
 
-Copie os exemplos:
+## Configuracao
+
+Copie os arquivos de ambiente que pertencem ao estado atual da aplicacao:
 
 ```bash
-cp .env.example .env
 cp packages/backend/.env.example packages/backend/.env
 cp packages/mobile/.env.example packages/mobile/.env
 ```
 
-Valores esperados:
+O gateway local do backend expoe TLS em `https://localhost:3333`. No modo web, o app normaliza URLs locais de desenvolvimento para esse gateway HTTPS automaticamente.
 
-```env
-# Root / backend helper
-PORT=3333
-MONGO_URI=mongodb://localhost:27017/abyssal_app
-JWT_SECRET=replace-with-a-long-random-secret
-ENCRYPTION_KEY=replace-with-64-hex-chars
-AUTO_SEED=true
-CORS_ORIGIN=*
-TRUST_PROXY=false
+## Como Rodar
 
-# Mobile
-EXPO_PUBLIC_API_BASE_URL=http://localhost:3333/api
-```
-
-Para dispositivo físico no Expo, ajuste `EXPO_PUBLIC_API_BASE_URL` com o IP da sua máquina na rede local.
-
-Para ambientes atrás de proxy reverso, configure também `TRUST_PROXY` no backend com `true`, `1` ou outro valor aceito pelo Express.
-
-## Como rodar
-
-Instalar tudo na raiz:
+Instale as dependencias na raiz:
 
 ```bash
 npm install
 ```
 
-Subir backend com Docker:
-
-```bash
-npm run dev:backend
-```
-
-Rodar backend local sem Docker:
-
-```bash
-npm run dev:backend:local
-```
-
-Rodar mobile:
-
-```bash
-npm run dev:mobile
-```
-
-Rodar backend Docker + mobile em paralelo:
+Suba backend + app mobile no fluxo padrao:
 
 ```bash
 npm run dev
 ```
 
-Esse fluxo sobe o backend Docker, acompanha os logs da API no mesmo terminal e mantém o Expo com QR code e comandos interativos do Metro.
+Rode o app no navegador:
 
-Ao pressionar `Ctrl+C`, o Expo é encerrado e os containers do `docker compose` tambem sao derrubados automaticamente.
+```bash
+npm run dev:web
+```
 
-Encerrar e limpar volumes do backend Docker:
+Rode apenas o backend em Docker:
+
+```bash
+npm run dev:backend
+```
+
+Rode o backend em background:
+
+```bash
+npm run dev:backend:detached
+```
+
+Pare a stack e remova os volumes do backend:
 
 ```bash
 npm run dev:backend:down
 ```
 
-Popular catálogo e filiais manualmente:
+Rode apenas o app mobile:
 
 ```bash
-npm run seed:backend
+npm run dev:mobile
 ```
 
-## Endpoints principais
+Rode apenas o app mobile em modo web:
 
-```text
-POST   /api/auth/register
-POST   /api/auth/login
-GET    /api/auth/me
-
-GET    /api/branches
-POST   /api/branches
-PATCH  /api/branches/:id
-DELETE /api/branches/:id
-
-GET    /api/menu
-POST   /api/menu
-PATCH  /api/menu/:id
-DELETE /api/menu/:id
-
-GET    /api/reservations
-POST   /api/reservations
-PATCH  /api/reservations/:id
-DELETE /api/reservations/:id
-
-GET    /api/orders
-POST   /api/orders
-PATCH  /api/orders/:id
-DELETE /api/orders/:id
+```bash
+npm run dev:mobile:web
 ```
 
-## Verificações executadas
+Build e testes do backend:
 
-- `node -e "require('./packages/backend/src/app').createApp(); console.log('backend-app-ok')"`
-- `docker compose -f packages/backend/docker-compose.yml config`
-- `docker compose -f packages/backend/docker-compose.yml up --build -d`
-- smoke test real na API Dockerizada com sucesso: `auth`, `branches`, `menu`, `reservations` e `orders`
-- `npx expo-doctor`
-- `npx expo export --platform android --output-dir .expo-export-test`
+```bash
+npm run build:backend
+npm run test:backend
+```
+
+## Backend
+
+Os detalhes do backend, da configuracao de seguranca e do gateway estao em [packages/backend/README.md](packages/backend/README.md).
+
+## Seguranca
+
+- PII sensivel fica criptografada em repouso.
+- O gateway encerra TLS no Nginx.
+- CORS e o bypass de URL local ficam ativos apenas em modo dev.
+- Em producao, mantenha `REQUIRE_HTTPS_IN_PRODUCTION=true` e restrinja `CORS_ALLOWED_ORIGIN`.
