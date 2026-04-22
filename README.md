@@ -1,22 +1,22 @@
 # Abyssal App Monorepo
 
-Monorepo com backend Spring Boot em microservicos, gateway Nginx com TLS e app mobile React Native + Expo.
+Monorepo com backend Spring Boot em microsserviços, gateway Nginx com TLS e app mobile React Native + Expo.
 
-## Visao Geral
+## Visão Geral
 
 - `packages/backend`: `identity-service`, `catalog-service`, `operations-service`, `nginx` e `postgres`.
-- `packages/mobile`: app Expo com autenticacao, menu, detalhes de prato, reservas, pedidos, endereco principal e perfil.
+- `packages/mobile`: app Expo com autenticação, menu, detalhes de prato, reservas, pedidos, endereço principal e perfil.
 
 ## Fluxos Principais
 
-- autenticacao de usuario;
+- autenticação de usuário;
 - home com filiais e destaques;
 - menu com categorias;
 - detalhes do prato;
 - reserva presencial;
-- delivery com carrinho e endereco por CEP;
-- endereco principal no perfil;
-- historico de reservas e pedidos.
+- delivery com carrinho e endereço por CEP;
+- endereço principal no perfil;
+- histórico de reservas e pedidos.
 
 ## Requisitos
 
@@ -25,26 +25,28 @@ Monorepo com backend Spring Boot em microservicos, gateway Nginx com TLS e app m
 - Maven 3.9+
 - Docker e Docker Compose
 
-## Configuracao
+## Configuração
 
-Copie os arquivos de ambiente que pertencem ao estado atual da aplicacao:
+Copie os arquivos de ambiente que pertencem ao estado atual da aplicação:
 
 ```bash
 cp packages/backend/.env.example packages/backend/.env
 cp packages/mobile/.env.example packages/mobile/.env
 ```
 
-O gateway local do backend expoe TLS em `https://localhost:3333`. No modo web, o app normaliza URLs locais de desenvolvimento para esse gateway HTTPS automaticamente.
+O gateway local do backend expõe TLS em `https://localhost:3333`. No modo web, o app normaliza URLs locais de desenvolvimento para esse gateway HTTPS automaticamente.
+
+Se estiver testando em Android ou iOS físico, ajuste `EXPO_PUBLIC_API_BASE_URL` para um host alcançável no seu ambiente.
 
 ## Como Rodar
 
-Instale as dependencias na raiz:
+Instale as dependências na raiz:
 
 ```bash
 npm install
 ```
 
-Suba backend + app mobile no fluxo padrao:
+Suba backend + app mobile no fluxo padrão:
 
 ```bash
 npm run dev
@@ -95,11 +97,11 @@ npm run test:backend
 
 ## Backend
 
-Os detalhes do backend, da configuracao de seguranca e do gateway estao em [packages/backend/README.md](packages/backend/README.md).
+Os detalhes do backend, da configuração de segurança e do gateway estão em [packages/backend/README.md](packages/backend/README.md).
 
-## Seguranca
+## Segurança
 
-- PII sensivel fica criptografada em repouso.
+- PII sensível fica criptografada em repouso.
 - O gateway encerra TLS no Nginx.
 - CORS e o bypass de URL local ficam ativos apenas em modo dev.
-- Em producao, mantenha `REQUIRE_HTTPS_IN_PRODUCTION=true` e restrinja `CORS_ALLOWED_ORIGIN`.
+- Em produção, mantenha `REQUIRE_HTTPS_IN_PRODUCTION=true` e restrinja `CORS_ALLOWED_ORIGIN`.
