@@ -12,6 +12,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 
 import { AddressFields } from "../components/AddressFields";
+import { BranchCard } from "../components/BranchCard";
 import { KeyboardScrollScreen } from "../components/KeyboardScrollScreen";
 import { SectionHeader } from "../components/SectionHeader";
 import { useAuth } from "../context/AuthContext";
@@ -116,6 +117,7 @@ export function ReservationScreen({ navigation }) {
   const layout = getResponsiveLayout(width);
   const selectedBranch =
     branches.find((branch) => branch.id === reservationForm.branchId) || branches[0];
+  const recentReservations = reservations.slice(0, 3);
   const nextReservationItem = reservations[0];
   const deliverySummary = buildAddressSummary(deliveryForm.address);
   const selectedPaymentLabel =
@@ -258,11 +260,11 @@ export function ReservationScreen({ navigation }) {
                 ]}
               >
                 {mode === "reservation"
-                  ? "Reserve sua mesa em poucos passos."
-                  : "Finalize seu pedido de entrega."}
+                  ? "Escolha a mesa e confirme em segundos."
+                  : "Finalize seu pedido sem distrações."}
               </Text>
               <Text style={styles.heroSubtitle}>
-                Preencha os dados principais e acompanhe o resumo no lado direito.
+                Tudo organizado em uma tela limpa: filial, horário, convidados e confirmação.
               </Text>
             </View>
 
@@ -318,11 +320,18 @@ export function ReservationScreen({ navigation }) {
                     }
                   ]}
                 >
-                  Monte sua noite em poucos blocos.
+                  Monte sua reserva com poucos toques.
                 </Text>
                 <Text style={styles.panelCopy}>
-                  Filial, horário, convidados e nível aparecem de forma simples.
+                  Escolha a unidade, ajuste o horário e confirme sem ruído visual.
                 </Text>
+
+                {selectedBranch ? (
+                  <View style={styles.branchSpotlight}>
+                    <Text style={styles.branchSpotlightLabel}>Filial selecionada</Text>
+                    <BranchCard branch={selectedBranch} compact style={styles.branchSpotlightCard} />
+                  </View>
+                ) : null}
 
                 <Field label="Filial">
                   <View style={styles.chipWrap}>
@@ -421,11 +430,10 @@ export function ReservationScreen({ navigation }) {
                     }
                   ]}
                 >
-                  Feche seu pedido com menos etapas.
+                  Feche seu pedido sem excesso de informação.
                 </Text>
                 <Text style={styles.panelCopy}>
-                  A logica ficou mais proxima de apps de checkout: carrinho, contato,
-                  endereco e pagamento em ordem natural.
+                  Carrinho, contato, endereço e pagamento aparecem na ordem certa.
                 </Text>
 
                 {items.length ? (
@@ -594,12 +602,12 @@ export function ReservationScreen({ navigation }) {
             </View>
 
             <SectionHeader
-              description="As reservas recentes aparecem na lateral quando houver espaço."
+              description="As reservas recentes aparecem de forma resumida, sem poluir a tela."
               eyebrow="Histórico"
               title="Reservas registradas"
             />
-            {reservations.length ? (
-              reservations.map((reservation) => (
+            {recentReservations.length ? (
+              recentReservations.map((reservation) => (
                 <HistoryCard
                   key={reservation.id}
                   meta={new Date(reservation.scheduledAt).toLocaleString("pt-BR")}
@@ -930,6 +938,24 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 22,
     marginBottom: theme.spacing.lg
+  },
+  branchSpotlight: {
+    backgroundColor: "rgba(255,255,255,0.03)",
+    borderColor: theme.colors.border,
+    borderWidth: 1,
+    marginBottom: theme.spacing.lg,
+    padding: theme.spacing.md
+  },
+  branchSpotlightLabel: {
+    color: theme.colors.textMuted,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 12,
+    letterSpacing: 1.1,
+    marginBottom: 10,
+    textTransform: "uppercase"
+  },
+  branchSpotlightCard: {
+    width: "100%"
   },
   dualFieldRow: {
     flexDirection: "row",
