@@ -797,8 +797,7 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.border,
     borderRadius: 0,
     borderWidth: 1,
-    flexDirection: "row",
-    flexWrap: "wrap",
+    flexDirection: "column",
     gap: 10,
     marginBottom: theme.spacing.lg,
     padding: theme.spacing.md
@@ -813,6 +812,7 @@ const styles = StyleSheet.create({
     gap: 8,
     justifyContent: "center",
     minHeight: 44,
+    width: "100%",
     paddingHorizontal: 14,
     paddingVertical: 10
   },
