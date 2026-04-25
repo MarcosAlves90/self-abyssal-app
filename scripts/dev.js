@@ -21,6 +21,7 @@ function spawnProcess(command, args, options = {}) {
   return spawn(command, args, {
     cwd: rootDir,
     env: process.env,
+    shell: true,
     ...options
   });
 }
