@@ -17,6 +17,7 @@ import { KeyboardScrollScreen } from "../components/KeyboardScrollScreen";
 import {
   createReservation,
   fetchBranches,
+  fetchReservations,
   getApiErrorMessage,
 } from "../services/api";
 import { getResponsiveLayout } from "../theme/layout";
@@ -31,9 +32,12 @@ function nextDate() {
 export function ReservationScreen() {
   const { width } = useWindowDimensions();
   const [branches, setBranches] = useState([]);
+  const [reservations, setReservations] = useState([]);
+  const [isLoadingReservations, setIsLoadingReservations] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmation, setConfirmation] = useState(null);
   const [feedback, setFeedback] = useState({ tone: "idle", message: "" });
+  const [showReservationForm, setShowReservationForm] = useState(true);
   const [reservationForm, setReservationForm] = useState({
     branchId: "",
     date: nextDate(),
@@ -44,10 +48,17 @@ export function ReservationScreen() {
 
   useEffect(() => {
     async function loadData() {
+      setIsLoadingReservations(true);
+
       try {
-        const nextBranches = await fetchBranches();
+        const [nextBranches, nextReservations] = await Promise.all([
+          fetchBranches(),
+          fetchReservations(),
+        ]);
 
         setBranches(nextBranches);
+        setReservations(nextReservations);
+        setShowReservationForm(nextReservations.length === 0);
 
         if (nextBranches.length) {
           setReservationForm((current) => {
@@ -64,6 +75,8 @@ export function ReservationScreen() {
         }
       } catch (error) {
         setFeedback({ tone: "error", message: getApiErrorMessage(error) });
+      } finally {
+        setIsLoadingReservations(false);
       }
     }
 
@@ -71,6 +84,7 @@ export function ReservationScreen() {
   }, []);
 
   const layout = getResponsiveLayout(width);
+  const hasReservations = reservations.length > 0;
   const selectedBranch =
     branches.find((branch) => branch.id === reservationForm.branchId) ||
     branches[0];
@@ -85,12 +99,17 @@ export function ReservationScreen() {
         `${reservationForm.date}T${reservationForm.time}:00`,
       ).toISOString();
 
-      await createReservation({
+      const createdReservation = await createReservation({
         branchId: reservationForm.branchId,
         scheduledAt,
         guests: Number(reservationForm.guests),
         depthLevel: reservationForm.depthLevel,
       });
+
+      setReservations((current) => [
+        createdReservation,
+        ...current.filter((reservation) => reservation.id !== createdReservation.id),
+      ]);
 
       setConfirmation({
         branchName: selectedBranch?.name || "Unidade selecionada",
@@ -108,6 +127,12 @@ export function ReservationScreen() {
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  function cancelReservationCreation() {
+    setShowReservationForm(false);
+    setConfirmation(null);
+    setFeedback({ tone: "idle", message: "" });
   }
 
   return (
@@ -136,105 +161,182 @@ export function ReservationScreen() {
             Reservar mesa
           </Text>
 
-          <Field icon="storefront-outline" label="Filial" required>
-            <View style={styles.chipWrap}>
-              {branches.map((branch) => (
-                <SelectionChip
-                  active={reservationForm.branchId === branch.id}
-                  key={branch.id}
-                  label={branch.name}
-                  onPress={() =>
-                    setReservationForm((current) => ({
-                      ...current,
-                      branchId: branch.id,
-                      depthLevel: branch.reservationDepths[0],
-                    }))
-                  }
-                />
-              ))}
-            </View>
-          </Field>
+          {hasReservations ? (
+            <View style={styles.existingReservationsBlock}>
+              <Text style={styles.existingReservationsEyebrow}>
+                Você já tem reservas
+              </Text>
+              <Text style={styles.existingReservationsTitle}>
+                Confira seus próximos agendamentos.
+              </Text>
 
-          <View
-            style={[
-              styles.dualFieldRow,
-              layout.isCompact && styles.dualFieldRowStack,
-            ]}
-          >
-            <Field icon="calendar-month-outline" label="Data" required>
-              <StyledInput
-                onChangeText={(value) =>
-                  setReservationForm((current) => ({ ...current, date: value }))
-                }
-                placeholder="2026-05-10"
-                value={reservationForm.date}
-              />
-            </Field>
-            <Field icon="clock-outline" label="Horário" required>
-              <StyledInput
-                onChangeText={(value) =>
-                  setReservationForm((current) => ({ ...current, time: value }))
-                }
-                placeholder="20:30"
-                value={reservationForm.time}
-              />
-            </Field>
-          </View>
-
-          <Field icon="account-group-outline" label="Convidados" required>
-            <StyledInput
-              keyboardType="number-pad"
-              onChangeText={(value) =>
-                setReservationForm((current) => ({ ...current, guests: value }))
-              }
-              value={reservationForm.guests}
-            />
-          </Field>
-
-          <Field icon="layers-outline" label="Nível" required>
-            <View style={styles.chipWrap}>
-              {(selectedBranch?.reservationDepths || []).map((depth) => (
-                <SelectionChip
-                  active={reservationForm.depthLevel === depth}
-                  key={depth}
-                  label={depth}
-                  onPress={() =>
-                    setReservationForm((current) => ({
-                      ...current,
-                      depthLevel: depth,
-                    }))
-                  }
-                />
-              ))}
-            </View>
-          </Field>
-
-          <PrimaryButton
-            disabled={isSubmitting}
-            label={isSubmitting ? "Confirmando..." : "Confirmar reserva"}
-            onPress={submitReservation}
-          />
-
-          <FeedbackBanner
-            message={feedback.message}
-            details={
-              feedback.tone === "success" && confirmation ? (
-                <View style={styles.confirmationDetails}>
-                  <Text style={styles.confirmationDetail}>
-                    {confirmation.branchName}
-                  </Text>
-                  <Text style={styles.confirmationDetail}>
-                    {new Date(confirmation.scheduledAt).toLocaleString("pt-BR")}
-                  </Text>
-                  <Text style={styles.confirmationDetail}>
-                    {confirmation.guests} pessoas
-                    {confirmation.depthLevel ? ` • ${confirmation.depthLevel}` : ""}
+              {isLoadingReservations ? (
+                <View style={styles.loadingReservations}>
+                  <ActivityIndicator
+                    color={theme.colors.accentSoft}
+                    size="small"
+                  />
+                  <Text style={styles.loadingReservationsText}>
+                    Carregando reservas...
                   </Text>
                 </View>
-              ) : null
-            }
-            tone={feedback.tone}
-          />
+              ) : (
+                <View style={styles.reservationsList}>
+                  {reservations.map((reservation) => (
+                    <View key={reservation.id} style={styles.reservationCard}>
+                      <View style={styles.reservationHeader}>
+                        <MaterialCommunityIcons
+                          color={theme.colors.success}
+                          name="calendar-check-outline"
+                          size={16}
+                        />
+                        <Text style={styles.reservationBranch}>
+                          {reservation.branchName}
+                        </Text>
+                      </View>
+                      <Text style={styles.reservationMeta}>
+                        {new Date(reservation.scheduledAt).toLocaleString("pt-BR")}
+                      </Text>
+                      <Text style={styles.reservationMeta}>
+                        {reservation.depthLevel} • {reservation.guests} pessoas
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              {!showReservationForm ? (
+                <PrimaryButton
+                  label="Fazer nova reserva"
+                  onPress={() => setShowReservationForm(true)}
+                />
+              ) : null}
+            </View>
+          ) : null}
+
+          {!hasReservations || showReservationForm ? (
+            <View style={hasReservations ? styles.reserveFormBlock : null}>
+              {hasReservations ? (
+                <Text style={styles.reserveFormEyebrow}>Nova reserva</Text>
+              ) : null}
+
+              <Field icon="storefront-outline" label="Filial" required>
+                <View style={styles.chipWrap}>
+                  {branches.map((branch) => (
+                    <SelectionChip
+                      active={reservationForm.branchId === branch.id}
+                      key={branch.id}
+                      label={branch.name}
+                      onPress={() =>
+                        setReservationForm((current) => ({
+                          ...current,
+                          branchId: branch.id,
+                          depthLevel: branch.reservationDepths[0],
+                        }))
+                      }
+                    />
+                  ))}
+                </View>
+              </Field>
+
+              <View
+                style={[
+                  styles.dualFieldRow,
+                  layout.isCompact && styles.dualFieldRowStack,
+                ]}
+              >
+                <Field icon="calendar-month-outline" label="Data" required>
+                  <StyledInput
+                    onChangeText={(value) =>
+                      setReservationForm((current) => ({ ...current, date: value }))
+                    }
+                    placeholder="2026-05-10"
+                    value={reservationForm.date}
+                  />
+                </Field>
+                <Field icon="clock-outline" label="Horário" required>
+                  <StyledInput
+                    onChangeText={(value) =>
+                      setReservationForm((current) => ({ ...current, time: value }))
+                    }
+                    placeholder="20:30"
+                    value={reservationForm.time}
+                  />
+                </Field>
+              </View>
+
+              <Field icon="account-group-outline" label="Convidados" required>
+                <StyledInput
+                  keyboardType="number-pad"
+                  onChangeText={(value) =>
+                    setReservationForm((current) => ({ ...current, guests: value }))
+                  }
+                  value={reservationForm.guests}
+                />
+              </Field>
+
+              <Field icon="layers-outline" label="Nível" required>
+                <View style={styles.chipWrap}>
+                  {(selectedBranch?.reservationDepths || []).map((depth) => (
+                    <SelectionChip
+                      active={reservationForm.depthLevel === depth}
+                      key={depth}
+                      label={depth}
+                      onPress={() =>
+                        setReservationForm((current) => ({
+                          ...current,
+                          depthLevel: depth,
+                        }))
+                      }
+                    />
+                  ))}
+                </View>
+              </Field>
+
+              <PrimaryButton
+                disabled={isSubmitting}
+                label={isSubmitting ? "Confirmando..." : "Confirmar reserva"}
+                onPress={submitReservation}
+              />
+
+              {hasReservations ? (
+                <Pressable
+                  accessibilityRole="button"
+                  disabled={isSubmitting}
+                  onPress={cancelReservationCreation}
+                  style={[
+                    styles.cancelReservationButton,
+                    isSubmitting && styles.buttonDisabled,
+                  ]}
+                >
+                  <Text style={styles.cancelReservationButtonText}>
+                    Cancelar
+                  </Text>
+                </Pressable>
+              ) : null}
+
+              <FeedbackBanner
+                message={feedback.message}
+                details={
+                  feedback.tone === "success" && confirmation ? (
+                    <View style={styles.confirmationDetails}>
+                      <Text style={styles.confirmationDetail}>
+                        {confirmation.branchName}
+                      </Text>
+                      <Text style={styles.confirmationDetail}>
+                        {new Date(confirmation.scheduledAt).toLocaleString("pt-BR")}
+                      </Text>
+                      <Text style={styles.confirmationDetail}>
+                        {confirmation.guests} pessoas
+                        {confirmation.depthLevel ? ` • ${confirmation.depthLevel}` : ""}
+                      </Text>
+                    </View>
+                  ) : null
+                }
+                tone={feedback.tone}
+              />
+            </View>
+          ) : null}
         </View>
       </View>
     </KeyboardScrollScreen>
@@ -371,6 +473,87 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
     fontFamily: theme.fonts.display,
     marginBottom: theme.spacing.md,
+  },
+  existingReservationsEyebrow: {
+    color: theme.colors.accentWarm,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 12,
+    letterSpacing: 1.2,
+    marginBottom: 8,
+    textTransform: "uppercase",
+  },
+  existingReservationsTitle: {
+    color: theme.colors.text,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 16,
+    marginBottom: theme.spacing.md,
+  },
+  loadingReservations: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: theme.spacing.md,
+  },
+  loadingReservationsText: {
+    color: theme.colors.textMuted,
+    fontFamily: theme.fonts.body,
+    fontSize: 13,
+  },
+  reservationsList: {
+    gap: 10,
+    marginBottom: theme.spacing.md,
+  },
+  reservationCard: {
+    backgroundColor: theme.colors.backgroundAlt,
+    borderColor: theme.colors.border,
+    borderWidth: 1,
+    padding: theme.spacing.md,
+  },
+  reservationHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 8,
+  },
+  reservationBranch: {
+    color: theme.colors.text,
+    flex: 1,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 14,
+  },
+  reservationMeta: {
+    color: theme.colors.textMuted,
+    fontFamily: theme.fonts.body,
+    fontSize: 13,
+    lineHeight: 20,
+  },
+  reserveFormBlock: {
+    borderTopColor: theme.colors.border,
+    borderTopWidth: 1,
+    paddingTop: theme.spacing.lg,
+  },
+  reserveFormEyebrow: {
+    color: theme.colors.accentWarm,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 12,
+    letterSpacing: 1.2,
+    marginBottom: 8,
+    textTransform: "uppercase",
+  },
+  cancelReservationButton: {
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.03)",
+    borderColor: theme.colors.border,
+    borderWidth: 1,
+    justifyContent: "center",
+    marginTop: 10,
+    minHeight: 44,
+    paddingHorizontal: 14,
+  },
+  cancelReservationButtonText: {
+    color: theme.colors.textMuted,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 13,
   },
   dualFieldRow: {
     flexDirection: "row",
