@@ -19,19 +19,15 @@ function getExperienceNotes(item) {
   const notes = [];
 
   if (item.availableForDineIn) {
-    notes.push(
-      "Perfeito para viver no salão, com ritmo e apresentação completos.",
-    );
+    notes.push("Brilha no salão, onde textura, aroma e presença têm tempo.");
   }
 
   if (item.availableForDelivery) {
-    notes.push(
-      "Funciona muito bem para levar a experiência para casa sem perder presença.",
-    );
+    notes.push("Segue bem para delivery sem perder identidade ou acabamento.");
   }
 
   if (!notes.length) {
-    notes.push("Uma escolha especial da casa, pensada para o momento certo.");
+    notes.push("Uma escolha da casa pensada para um momento específico.");
   }
 
   return notes;
@@ -57,7 +53,7 @@ function getPresentationLine(item) {
     return item.imageHint.replaceAll("-", " ").replaceAll("_", " ").trim();
   }
 
-  return item.name;
+  return "Assinatura da casa";
 }
 
 function getHeroHeight(layout) {
@@ -97,9 +93,9 @@ function PremiumDetailHero({ item, layout }) {
 
       <LinearGradient
         colors={[
-          "rgba(4, 11, 23, 0.08)",
-          "rgba(4, 11, 23, 0.42)",
-          "rgba(4, 11, 23, 0.8)",
+          "rgba(255, 217, 138, 0.05)",
+          "rgba(4, 11, 23, 0.44)",
+          "rgba(4, 11, 23, 0.82)",
           "rgba(4, 11, 23, 0.98)",
         ]}
         end={{ x: 0.5, y: 1 }}
@@ -119,7 +115,7 @@ function PremiumDetailHero({ item, layout }) {
       </View>
 
       <View style={styles.heroContent}>
-        <Text style={styles.kicker}>Experiência da casa</Text>
+        <Text style={styles.kicker}>Seleção da mesa</Text>
         <Text
           style={[
             styles.title,
@@ -143,7 +139,7 @@ function PremiumDetailHero({ item, layout }) {
 
         <View style={styles.heroFooter}>
           <View style={styles.priceCluster}>
-            <Text style={styles.priceLabel}>A partir de</Text>
+            <Text style={styles.priceLabel}>Investimento</Text>
             <Text style={styles.price}>{formatCurrency(item.priceCents)}</Text>
           </View>
 
@@ -211,36 +207,34 @@ export function DishDetailsScreen({ route, navigation }) {
       <View style={[styles.shell, { maxWidth: layout.contentMaxWidth }]}>
         <PremiumDetailHero item={item} layout={layout} />
 
-        <PremiumSection title="O que esperar">
+        <PremiumSection title="Assinatura do prato">
           <Text style={styles.sectionLead}>
-            Uma leitura curta, visual limpa e foco total na decisão certa. Esta
-            tela foi pensada para transmitir valor, atmosfera e segurança antes
-            do toque final.
+            Poucas linhas, imagem dominante e foco total no que importa:
+            presença, acabamento e decisão segura.
           </Text>
           <View style={styles.benefitList}>
             <View style={styles.benefitItem}>
               <View style={styles.benefitDot} />
               <Text style={styles.sectionCopy}>
-                Imagem dominante para vender a experiência antes do preço.
+                Visual dominante para valorizar a construção do prato.
               </Text>
             </View>
             <View style={styles.benefitItem}>
               <View style={styles.benefitDot} />
               <Text style={styles.sectionCopy}>
-                Texto direto, sem excesso, para manter o ritmo premium.
+                Texto direto, sem ruído, para manter a leitura elegante.
               </Text>
             </View>
             <View style={styles.benefitItem}>
               <View style={styles.benefitDot} />
               <Text style={styles.sectionCopy}>
-                CTA único e claro, sem disputar atenção com elementos
-                secundários.
+                Um CTA único, com hierarquia clara e sem distrações.
               </Text>
             </View>
           </View>
         </PremiumSection>
 
-        <PremiumSection title="Momento ideal">
+        <PremiumSection title="Quando pedir">
           <View style={styles.benefitList}>
             {getExperienceNotes(item).map((note) => (
               <View key={note} style={styles.benefitItem}>
@@ -261,11 +255,11 @@ export function DishDetailsScreen({ route, navigation }) {
             }}
             style={styles.primaryButton}
           >
-            <Text style={styles.primaryButtonText}>Selecionar prato</Text>
+            <Text style={styles.primaryButtonText}>Adicionar à seleção</Text>
           </Pressable>
 
           <Text style={styles.actionHint}>
-            Vai para o carrinho para finalizar o delivery.
+            Vai para a seleção da mesa e segue para a finalização.
           </Text>
         </View>
       </View>
@@ -314,14 +308,14 @@ const styles = StyleSheet.create({
     padding: theme.spacing.xl,
     justifyContent: "flex-end",
     backgroundColor: theme.colors.surfaceRaised,
-    borderColor: "rgba(141, 249, 255, 0.1)",
+    borderColor: "rgba(255, 217, 138, 0.14)",
     borderWidth: 1,
   },
   heroFallback: {
     ...StyleSheet.absoluteFillObject,
   },
   heroGlow: {
-    backgroundColor: "rgba(141, 249, 255, 0.12)",
+    backgroundColor: "rgba(255, 217, 138, 0.16)",
     height: 220,
     opacity: 0.22,
     position: "absolute",
@@ -339,8 +333,8 @@ const styles = StyleSheet.create({
   },
   categoryPill: {
     alignItems: "center",
-    backgroundColor: "rgba(4, 11, 23, 0.3)",
-    borderColor: "rgba(141, 249, 255, 0.14)",
+    backgroundColor: "rgba(4, 11, 23, 0.42)",
+    borderColor: "rgba(255, 217, 138, 0.18)",
     borderWidth: 1,
     justifyContent: "center",
     minHeight: 34,
@@ -355,11 +349,11 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
   featuredMark: {
-    color: theme.colors.accentSoft,
+    color: theme.colors.warning,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 28,
     lineHeight: 28,
-    textShadowColor: "rgba(141, 249, 255, 0.42)",
+    textShadowColor: "rgba(255, 217, 138, 0.45)",
     textShadowOffset: {
       width: 0,
       height: 0,
@@ -371,7 +365,7 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   kicker: {
-    color: theme.colors.accentSoft,
+    color: theme.colors.warning,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 12,
     letterSpacing: 1.5,
@@ -384,7 +378,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   description: {
-    color: "rgba(245, 251, 255, 0.86)",
+    color: "rgba(245, 251, 255, 0.84)",
     fontFamily: theme.fonts.body,
     fontSize: 15,
     lineHeight: 24,
@@ -405,12 +399,12 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   pillPositive: {
-    backgroundColor: "rgba(114, 240, 184, 0.1)",
-    borderColor: "rgba(114, 240, 184, 0.22)",
+    backgroundColor: "rgba(255, 217, 138, 0.08)",
+    borderColor: "rgba(255, 217, 138, 0.18)",
   },
   pillNeutral: {
-    backgroundColor: "rgba(255,255,255,0.06)",
-    borderColor: "rgba(255,255,255,0.09)",
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderColor: "rgba(255,255,255,0.08)",
   },
   servicePillText: {
     color: theme.colors.text,
@@ -430,7 +424,7 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   priceLabel: {
-    color: theme.colors.accentSoft,
+    color: theme.colors.warning,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 11,
     letterSpacing: 1.2,
@@ -443,7 +437,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   presentationLine: {
-    color: "rgba(245, 251, 255, 0.72)",
+    color: "rgba(245, 251, 255, 0.7)",
     flex: 1,
     fontFamily: theme.fonts.body,
     fontSize: 13,
@@ -451,7 +445,7 @@ const styles = StyleSheet.create({
     textAlign: "right",
   },
   heroBottomBand: {
-    borderTopColor: "rgba(141, 249, 255, 0.08)",
+    borderTopColor: "rgba(255, 217, 138, 0.08)",
     borderTopWidth: 1,
     marginTop: theme.spacing.xl,
     paddingTop: theme.spacing.md,
@@ -466,7 +460,7 @@ const styles = StyleSheet.create({
   },
   sectionCard: {
     backgroundColor: theme.colors.surface,
-    borderColor: "rgba(141, 249, 255, 0.08)",
+    borderColor: "rgba(255, 217, 138, 0.12)",
     borderWidth: 1,
     marginTop: theme.spacing.lg,
     padding: theme.spacing.lg,
@@ -493,7 +487,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   benefitDot: {
-    backgroundColor: theme.colors.accent,
+    backgroundColor: theme.colors.warning,
     height: 8,
     marginTop: 8,
     width: 8,
@@ -511,7 +505,7 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     alignItems: "center",
-    backgroundColor: theme.colors.accent,
+    backgroundColor: theme.colors.warning,
     justifyContent: "center",
     minHeight: 58,
     paddingHorizontal: theme.spacing.lg,
