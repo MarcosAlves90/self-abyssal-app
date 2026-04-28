@@ -9,8 +9,16 @@ const ENTITY_ADDRESS = "Address";
 const ENTITY_ADDRESS_REQUEST = "AddressRequest";
 const ENTITY_POSTAL_LOOKUP_RESPONSE = "PostalLookupResponse";
 
+function buildAddressSummaryFallback(address) {
+  const firstLine = [address.street, address.number].filter(Boolean).join(", ");
+  const secondLine = [address.complement, address.neighborhood].filter(Boolean).join(", ");
+  const thirdLine = [address.city, address.state].filter(Boolean).join(" - ");
+
+  return [firstLine, secondLine, thirdLine].filter(Boolean).join(" • ");
+}
+
 function normalizeAddress(raw) {
-  return {
+  const normalized = {
     label: optionalStringWithLength(raw?.label, {
       entity: ENTITY_ADDRESS,
       field: "label",
@@ -29,7 +37,17 @@ function normalizeAddress(raw) {
     neighborhood: requiredString(raw?.neighborhood, { entity: ENTITY_ADDRESS, field: "neighborhood" }),
     city: requiredString(raw?.city, { entity: ENTITY_ADDRESS, field: "city" }),
     state: requiredString(raw?.state, { entity: ENTITY_ADDRESS, field: "state" }),
+    summary: optionalStringWithLength(raw?.summary, {
+      entity: ENTITY_ADDRESS,
+      field: "summary",
+    }) || "",
   };
+
+  if (!normalized.summary) {
+    normalized.summary = buildAddressSummaryFallback(normalized);
+  }
+
+  return normalized;
 }
 
 export function normalizeAddressResponse(raw) {
