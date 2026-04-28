@@ -17,12 +17,12 @@ import { SectionHeader } from "../components/SectionHeader";
 import { useCart } from "../context/CartContext";
 import { fetchMenu, getApiErrorMessage } from "../services/api";
 import { getResponsiveLayout } from "../theme/layout";
-import { formatCurrency, getCategoryLabel, theme } from "../theme/tokens";
+import { getCategoryLabel, theme } from "../theme/tokens";
 
 const filters = ["todos", "entradas", "principais", "sobremesas", "bebidas"];
 
 export function MenuScreen({ navigation }) {
-  const { addItem, itemCount, totalCents } = useCart();
+  const { addItem, itemCount } = useCart();
   const { width } = useWindowDimensions();
   const [items, setItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -53,12 +53,8 @@ export function MenuScreen({ navigation }) {
       : items.filter((item) => item.category === activeFilter);
 
   const layout = getResponsiveLayout(width);
-  const heroAsideLabel = itemCount ? "Itens no carrinho" : "Carrinho vazio";
-  const heroAsideValue = itemCount ? `${itemCount} itens` : `${items.length} pratos`;
-  const heroAsideCopy = itemCount
-    ? `${itemCount} itens somando ${formatCurrency(totalCents)} estão prontos para finalizar na aba Reserva.`
-    : "Filtre por categoria e descubra os pratos mais fortes do cardápio.";
-  const filterActionLabel = itemCount ? `Carrinho • ${itemCount}` : undefined;
+  const hasCartItems = itemCount > 0;
+  const filterActionLabel = hasCartItems ? `Carrinho • ${itemCount}` : undefined;
   const menuHeaderDescription = `Mostrando ${visibleItems.length} itens neste filtro. Adicione sem sair da tela.`;
   const filterButtons = filters.map((filter) => {
     const isActive = activeFilter === filter;
@@ -96,93 +92,61 @@ export function MenuScreen({ navigation }) {
   ));
 
   return (
-    <ScrollView
-      style={styles.screen}
-      contentContainerStyle={[styles.content, { padding: layout.contentPadding }]}
-    >
-      <View style={[styles.shell, { maxWidth: layout.contentMaxWidth }]}>
-        <LinearGradient
-          colors={["#08172c", "#0c223c", "#13345b"]}
-          end={{ x: 1, y: 1 }}
-          start={{ x: 0, y: 0 }}
-          style={[styles.hero, layout.isCompact && styles.heroCompact]}
-        >
-          <View style={[styles.heroTop, layout.isWide && styles.heroTopWide]}>
-            <View style={styles.heroCopy}>
-              <Text style={styles.heroEyebrow}>Cardápio</Text>
-              <Text
-                style={[
-                  styles.heroTitle,
-                  {
-                    fontSize: layout.heroTitleSize,
-                    lineHeight: layout.heroTitleLineHeight
-                  }
-                ]}
-              >
-                Escolha o que pedir agora.
-              </Text>
-              <Text style={styles.heroSubtitle}>
-                Filtre rápido e adicione os pratos mais atrativos em poucos toques.
+    <View style={styles.screen}>
+      <ScrollView
+        contentContainerStyle={[styles.content, { padding: layout.contentPadding }]}
+        style={styles.scroll}
+      >
+        <View style={[styles.shell, { maxWidth: layout.contentMaxWidth }]}> 
+          <LinearGradient
+            colors={["#08172c", "#0c223c", "#13345b"]}
+            end={{ x: 1, y: 1 }}
+            start={{ x: 0, y: 0 }}
+            style={[styles.hero, layout.isCompact && styles.heroCompact]}
+          >
+            <View style={styles.heroTop}>
+              <View style={styles.heroCopy}>
+                <Text style={styles.heroEyebrow}>Cardápio</Text>
+                <Text
+                  style={[
+                    styles.heroTitle,
+                    {
+                      fontSize: layout.heroTitleSize,
+                      lineHeight: layout.heroTitleLineHeight
+                    }
+                  ]}
+                >
+                  Escolha o que pedir agora.
+                </Text>
+                <Text style={styles.heroSubtitle}>
+                  Filtre rápido e adicione os pratos mais atrativos em poucos toques.
+                </Text>
+              </View>
+            </View>
+          </LinearGradient>
+
+          <SectionHeader
+            actionLabel={filterActionLabel}
+            description={menuHeaderDescription}
+            eyebrow="Filtros"
+            onActionPress={() => navigation.navigate("Cart")}
+            title="Cardápio"
+          />
+          <View style={styles.filters}>{filterButtons}</View>
+
+          {visibleItems.length ? (
+            <View style={styles.menuGrid}>{menuCards}</View>
+          ) : (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyTitle}>Nenhum prato nesse filtro.</Text>
+              <Text style={styles.emptyCopy}>
+                Troque a categoria para continuar explorando o cardápio.
               </Text>
             </View>
-
-            <View style={[styles.heroAside, layout.isCompact && styles.heroAsideCompact]}>
-              <Text style={styles.heroAsideEyebrow}>{heroAsideLabel}</Text>
-              <Text
-                style={[
-                  styles.heroAsideValue,
-                  {
-                    fontSize: layout.featureTitleSize,
-                    lineHeight: layout.featureTitleLineHeight
-                  }
-                ]}
-              >
-                {heroAsideValue}
-              </Text>
-              <Text style={styles.heroAsideCopy}>{heroAsideCopy}</Text>
-              {itemCount ? (
-                <View style={styles.heroActionStack}>
-                  <Pressable
-                    accessibilityRole="button"
-                    onPress={() => navigation.navigate("Reserva")}
-                    style={[styles.heroAction, layout.isCompact && styles.heroActionCompact]}
-                  >
-                    <Text style={styles.heroActionText}>Ir para finalizar</Text>
-                  </Pressable>
-                  <Text style={styles.heroActionHint}>
-                    Seu carrinho já pode virar um pedido ou uma reserva.
-                  </Text>
-                </View>
-              ) : null}
-            </View>
-          </View>
-        </LinearGradient>
-
-        <SectionHeader
-          actionLabel={filterActionLabel}
-          description={menuHeaderDescription}
-          eyebrow="Filtros"
-          onActionPress={() => navigation.navigate("Reserva")}
-          title="Cardápio"
-        />
-        <View style={styles.filters}>
-          {filterButtons}
+          )}
         </View>
-
-        {visibleItems.length ? (
-          <View style={styles.menuGrid}>
-            {menuCards}
-          </View>
-        ) : (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyTitle}>Nenhum prato nesse filtro.</Text>
-            <Text style={styles.emptyCopy}>
-              Troque a categoria para continuar explorando o cardápio.
-            </Text>
-          </View>
-        )}
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -194,7 +158,11 @@ MenuScreen.propTypes = {
 
 const styles = StyleSheet.create({
   screen: {
+    flex: 1,
     backgroundColor: theme.colors.background
+  },
+  scroll: {
+    flex: 1
   },
   content: {
     alignItems: "center",
@@ -213,11 +181,6 @@ const styles = StyleSheet.create({
   },
   heroTop: {
     gap: 20
-  },
-  heroTopWide: {
-    alignItems: "flex-start",
-    flexDirection: "row",
-    justifyContent: "space-between"
   },
   heroCopy: {
     flex: 1,
@@ -241,62 +204,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 24,
     marginTop: 10
-  },
-  heroAside: {
-    backgroundColor: "rgba(255,255,255,0.05)",
-    borderColor: "rgba(255,255,255,0.06)",
-    borderWidth: 1,
-    minWidth: 250,
-    padding: theme.spacing.lg
-  },
-  heroAsideCompact: {
-    minWidth: 0,
-    width: "100%"
-  },
-  heroAsideEyebrow: {
-    color: theme.colors.accentWarm,
-    fontFamily: theme.fonts.bodyBold,
-    fontSize: 12,
-    letterSpacing: 1.1,
-    marginBottom: 8,
-    textTransform: "uppercase"
-  },
-  heroAsideValue: {
-    color: theme.colors.text,
-    fontFamily: theme.fonts.display,
-    marginBottom: 8
-  },
-  heroAsideCopy: {
-    color: theme.colors.textMuted,
-    fontFamily: theme.fonts.body,
-    fontSize: 13,
-    lineHeight: 20
-  },
-  heroAction: {
-    alignItems: "center",
-    backgroundColor: theme.colors.accent,
-    justifyContent: "center",
-    marginTop: 16,
-    minHeight: 46,
-    paddingHorizontal: 16
-  },
-  heroActionCompact: {
-    width: "100%"
-  },
-  heroActionText: {
-    color: theme.colors.background,
-    fontFamily: theme.fonts.bodyBold,
-    fontSize: 13
-  },
-  heroActionStack: {
-    gap: 8,
-    marginTop: 16
-  },
-  heroActionHint: {
-    color: theme.colors.textMuted,
-    fontFamily: theme.fonts.body,
-    fontSize: 12,
-    lineHeight: 18
   },
   filters: {
     flexDirection: "row",
@@ -361,5 +268,5 @@ const styles = StyleSheet.create({
     fontFamily: theme.fonts.body,
     fontSize: 14,
     lineHeight: 22
-  }
+  },
 });

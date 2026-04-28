@@ -1,5 +1,5 @@
 import React from "react";
-import { NavigationContainer, DarkTheme } from "@react-navigation/native";
+import { NavigationContainer, DarkTheme, useNavigationContainerRef } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
 import {
@@ -9,10 +9,12 @@ import {
   SpaceGrotesk_500Medium,
   SpaceGrotesk_700Bold
 } from "@expo-google-fonts/space-grotesk";
+import { View, StyleSheet } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { CartProvider } from "./src/context/CartContext";
 import { AuthProvider, useAuth } from "./src/context/AuthContext";
+import { CartFab } from "./src/components/CartFab";
 import { RootNavigator } from "./src/navigation/RootNavigator";
 import { LoadingOverlay } from "./src/components/LoadingOverlay";
 import { theme } from "./src/theme/tokens";
@@ -31,6 +33,7 @@ const navigationTheme = {
 
 function AppShell() {
   const { isBootstrapping } = useAuth();
+  const navigationRef = useNavigationContainerRef();
   const [fontsLoaded] = useFonts({
     SpaceGrotesk_500Medium,
     SpaceGrotesk_700Bold,
@@ -42,10 +45,13 @@ function AppShell() {
   }
 
   return (
-    <NavigationContainer theme={navigationTheme}>
-      <StatusBar style="light" />
-      <RootNavigator />
-    </NavigationContainer>
+    <View style={styles.appShell}>
+      <NavigationContainer ref={navigationRef} theme={navigationTheme}>
+        <StatusBar style="light" />
+        <RootNavigator />
+      </NavigationContainer>
+      <CartFab navigation={navigationRef} />
+    </View>
   );
 }
 
@@ -60,3 +66,9 @@ export default function App() {
     </SafeAreaProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  appShell: {
+    flex: 1
+  }
+});

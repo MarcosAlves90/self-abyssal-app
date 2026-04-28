@@ -6,6 +6,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useAuth } from "../context/AuthContext";
 import { theme } from "../theme/tokens";
 import { AuthScreen } from "../screens/AuthScreen";
+import { CartScreen } from "../screens/CartScreen";
 import { DishDetailsScreen } from "../screens/DishDetailsScreen";
 import { HomeScreen } from "../screens/HomeScreen";
 import { MenuScreen } from "../screens/MenuScreen";
@@ -88,6 +89,7 @@ export function RootNavigator() {
             name="DishDetails"
             options={{ title: "Detalhes do prato" }}
           />
+          <Stack.Screen component={CartScreen} name="Cart" options={{ title: "Carrinho" }} />
         </>
       ) : (
         <Stack.Screen component={AuthScreen} name="Auth" options={{ headerShown: false }} />
