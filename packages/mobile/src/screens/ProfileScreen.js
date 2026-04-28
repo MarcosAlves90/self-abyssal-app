@@ -55,7 +55,6 @@ export function ProfileScreen() {
     [reservations]
   );
 
-  const initials = useMemo(() => getInitials(user?.name), [user?.name]);
   const primaryAddress = user?.savedAddresses?.[0];
 
   async function loadProfile() {
@@ -157,7 +156,6 @@ export function ProfileScreen() {
       reservations={reservations}
       showAddressEditor={showAddressEditor}
       user={user}
-      userInitials={initials}
     />
   );
 }
@@ -178,8 +176,7 @@ function ProfileContent({
   primaryAddress,
   reservations,
   showAddressEditor,
-  user,
-  userInitials
+  user
 }) {
   const { width } = useWindowDimensions();
   const layout = getResponsiveLayout(width);
@@ -193,9 +190,7 @@ function ProfileContent({
     >
       <View style={[styles.shell, { maxWidth: layout.contentMaxWidth }]}>
         <ProfileHero
-          initials={userInitials}
           loadProfile={loadProfile}
-          logout={logout}
           user={user}
         />
 
@@ -257,6 +252,19 @@ function ProfileContent({
             </View>
           </View>
         </View>
+
+        <Pressable
+          accessibilityRole="button"
+          onPress={logout}
+          style={styles.logoutButton}
+        >
+          <MaterialCommunityIcons
+            color={theme.colors.danger}
+            name="logout"
+            size={18}
+          />
+          <Text style={styles.logoutButtonText}>Sair</Text>
+        </Pressable>
       </View>
     </KeyboardScrollScreen>
   );
@@ -301,11 +309,10 @@ ProfileContent.propTypes = {
   user: PropTypes.shape({
     email: PropTypes.string,
     name: PropTypes.string
-  }),
-  userInitials: PropTypes.string.isRequired
+  })
 };
 
-function ProfileHero({ initials, loadProfile, logout, user }) {
+function ProfileHero({ loadProfile, user }) {
   return (
     <LinearGradient
       colors={["#08172c", "#0b203d", "#13345b"]}
@@ -314,21 +321,14 @@ function ProfileHero({ initials, loadProfile, logout, user }) {
       style={styles.hero}
     >
       <View style={styles.heroTop}>
-        <View style={styles.identityRow}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{initials}</Text>
-          </View>
-
-          <View style={styles.identityCopy}>
-            <Text style={styles.heroEyebrow}>Perfil</Text>
-            <Text style={styles.name}>{user?.name}</Text>
-            <Text style={styles.email}>{user?.email}</Text>
-          </View>
+        <View style={styles.identityCopy}>
+          <Text style={styles.heroEyebrow}>Perfil</Text>
+          <Text style={styles.name}>{user?.name}</Text>
+          <Text style={styles.email}>{user?.email}</Text>
         </View>
 
         <View style={styles.heroActions}>
           <ActionButton label="Atualizar" icon="refresh" onPress={loadProfile} />
-          <ActionButton label="Sair" icon="logout" danger onPress={logout} />
         </View>
       </View>
     </LinearGradient>
@@ -336,9 +336,7 @@ function ProfileHero({ initials, loadProfile, logout, user }) {
 }
 
 ProfileHero.propTypes = {
-  initials: PropTypes.string.isRequired,
   loadProfile: PropTypes.func.isRequired,
-  logout: PropTypes.func.isRequired,
   user: PropTypes.shape({
     email: PropTypes.string,
     name: PropTypes.string
@@ -602,17 +600,6 @@ QuickAction.propTypes = {
   onPress: PropTypes.func.isRequired
 };
 
-function getInitials(name) {
-  const firstLetters = name
-    ?.split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part.charAt(0).toUpperCase())
-    .join("");
-
-  return firstLetters || "A";
-}
-
 function getMostRecent(items, dateField) {
   return [...items].sort(
     (left, right) => new Date(right[dateField]).getTime() - new Date(left[dateField]).getTime()
@@ -678,27 +665,6 @@ const styles = StyleSheet.create({
   },
   heroTop: {
     gap: 18
-  },
-  identityRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 16
-  },
-  avatar: {
-    alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.08)",
-    borderColor: "rgba(255,255,255,0.08)",
-    borderRadius: 0,
-    borderWidth: 1,
-    height: 72,
-    justifyContent: "center",
-    width: 72
-  },
-  avatarText: {
-    color: theme.colors.text,
-    fontFamily: theme.fonts.display,
-    fontSize: 30,
-    lineHeight: 32
   },
   identityCopy: {
     flex: 1,
@@ -812,7 +778,26 @@ const styles = StyleSheet.create({
     fontSize: 13
   },
   mainGrid: {
-    gap: theme.spacing.lg
+    gap: theme.spacing.lg,
+    marginBottom: theme.spacing.xl
+  },
+  logoutButton: {
+    alignItems: "center",
+    alignSelf: "stretch",
+    backgroundColor: "rgba(255,255,255,0.03)",
+    borderColor: "rgba(255,139,156,0.28)",
+    borderRadius: 0,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 8,
+    justifyContent: "center",
+    minHeight: 48,
+    paddingHorizontal: 16
+  },
+  logoutButtonText: {
+    color: theme.colors.danger,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 14
   },
   primaryColumn: {
     flex: 1
