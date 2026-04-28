@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import {
+  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -14,100 +15,236 @@ import { useCart } from "../context/CartContext";
 import { getResponsiveLayout } from "../theme/layout";
 import { formatCurrency, getCategoryLabel, theme } from "../theme/tokens";
 
+function getExperienceNotes(item) {
+  const notes = [];
+
+  if (item.availableForDineIn) {
+    notes.push("Perfeito para viver no salão, com ritmo e apresentação completos.");
+  }
+
+  if (item.availableForDelivery) {
+    notes.push("Funciona muito bem para levar a experiência para casa sem perder presença.");
+  }
+
+  if (!notes.length) {
+    notes.push("Uma escolha especial da casa, pensada para o momento certo.");
+  }
+
+  return notes;
+}
+
+function getServicePills(item) {
+  return [
+    {
+      label: item.availableForDineIn ? "Salão" : "Não indicado para salão",
+      tone: item.availableForDineIn ? styles.pillPositive : styles.pillNeutral
+    },
+    {
+      label: item.availableForDelivery ? "Delivery" : "Somente na casa",
+      tone: item.availableForDelivery ? styles.pillPositive : styles.pillNeutral
+    }
+  ];
+}
+
+function getPresentationLine(item) {
+  if (item.imageHint) {
+    return item.imageHint.replaceAll("-", " ").replaceAll("_", " ").trim();
+  }
+
+  return item.name;
+}
+
+function getHeroHeight(layout) {
+  if (layout.isTiny) {
+    return 380;
+  }
+
+  if (layout.isCompact) {
+    return 420;
+  }
+
+  return 470;
+}
+
+function PremiumDetailHero({ item, layout }) {
+  const heroHeight = getHeroHeight(layout);
+  const servicePills = getServicePills(item);
+  const experienceNotes = getExperienceNotes(item);
+
+  return (
+    <View style={[styles.hero, { minHeight: heroHeight }]}>
+      {item.imageUrl ? (
+        <Image
+          accessibilityIgnoresInvertColors
+          resizeMode="cover"
+          source={{ uri: item.imageUrl }}
+          style={StyleSheet.absoluteFillObject}
+        />
+      ) : (
+        <View style={[styles.heroFallback, { backgroundColor: item.accentColor || theme.colors.surfaceRaised }]} />
+      )}
+
+      <LinearGradient
+        colors={[
+          "rgba(4, 11, 23, 0.08)",
+          "rgba(4, 11, 23, 0.42)",
+          "rgba(4, 11, 23, 0.8)",
+          "rgba(4, 11, 23, 0.98)"
+        ]}
+        end={{ x: 0.5, y: 1 }}
+        start={{ x: 0.5, y: 0 }}
+        style={StyleSheet.absoluteFillObject}
+      />
+
+      <View style={styles.heroGlow} />
+
+      <View style={styles.heroHeader}>
+        <View style={styles.categoryPill}>
+          <Text style={styles.categoryPillText}>{getCategoryLabel(item.category)}</Text>
+        </View>
+        {item.isFeatured ? <Text style={styles.featuredMark}>★</Text> : null}
+      </View>
+
+      <View style={styles.heroContent}>
+        <Text style={styles.kicker}>Experiência da casa</Text>
+        <Text
+          style={[
+            styles.title,
+            {
+              fontSize: layout.heroTitleSize,
+              lineHeight: layout.heroTitleLineHeight
+            }
+          ]}
+        >
+          {item.name}
+        </Text>
+        <Text style={styles.description}>{item.description}</Text>
+
+        <View style={styles.serviceRow}>
+          {servicePills.map((pill) => (
+            <View key={pill.label} style={[styles.servicePill, pill.tone]}>
+              <Text style={styles.servicePillText}>{pill.label}</Text>
+            </View>
+          ))}
+        </View>
+
+        <View style={styles.heroFooter}>
+          <View style={styles.priceCluster}>
+            <Text style={styles.priceLabel}>A partir de</Text>
+            <Text style={styles.price}>{formatCurrency(item.priceCents)}</Text>
+          </View>
+
+          <Text style={styles.presentationLine}>{getPresentationLine(item)}</Text>
+        </View>
+      </View>
+
+      <View style={styles.heroBottomBand}>
+        <Text style={styles.heroBottomCopy}>{experienceNotes[0]}</Text>
+      </View>
+    </View>
+  );
+}
+
+function PremiumSection({ title, children }) {
+  return (
+    <View style={styles.sectionCard}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+      {children}
+    </View>
+  );
+}
+
+PremiumDetailHero.propTypes = {
+  item: PropTypes.shape({
+    accentColor: PropTypes.string,
+    availableForDelivery: PropTypes.bool,
+    availableForDineIn: PropTypes.bool,
+    category: PropTypes.string.isRequired,
+    description: PropTypes.string.isRequired,
+    imageHint: PropTypes.string,
+    imageUrl: PropTypes.string,
+    isFeatured: PropTypes.bool,
+    name: PropTypes.string.isRequired,
+    priceCents: PropTypes.number.isRequired
+  }).isRequired,
+  layout: PropTypes.shape({
+    heroTitleLineHeight: PropTypes.number.isRequired,
+    heroTitleSize: PropTypes.number.isRequired,
+    isCompact: PropTypes.bool.isRequired,
+    isTiny: PropTypes.bool.isRequired
+  }).isRequired
+};
+
+PremiumSection.propTypes = {
+  children: PropTypes.node.isRequired,
+  title: PropTypes.string.isRequired
+};
+
 export function DishDetailsScreen({ route, navigation }) {
   const { addItem } = useCart();
   const { item } = route.params;
   const { width } = useWindowDimensions();
   const layout = getResponsiveLayout(width);
 
-  const availabilityChips = [
-    {
-      label: item.availableForDineIn ? "Salão disponível" : "Sem salão",
-      tone: item.availableForDineIn ? styles.chipSuccess : styles.chipMuted
-    },
-    {
-      label: item.availableForDelivery ? "Delivery disponível" : "Apenas no local",
-      tone: item.availableForDelivery ? styles.chipSuccess : styles.chipMuted
-    }
-  ];
-
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+    <ScrollView
+      bounces={false}
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+      style={styles.screen}
+    >
       <View style={[styles.shell, { maxWidth: layout.contentMaxWidth }]}>
-        <LinearGradient
-          colors={[item.accentColor || theme.colors.accent, "#0a1730", "#040b17"]}
-          end={{ x: 1, y: 1 }}
-          start={{ x: 0, y: 0 }}
-          style={[styles.hero, layout.isCompact && styles.heroCompact]}
-        >
-          <View style={styles.heroGlow} />
-          <Text style={styles.eyebrow}>{getCategoryLabel(item.category)}</Text>
-          <Text
-            style={[
-              styles.title,
-              {
-                fontSize: layout.heroTitleSize,
-                lineHeight: layout.heroTitleLineHeight
-              }
-            ]}
-          >
-            {item.name}
-          </Text>
-          <Text style={styles.description}>{item.description}</Text>
+        <PremiumDetailHero item={item} layout={layout} />
 
-          <View style={styles.metaRow}>
-            <View style={styles.pricePill}>
-              <Text style={styles.price}>{formatCurrency(item.priceCents)}</Text>
-            </View>
-            <Text style={styles.metaCopy}>Adicione agora e siga direto para finalizar.</Text>
-          </View>
-
-          <View style={styles.chipRow}>
-            {availabilityChips.map((chip) => (
-              <View key={chip.label} style={[styles.chip, chip.tone]}>
-                <Text style={styles.chipText}>{chip.label}</Text>
-              </View>
-            ))}
-          </View>
-        </LinearGradient>
-
-        <View style={styles.panel}>
-          <Text style={styles.sectionTitle}>Por que pedir agora</Text>
+        <PremiumSection title="O que esperar">
           <Text style={styles.sectionLead}>
-            A página foi encurtada para ajudar na decisão: leitura rápida, preço em destaque e
-            uma ação principal bem clara.
+            Uma leitura curta, visual limpa e foco total na decisão certa. Esta tela foi pensada
+            para transmitir valor, atmosfera e segurança antes do toque final.
           </Text>
           <View style={styles.benefitList}>
             <View style={styles.benefitItem}>
               <View style={styles.benefitDot} />
-              <Text style={styles.sectionCopy}>Entra no carrinho em um toque.</Text>
+              <Text style={styles.sectionCopy}>Imagem dominante para vender a experiência antes do preço.</Text>
             </View>
             <View style={styles.benefitItem}>
               <View style={styles.benefitDot} />
-              <Text style={styles.sectionCopy}>Segue para a aba Reserva sem perder o contexto.</Text>
+              <Text style={styles.sectionCopy}>Texto direto, sem excesso, para manter o ritmo premium.</Text>
             </View>
             <View style={styles.benefitItem}>
               <View style={styles.benefitDot} />
-              <Text style={styles.sectionCopy}>
-                Você vê disponibilidade no salão e no delivery sem procurar em outra tela.
-              </Text>
+              <Text style={styles.sectionCopy}>CTA único e claro, sem disputar atenção com elementos secundários.</Text>
             </View>
           </View>
-        </View>
+        </PremiumSection>
 
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`Adicionar ${item.name} ao carrinho por ${formatCurrency(item.priceCents)}`}
-          onPress={() => {
-            addItem(item);
-            navigation.navigate("MainTabs", {
-              screen: "Reserva"
-            });
-          }}
-          style={styles.primaryButton}
-        >
-          <Text style={styles.primaryButtonText}>Adicionar ao carrinho</Text>
-        </Pressable>
+        <PremiumSection title="Momento ideal">
+          <View style={styles.benefitList}>
+            {getExperienceNotes(item).map((note) => (
+              <View key={note} style={styles.benefitItem}>
+                <View style={styles.benefitDot} />
+                <Text style={styles.sectionCopy}>{note}</Text>
+              </View>
+            ))}
+          </View>
+        </PremiumSection>
+
+        <View style={styles.actionBar}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Selecionar ${item.name}`}
+            onPress={() => {
+              addItem(item);
+              navigation.navigate("MainTabs", {
+                screen: "Reserva"
+              });
+            }}
+            style={styles.primaryButton}
+          >
+            <Text style={styles.primaryButtonText}>Selecionar prato</Text>
+          </Pressable>
+
+          <Text style={styles.actionHint}>Vai para a reserva com o prato já incluído.</Text>
+        </View>
       </View>
     </ScrollView>
   );
@@ -126,6 +263,9 @@ DishDetailsScreen.propTypes = {
         category: PropTypes.string.isRequired,
         description: PropTypes.string.isRequired,
         id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+        imageHint: PropTypes.string,
+        imageUrl: PropTypes.string,
+        isFeatured: PropTypes.bool,
         name: PropTypes.string.isRequired,
         priceCents: PropTypes.number.isRequired
       }).isRequired
@@ -147,96 +287,163 @@ const styles = StyleSheet.create({
   },
   hero: {
     overflow: "hidden",
-    minHeight: 300,
     padding: theme.spacing.xl,
-    justifyContent: "flex-end"
+    justifyContent: "flex-end",
+    backgroundColor: theme.colors.surfaceRaised,
+    borderColor: "rgba(141, 249, 255, 0.1)",
+    borderWidth: 1
   },
-  heroCompact: {
-    padding: theme.spacing.lg
+  heroFallback: {
+    ...StyleSheet.absoluteFillObject
   },
   heroGlow: {
-    backgroundColor: "rgba(255,255,255,0.08)",
-    height: 180,
-    opacity: 0.3,
+    backgroundColor: "rgba(141, 249, 255, 0.12)",
+    height: 220,
+    opacity: 0.22,
     position: "absolute",
-    right: -60,
-    top: -60,
-    width: 180
+    right: -48,
+    top: -72,
+    width: 220
   },
-  eyebrow: {
-    color: theme.colors.background,
+  heroHeader: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: theme.spacing.md,
+    position: "relative",
+    zIndex: 2
+  },
+  categoryPill: {
+    alignItems: "center",
+    backgroundColor: "rgba(4, 11, 23, 0.3)",
+    borderColor: "rgba(141, 249, 255, 0.14)",
+    borderWidth: 1,
+    justifyContent: "center",
+    minHeight: 34,
+    paddingHorizontal: 14,
+    paddingVertical: 8
+  },
+  categoryPillText: {
+    color: theme.colors.text,
     fontFamily: theme.fonts.bodyBold,
-    fontSize: 13,
+    fontSize: 11,
     letterSpacing: 1.4,
+    textTransform: "uppercase"
+  },
+  featuredMark: {
+    color: theme.colors.accentSoft,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 28,
+    lineHeight: 28,
+    textShadowColor: "rgba(141, 249, 255, 0.42)",
+    textShadowOffset: {
+      width: 0,
+      height: 0
+    },
+    textShadowRadius: 10
+  },
+  heroContent: {
+    position: "relative",
+    zIndex: 2
+  },
+  kicker: {
+    color: theme.colors.accentSoft,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 12,
+    letterSpacing: 1.5,
     marginBottom: 10,
     textTransform: "uppercase"
   },
   title: {
     color: theme.colors.text,
     fontFamily: theme.fonts.display,
-    fontSize: 48,
-    marginBottom: 8
+    marginBottom: 10
   },
   description: {
-    color: "rgba(245, 251, 255, 0.82)",
+    color: "rgba(245, 251, 255, 0.86)",
     fontFamily: theme.fonts.body,
     fontSize: 15,
-    lineHeight: 24
+    lineHeight: 24,
+    maxWidth: 620
   },
-  metaRow: {
-    alignItems: "center",
+  serviceRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 12,
+    gap: 10,
     marginTop: theme.spacing.lg
   },
-  pricePill: {
+  servicePill: {
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.12)",
-    borderColor: "rgba(255,255,255,0.15)",
     borderWidth: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 10
+    justifyContent: "center",
+    minHeight: 34,
+    paddingHorizontal: 12,
+    paddingVertical: 8
+  },
+  pillPositive: {
+    backgroundColor: "rgba(114, 240, 184, 0.1)",
+    borderColor: "rgba(114, 240, 184, 0.22)"
+  },
+  pillNeutral: {
+    backgroundColor: "rgba(255,255,255,0.06)",
+    borderColor: "rgba(255,255,255,0.09)"
+  },
+  servicePillText: {
+    color: theme.colors.text,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 12
+  },
+  heroFooter: {
+    alignItems: "flex-end",
+    flexDirection: "row",
+    gap: 16,
+    justifyContent: "space-between",
+    marginTop: theme.spacing.xl,
+    position: "relative",
+    zIndex: 2
+  },
+  priceCluster: {
+    flexShrink: 1
+  },
+  priceLabel: {
+    color: theme.colors.accentSoft,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 11,
+    letterSpacing: 1.2,
+    marginBottom: 4,
+    textTransform: "uppercase"
   },
   price: {
     color: theme.colors.text,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 18
   },
-  metaCopy: {
-    color: theme.colors.textMuted,
+  presentationLine: {
+    color: "rgba(245, 251, 255, 0.72)",
     flex: 1,
     fontFamily: theme.fonts.body,
     fontSize: 13,
-    lineHeight: 18,
-    minWidth: 180
+    lineHeight: 20,
+    textAlign: "right"
   },
-  chipRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-    marginTop: theme.spacing.lg
+  heroBottomBand: {
+    borderTopColor: "rgba(141, 249, 255, 0.08)",
+    borderTopWidth: 1,
+    marginTop: theme.spacing.xl,
+    paddingTop: theme.spacing.md,
+    position: "relative",
+    zIndex: 2
   },
-  chip: {
-    borderWidth: 1,
-    paddingHorizontal: 12,
-    paddingVertical: 8
+  heroBottomCopy: {
+    color: theme.colors.textMuted,
+    fontFamily: theme.fonts.body,
+    fontSize: 13,
+    lineHeight: 20
   },
-  chipSuccess: {
-    backgroundColor: "rgba(114, 240, 184, 0.12)",
-    borderColor: "rgba(114, 240, 184, 0.24)"
-  },
-  chipMuted: {
-    backgroundColor: "rgba(255,255,255,0.06)",
-    borderColor: "rgba(255,255,255,0.1)"
-  },
-  chipText: {
-    color: theme.colors.text,
-    fontFamily: theme.fonts.bodyBold,
-    fontSize: 12
-  },
-  panel: {
+  sectionCard: {
     backgroundColor: theme.colors.surface,
+    borderColor: "rgba(141, 249, 255, 0.08)",
+    borderWidth: 1,
     marginTop: theme.spacing.lg,
     padding: theme.spacing.lg
   },
@@ -244,7 +451,7 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 18,
-    marginBottom: 8
+    marginBottom: 10
   },
   sectionLead: {
     color: theme.colors.textMuted,
@@ -263,7 +470,6 @@ const styles = StyleSheet.create({
   },
   benefitDot: {
     backgroundColor: theme.colors.accent,
-    borderRadius: 999,
     height: 8,
     marginTop: 8,
     width: 8
@@ -275,17 +481,28 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     flex: 1
   },
+  actionBar: {
+    marginTop: theme.spacing.xl,
+    paddingBottom: theme.spacing.xl
+  },
   primaryButton: {
     alignItems: "center",
-    backgroundColor: theme.colors.accentWarm,
-    marginTop: theme.spacing.xl,
+    backgroundColor: theme.colors.accent,
     justifyContent: "center",
-    minHeight: 56,
+    minHeight: 58,
     paddingHorizontal: theme.spacing.lg
   },
   primaryButtonText: {
     color: theme.colors.background,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 15
+  },
+  actionHint: {
+    color: theme.colors.textMuted,
+    fontFamily: theme.fonts.body,
+    fontSize: 12,
+    lineHeight: 18,
+    marginTop: 10,
+    textAlign: "center"
   }
 });
