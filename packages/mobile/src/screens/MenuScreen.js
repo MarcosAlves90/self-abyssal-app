@@ -6,10 +6,12 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   useWindowDimensions,
   View
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { LoadingOverlay } from "../components/LoadingOverlay";
 import { MenuCard } from "../components/MenuCard";
@@ -22,11 +24,12 @@ import { getCategoryLabel, theme } from "../theme/tokens";
 const filters = ["todos", "entradas", "principais", "sobremesas", "bebidas"];
 
 export function MenuScreen({ navigation }) {
-  const { addItem, itemCount } = useCart();
+  const { addItem } = useCart();
   const { width } = useWindowDimensions();
   const [items, setItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState("todos");
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     async function loadMenu() {
@@ -47,14 +50,16 @@ export function MenuScreen({ navigation }) {
     return <LoadingOverlay label="Carregando cardápio..." />;
   }
 
-  const visibleItems =
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const filteredItems =
     activeFilter === "todos"
       ? items
       : items.filter((item) => item.category === activeFilter);
+  const visibleItems = normalizedQuery
+    ? filteredItems.filter((item) => item.name.toLowerCase().includes(normalizedQuery))
+    : filteredItems;
 
   const layout = getResponsiveLayout(width);
-  const hasCartItems = itemCount > 0;
-  const filterActionLabel = hasCartItems ? `Carrinho • ${itemCount}` : undefined;
   const menuHeaderDescription = `Mostrando ${visibleItems.length} itens neste filtro. Adicione sem sair da tela.`;
   const filterButtons = filters.map((filter) => {
     const isActive = activeFilter === filter;
@@ -62,6 +67,14 @@ export function MenuScreen({ navigation }) {
       filter === "todos"
         ? items.length
         : items.filter((item) => item.category === filter).length;
+    const iconName =
+      {
+        todos: "silverware-fork-knife",
+        entradas: "food-variant",
+        principais: "food-steak",
+        sobremesas: "ice-cream",
+        bebidas: "glass-cocktail"
+      }[filter] || "food";
 
     return (
       <Pressable
@@ -71,6 +84,11 @@ export function MenuScreen({ navigation }) {
         onPress={() => setActiveFilter(filter)}
         style={[styles.filterChip, isActive && styles.filterChipActive]}
       >
+        <MaterialCommunityIcons
+          color={isActive ? theme.colors.text : theme.colors.textMuted}
+          name={iconName}
+          size={14}
+        />
         <Text style={[styles.filterText, isActive && styles.filterTextActive]}>
           {filter === "todos" ? "Todos" : getCategoryLabel(filter)}
         </Text>
@@ -126,13 +144,33 @@ export function MenuScreen({ navigation }) {
           </LinearGradient>
 
           <SectionHeader
-            actionLabel={filterActionLabel}
             description={menuHeaderDescription}
             eyebrow="Filtros"
-            onActionPress={() => navigation.navigate("Cart")}
             title="Cardápio"
           />
-          <View style={styles.filters}>{filterButtons}</View>
+          <View style={styles.filterBar}>
+            <View style={styles.searchRow}>
+              <MaterialCommunityIcons
+                color={theme.colors.textMuted}
+                name="magnify"
+                size={16}
+              />
+              <TextInput
+                placeholder="Buscar prato"
+                placeholderTextColor={theme.colors.textMuted}
+                style={styles.filterSearch}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+            </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.filters}
+            >
+              {filterButtons}
+            </ScrollView>
+          </View>
 
           {visibleItems.length ? (
             <View style={styles.menuGrid}>{menuCards}</View>
@@ -209,7 +247,28 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 10,
+    paddingBottom: 6
+  },
+  filterBar: {
+    gap: 10,
     marginBottom: theme.spacing.lg
+  },
+  searchRow: {
+    alignItems: "center",
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.border,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 8,
+    minHeight: 42,
+    paddingHorizontal: 12
+  },
+  filterSearch: {
+    color: theme.colors.text,
+    fontFamily: theme.fonts.body,
+    fontSize: 13,
+    flex: 1,
+    paddingVertical: 10
   },
   filterChip: {
     alignItems: "center",
@@ -219,8 +278,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 8,
     justifyContent: "center",
-    minHeight: 44,
-    paddingHorizontal: 14
+    minHeight: 36,
+    paddingHorizontal: 12
   },
   filterChipActive: {
     backgroundColor: "rgba(49,231,255,0.12)",
@@ -229,7 +288,7 @@ const styles = StyleSheet.create({
   filterText: {
     color: theme.colors.textMuted,
     fontFamily: theme.fonts.body,
-    fontSize: 13
+    fontSize: 12
   },
   filterTextActive: {
     color: theme.colors.text
@@ -237,7 +296,7 @@ const styles = StyleSheet.create({
   filterCount: {
     color: theme.colors.textMuted,
     fontFamily: theme.fonts.bodyBold,
-    fontSize: 12
+    fontSize: 11
   },
   filterCountActive: {
     color: theme.colors.text
