@@ -215,7 +215,10 @@ export function ReservationScreen({ navigation }) {
 
   return (
     <KeyboardScrollScreen
-      contentContainerStyle={[styles.content, { padding: layout.contentPadding }]}
+      contentContainerStyle={[
+        styles.content,
+        { paddingHorizontal: layout.contentPadding, paddingTop: layout.contentPadding }
+      ]}
       extraKeyboardSpace={56}
       style={styles.screen}
     >
@@ -551,7 +554,7 @@ const styles = StyleSheet.create({
   content: {
     alignItems: "center",
     padding: theme.spacing.lg,
-    paddingBottom: 120
+    paddingBottom: theme.overlays.scrollBottomSafeArea
   },
   shell: {
     width: "100%"

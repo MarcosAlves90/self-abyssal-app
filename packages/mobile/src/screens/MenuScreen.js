@@ -111,7 +111,10 @@ export function MenuScreen({ navigation }) {
   return (
     <View style={styles.screen}>
       <ScrollView
-        contentContainerStyle={[styles.content, { padding: layout.contentPadding }]}
+        contentContainerStyle={[
+          styles.content,
+          { paddingHorizontal: layout.contentPadding, paddingTop: layout.contentPadding }
+        ]}
         style={styles.scroll}
       >
         <View style={[styles.shell, { maxWidth: layout.contentMaxWidth }]}> 
@@ -177,7 +180,7 @@ const styles = StyleSheet.create({
   content: {
     alignItems: "center",
     padding: theme.spacing.lg,
-    paddingBottom: 120
+    paddingBottom: theme.overlays.scrollBottomSafeArea
   },
   shell: {
     width: "100%"

@@ -7,7 +7,7 @@ import {
   StyleSheet,
   Text,
   useWindowDimensions,
-  View
+  View,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -19,11 +19,15 @@ function getExperienceNotes(item) {
   const notes = [];
 
   if (item.availableForDineIn) {
-    notes.push("Perfeito para viver no salão, com ritmo e apresentação completos.");
+    notes.push(
+      "Perfeito para viver no salão, com ritmo e apresentação completos.",
+    );
   }
 
   if (item.availableForDelivery) {
-    notes.push("Funciona muito bem para levar a experiência para casa sem perder presença.");
+    notes.push(
+      "Funciona muito bem para levar a experiência para casa sem perder presença.",
+    );
   }
 
   if (!notes.length) {
@@ -37,12 +41,14 @@ function getServicePills(item) {
   return [
     {
       label: item.availableForDineIn ? "Salão" : "Não indicado para salão",
-      tone: item.availableForDineIn ? styles.pillPositive : styles.pillNeutral
+      tone: item.availableForDineIn ? styles.pillPositive : styles.pillNeutral,
     },
     {
       label: item.availableForDelivery ? "Delivery" : "Somente na casa",
-      tone: item.availableForDelivery ? styles.pillPositive : styles.pillNeutral
-    }
+      tone: item.availableForDelivery
+        ? styles.pillPositive
+        : styles.pillNeutral,
+    },
   ];
 }
 
@@ -81,7 +87,12 @@ function PremiumDetailHero({ item, layout }) {
           style={StyleSheet.absoluteFillObject}
         />
       ) : (
-        <View style={[styles.heroFallback, { backgroundColor: item.accentColor || theme.colors.surfaceRaised }]} />
+        <View
+          style={[
+            styles.heroFallback,
+            { backgroundColor: item.accentColor || theme.colors.surfaceRaised },
+          ]}
+        />
       )}
 
       <LinearGradient
@@ -89,7 +100,7 @@ function PremiumDetailHero({ item, layout }) {
           "rgba(4, 11, 23, 0.08)",
           "rgba(4, 11, 23, 0.42)",
           "rgba(4, 11, 23, 0.8)",
-          "rgba(4, 11, 23, 0.98)"
+          "rgba(4, 11, 23, 0.98)",
         ]}
         end={{ x: 0.5, y: 1 }}
         start={{ x: 0.5, y: 0 }}
@@ -100,7 +111,9 @@ function PremiumDetailHero({ item, layout }) {
 
       <View style={styles.heroHeader}>
         <View style={styles.categoryPill}>
-          <Text style={styles.categoryPillText}>{getCategoryLabel(item.category)}</Text>
+          <Text style={styles.categoryPillText}>
+            {getCategoryLabel(item.category)}
+          </Text>
         </View>
         {item.isFeatured ? <Text style={styles.featuredMark}>★</Text> : null}
       </View>
@@ -112,8 +125,8 @@ function PremiumDetailHero({ item, layout }) {
             styles.title,
             {
               fontSize: layout.heroTitleSize,
-              lineHeight: layout.heroTitleLineHeight
-            }
+              lineHeight: layout.heroTitleLineHeight,
+            },
           ]}
         >
           {item.name}
@@ -134,7 +147,9 @@ function PremiumDetailHero({ item, layout }) {
             <Text style={styles.price}>{formatCurrency(item.priceCents)}</Text>
           </View>
 
-          <Text style={styles.presentationLine}>{getPresentationLine(item)}</Text>
+          <Text style={styles.presentationLine}>
+            {getPresentationLine(item)}
+          </Text>
         </View>
       </View>
 
@@ -165,19 +180,19 @@ PremiumDetailHero.propTypes = {
     imageUrl: PropTypes.string,
     isFeatured: PropTypes.bool,
     name: PropTypes.string.isRequired,
-    priceCents: PropTypes.number.isRequired
+    priceCents: PropTypes.number.isRequired,
   }).isRequired,
   layout: PropTypes.shape({
     heroTitleLineHeight: PropTypes.number.isRequired,
     heroTitleSize: PropTypes.number.isRequired,
     isCompact: PropTypes.bool.isRequired,
-    isTiny: PropTypes.bool.isRequired
-  }).isRequired
+    isTiny: PropTypes.bool.isRequired,
+  }).isRequired,
 };
 
 PremiumSection.propTypes = {
   children: PropTypes.node.isRequired,
-  title: PropTypes.string.isRequired
+  title: PropTypes.string.isRequired,
 };
 
 export function DishDetailsScreen({ route, navigation }) {
@@ -198,21 +213,29 @@ export function DishDetailsScreen({ route, navigation }) {
 
         <PremiumSection title="O que esperar">
           <Text style={styles.sectionLead}>
-            Uma leitura curta, visual limpa e foco total na decisão certa. Esta tela foi pensada
-            para transmitir valor, atmosfera e segurança antes do toque final.
+            Uma leitura curta, visual limpa e foco total na decisão certa. Esta
+            tela foi pensada para transmitir valor, atmosfera e segurança antes
+            do toque final.
           </Text>
           <View style={styles.benefitList}>
             <View style={styles.benefitItem}>
               <View style={styles.benefitDot} />
-              <Text style={styles.sectionCopy}>Imagem dominante para vender a experiência antes do preço.</Text>
+              <Text style={styles.sectionCopy}>
+                Imagem dominante para vender a experiência antes do preço.
+              </Text>
             </View>
             <View style={styles.benefitItem}>
               <View style={styles.benefitDot} />
-              <Text style={styles.sectionCopy}>Texto direto, sem excesso, para manter o ritmo premium.</Text>
+              <Text style={styles.sectionCopy}>
+                Texto direto, sem excesso, para manter o ritmo premium.
+              </Text>
             </View>
             <View style={styles.benefitItem}>
               <View style={styles.benefitDot} />
-              <Text style={styles.sectionCopy}>CTA único e claro, sem disputar atenção com elementos secundários.</Text>
+              <Text style={styles.sectionCopy}>
+                CTA único e claro, sem disputar atenção com elementos
+                secundários.
+              </Text>
             </View>
           </View>
         </PremiumSection>
@@ -235,7 +258,7 @@ export function DishDetailsScreen({ route, navigation }) {
             onPress={() => {
               addItem(item);
               navigation.navigate("MainTabs", {
-                screen: "Reserva"
+                screen: "Reserva",
               });
             }}
             style={styles.primaryButton}
@@ -243,7 +266,9 @@ export function DishDetailsScreen({ route, navigation }) {
             <Text style={styles.primaryButtonText}>Selecionar prato</Text>
           </Pressable>
 
-          <Text style={styles.actionHint}>Vai para a reserva com o prato já incluído.</Text>
+          <Text style={styles.actionHint}>
+            Vai para a reserva com o prato já incluído.
+          </Text>
         </View>
       </View>
     </ScrollView>
@@ -252,7 +277,7 @@ export function DishDetailsScreen({ route, navigation }) {
 
 DishDetailsScreen.propTypes = {
   navigation: PropTypes.shape({
-    navigate: PropTypes.func.isRequired
+    navigate: PropTypes.func.isRequired,
   }).isRequired,
   route: PropTypes.shape({
     params: PropTypes.shape({
@@ -262,28 +287,29 @@ DishDetailsScreen.propTypes = {
         availableForDineIn: PropTypes.bool,
         category: PropTypes.string.isRequired,
         description: PropTypes.string.isRequired,
-        id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+        id: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+          .isRequired,
         imageHint: PropTypes.string,
         imageUrl: PropTypes.string,
         isFeatured: PropTypes.bool,
         name: PropTypes.string.isRequired,
-        priceCents: PropTypes.number.isRequired
-      }).isRequired
-    }).isRequired
-  }).isRequired
+        priceCents: PropTypes.number.isRequired,
+      }).isRequired,
+    }).isRequired,
+  }).isRequired,
 };
 
 const styles = StyleSheet.create({
   screen: {
-    backgroundColor: theme.colors.background
+    backgroundColor: theme.colors.background,
   },
   content: {
     alignItems: "center",
     padding: theme.spacing.lg,
-    paddingBottom: 120
+    paddingBottom: theme.overlays.scrollBottomSafeArea,
   },
   shell: {
-    width: "100%"
+    width: "100%",
   },
   hero: {
     overflow: "hidden",
@@ -291,10 +317,10 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     backgroundColor: theme.colors.surfaceRaised,
     borderColor: "rgba(141, 249, 255, 0.1)",
-    borderWidth: 1
+    borderWidth: 1,
   },
   heroFallback: {
-    ...StyleSheet.absoluteFillObject
+    ...StyleSheet.absoluteFillObject,
   },
   heroGlow: {
     backgroundColor: "rgba(141, 249, 255, 0.12)",
@@ -303,7 +329,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: -48,
     top: -72,
-    width: 220
+    width: 220,
   },
   heroHeader: {
     alignItems: "flex-start",
@@ -311,7 +337,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: theme.spacing.md,
     position: "relative",
-    zIndex: 2
+    zIndex: 2,
   },
   categoryPill: {
     alignItems: "center",
@@ -321,14 +347,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     minHeight: 34,
     paddingHorizontal: 14,
-    paddingVertical: 8
+    paddingVertical: 8,
   },
   categoryPillText: {
     color: theme.colors.text,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 11,
     letterSpacing: 1.4,
-    textTransform: "uppercase"
+    textTransform: "uppercase",
   },
   featuredMark: {
     color: theme.colors.accentSoft,
@@ -338,13 +364,13 @@ const styles = StyleSheet.create({
     textShadowColor: "rgba(141, 249, 255, 0.42)",
     textShadowOffset: {
       width: 0,
-      height: 0
+      height: 0,
     },
-    textShadowRadius: 10
+    textShadowRadius: 10,
   },
   heroContent: {
     position: "relative",
-    zIndex: 2
+    zIndex: 2,
   },
   kicker: {
     color: theme.colors.accentSoft,
@@ -352,25 +378,25 @@ const styles = StyleSheet.create({
     fontSize: 12,
     letterSpacing: 1.5,
     marginBottom: 10,
-    textTransform: "uppercase"
+    textTransform: "uppercase",
   },
   title: {
     color: theme.colors.text,
     fontFamily: theme.fonts.display,
-    marginBottom: 10
+    marginBottom: 10,
   },
   description: {
     color: "rgba(245, 251, 255, 0.86)",
     fontFamily: theme.fonts.body,
     fontSize: 15,
     lineHeight: 24,
-    maxWidth: 620
+    maxWidth: 620,
   },
   serviceRow: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 10,
-    marginTop: theme.spacing.lg
+    marginTop: theme.spacing.lg,
   },
   servicePill: {
     alignItems: "center",
@@ -378,20 +404,20 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     minHeight: 34,
     paddingHorizontal: 12,
-    paddingVertical: 8
+    paddingVertical: 8,
   },
   pillPositive: {
     backgroundColor: "rgba(114, 240, 184, 0.1)",
-    borderColor: "rgba(114, 240, 184, 0.22)"
+    borderColor: "rgba(114, 240, 184, 0.22)",
   },
   pillNeutral: {
     backgroundColor: "rgba(255,255,255,0.06)",
-    borderColor: "rgba(255,255,255,0.09)"
+    borderColor: "rgba(255,255,255,0.09)",
   },
   servicePillText: {
     color: theme.colors.text,
     fontFamily: theme.fonts.bodyBold,
-    fontSize: 12
+    fontSize: 12,
   },
   heroFooter: {
     alignItems: "flex-end",
@@ -400,10 +426,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginTop: theme.spacing.xl,
     position: "relative",
-    zIndex: 2
+    zIndex: 2,
   },
   priceCluster: {
-    flexShrink: 1
+    flexShrink: 1,
   },
   priceLabel: {
     color: theme.colors.accentSoft,
@@ -411,12 +437,12 @@ const styles = StyleSheet.create({
     fontSize: 11,
     letterSpacing: 1.2,
     marginBottom: 4,
-    textTransform: "uppercase"
+    textTransform: "uppercase",
   },
   price: {
     color: theme.colors.text,
     fontFamily: theme.fonts.bodyBold,
-    fontSize: 18
+    fontSize: 18,
   },
   presentationLine: {
     color: "rgba(245, 251, 255, 0.72)",
@@ -424,7 +450,7 @@ const styles = StyleSheet.create({
     fontFamily: theme.fonts.body,
     fontSize: 13,
     lineHeight: 20,
-    textAlign: "right"
+    textAlign: "right",
   },
   heroBottomBand: {
     borderTopColor: "rgba(141, 249, 255, 0.08)",
@@ -432,70 +458,70 @@ const styles = StyleSheet.create({
     marginTop: theme.spacing.xl,
     paddingTop: theme.spacing.md,
     position: "relative",
-    zIndex: 2
+    zIndex: 2,
   },
   heroBottomCopy: {
     color: theme.colors.textMuted,
     fontFamily: theme.fonts.body,
     fontSize: 13,
-    lineHeight: 20
+    lineHeight: 20,
   },
   sectionCard: {
     backgroundColor: theme.colors.surface,
     borderColor: "rgba(141, 249, 255, 0.08)",
     borderWidth: 1,
     marginTop: theme.spacing.lg,
-    padding: theme.spacing.lg
+    padding: theme.spacing.lg,
   },
   sectionTitle: {
     color: theme.colors.text,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 18,
-    marginBottom: 10
+    marginBottom: 10,
   },
   sectionLead: {
     color: theme.colors.textMuted,
     fontFamily: theme.fonts.body,
     fontSize: 14,
     lineHeight: 22,
-    marginBottom: theme.spacing.md
+    marginBottom: theme.spacing.md,
   },
   benefitList: {
-    gap: 12
+    gap: 12,
   },
   benefitItem: {
     alignItems: "flex-start",
     flexDirection: "row",
-    gap: 10
+    gap: 10,
   },
   benefitDot: {
     backgroundColor: theme.colors.accent,
     height: 8,
     marginTop: 8,
-    width: 8
+    width: 8,
   },
   sectionCopy: {
     color: theme.colors.textMuted,
     fontFamily: theme.fonts.body,
     fontSize: 14,
     lineHeight: 22,
-    flex: 1
+    flex: 1,
   },
   actionBar: {
     marginTop: theme.spacing.xl,
-    paddingBottom: theme.spacing.xl
+    paddingBottom: theme.spacing.xl,
   },
   primaryButton: {
     alignItems: "center",
     backgroundColor: theme.colors.accent,
     justifyContent: "center",
     minHeight: 58,
-    paddingHorizontal: theme.spacing.lg
+    paddingHorizontal: theme.spacing.lg,
   },
   primaryButtonText: {
     color: theme.colors.background,
     fontFamily: theme.fonts.bodyBold,
-    fontSize: 15
+    fontSize: 15,
   },
   actionHint: {
     color: theme.colors.textMuted,
@@ -503,6 +529,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 18,
     marginTop: 10,
-    textAlign: "center"
-  }
+    textAlign: "center",
+  },
 });

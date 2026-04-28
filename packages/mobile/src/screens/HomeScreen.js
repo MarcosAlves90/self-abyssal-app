@@ -87,7 +87,10 @@ export function HomeScreen({ navigation }) {
   return (
     <ScrollView
       style={styles.screen}
-      contentContainerStyle={[styles.content, { padding: layout.contentPadding }]}
+      contentContainerStyle={[
+        styles.content,
+        { paddingHorizontal: layout.contentPadding, paddingTop: layout.contentPadding }
+      ]}
     >
       <View style={[styles.shell, { maxWidth: layout.contentMaxWidth }]}>
         <SectionHeader
@@ -262,7 +265,7 @@ const styles = StyleSheet.create({
   content: {
     alignItems: "center",
     padding: theme.spacing.lg,
-    paddingBottom: 120
+    paddingBottom: theme.overlays.scrollBottomSafeArea
   },
   shell: {
     width: "100%"

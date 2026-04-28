@@ -1,4 +1,7 @@
 export const theme = {
+  overlays: {
+    scrollBottomSafeArea: 142
+  },
   colors: {
     background: "#040b17",
     backgroundAlt: "#071226",

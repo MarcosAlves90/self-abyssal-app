@@ -61,7 +61,10 @@ export function CartScreen({ navigation }) {
 
   return (
     <ScrollView
-      contentContainerStyle={[styles.content, { padding: layout.contentPadding }]}
+      contentContainerStyle={[
+        styles.content,
+        { paddingHorizontal: layout.contentPadding, paddingTop: layout.contentPadding }
+      ]}
       style={styles.screen}
     >
       <View style={[styles.shell, { maxWidth: layout.contentMaxWidth }]}> 
@@ -143,7 +146,7 @@ const styles = StyleSheet.create({
   },
   content: {
     alignItems: "center",
-    paddingBottom: 120
+    paddingBottom: theme.overlays.scrollBottomSafeArea
   },
   shell: {
     width: "100%"
