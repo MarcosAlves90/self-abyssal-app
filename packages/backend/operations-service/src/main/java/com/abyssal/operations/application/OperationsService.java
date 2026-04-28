@@ -15,12 +15,14 @@ import com.abyssal.operations.web.OperationsPayloads;
 import com.abyssal.shared.crypto.TextCrypto;
 import com.abyssal.shared.error.ApiException;
 import com.abyssal.shared.security.AuthenticatedUser;
+import java.time.Instant;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +30,9 @@ import org.springframework.util.StringUtils;
 
 @Service
 public class OperationsService {
+  private static final String ACTIVE_RESERVATION_CONFLICT_MESSAGE =
+    "An active reservation already exists for this branch, time and depth level.";
+
   private final ReservationRepository reservationRepository;
   private final OrderRepository orderRepository;
   private final CatalogClient catalogClient;
@@ -75,10 +80,13 @@ public class OperationsService {
     AuthenticatedUser user
   ) {
     CatalogClient.BranchSnapshot branch = catalogClient.getBranch(request.branchId());
+    String depthLevel = request.depthLevel().trim();
 
-    if (!branch.reservationDepths().contains(request.depthLevel().trim())) {
+    if (!branch.reservationDepths().contains(depthLevel)) {
       throw new ApiException(HttpStatus.BAD_REQUEST, "Selected branch does not support this depth level.");
     }
+
+    ensureReservationSlotIsAvailable(request.branchId(), request.scheduledAt(), depthLevel, null);
 
     ReservationEntity reservation = new ReservationEntity();
     reservation.setUserId(user.id());
@@ -86,10 +94,10 @@ public class OperationsService {
     reservation.setBranchNameSnapshot(branch.name());
     reservation.setScheduledAt(request.scheduledAt());
     reservation.setGuests(request.guests());
-    reservation.setDepthLevel(request.depthLevel().trim());
+    reservation.setDepthLevel(depthLevel);
     reservation.setSpecialRequestEncrypted(textCrypto.encrypt(trimOrNull(request.specialRequest())));
 
-    return toReservationResponse(reservationRepository.save(reservation));
+    return saveReservation(reservation);
   }
 
   @Transactional
@@ -111,6 +119,8 @@ public class OperationsService {
 
     UUID nextBranchId = request.branchId() == null ? reservation.getBranchId() : request.branchId();
     String nextDepthLevel = request.depthLevel() == null ? reservation.getDepthLevel() : request.depthLevel().trim();
+    Instant nextScheduledAt = request.scheduledAt() == null ? reservation.getScheduledAt() : request.scheduledAt();
+    ReservationStatus nextStatus = request.status() == null ? reservation.getStatus() : parseReservationStatus(request.status());
 
     if (request.branchId() != null || request.depthLevel() != null) {
       CatalogClient.BranchSnapshot branch = catalogClient.getBranch(nextBranchId);
@@ -133,14 +143,18 @@ public class OperationsService {
     }
 
     if (request.status() != null) {
-      reservation.setStatus(parseReservationStatus(request.status()));
+      reservation.setStatus(nextStatus);
     }
 
     if (request.specialRequest() != null) {
       reservation.setSpecialRequestEncrypted(textCrypto.encrypt(trimOrNull(request.specialRequest())));
     }
 
-    return toReservationResponse(reservationRepository.save(reservation));
+    if (nextStatus != ReservationStatus.CANCELLED) {
+      ensureReservationSlotIsAvailable(nextBranchId, nextScheduledAt, nextDepthLevel, reservation.getId());
+    }
+
+    return saveReservation(reservation);
   }
 
   @Transactional
@@ -278,6 +292,33 @@ public class OperationsService {
   private ReservationEntity findReservation(UUID reservationId) {
     return reservationRepository.findById(reservationId)
       .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Reservation not found."));
+  }
+
+  private void ensureReservationSlotIsAvailable(
+    UUID branchId,
+    java.time.Instant scheduledAt,
+    String depthLevel,
+    UUID excludedReservationId
+  ) {
+    boolean conflict = reservationRepository.existsActiveReservationConflict(
+      branchId,
+      scheduledAt,
+      depthLevel,
+      ReservationStatus.CANCELLED,
+      excludedReservationId
+    );
+
+    if (conflict) {
+      throw new ApiException(HttpStatus.CONFLICT, ACTIVE_RESERVATION_CONFLICT_MESSAGE);
+    }
+  }
+
+  private OperationsPayloads.ReservationResponse saveReservation(ReservationEntity reservation) {
+    try {
+      return toReservationResponse(reservationRepository.saveAndFlush(reservation));
+    } catch (DataIntegrityViolationException exception) {
+      throw new ApiException(HttpStatus.CONFLICT, ACTIVE_RESERVATION_CONFLICT_MESSAGE);
+    }
   }
 
   private OrderEntity findOrder(UUID orderId) {

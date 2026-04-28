@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   ActivityIndicator,
-  Alert,
   Pressable,
   StyleSheet,
   Text,
@@ -12,6 +11,7 @@ import {
   View,
 } from "react-native";
 
+import { FeedbackBanner } from "../components/FeedbackBanner";
 import { KeyboardScrollScreen } from "../components/KeyboardScrollScreen";
 import {
   createReservation,
@@ -32,6 +32,7 @@ export function ReservationScreen() {
   const [branches, setBranches] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmation, setConfirmation] = useState(null);
+  const [feedback, setFeedback] = useState({ tone: "idle", message: "" });
   const [reservationForm, setReservationForm] = useState({
     branchId: "",
     date: nextDate(),
@@ -61,7 +62,7 @@ export function ReservationScreen() {
           });
         }
       } catch (error) {
-        Alert.alert("Falha ao carregar reservas", getApiErrorMessage(error));
+        setFeedback({ tone: "error", message: getApiErrorMessage(error) });
       }
     }
 
@@ -75,6 +76,7 @@ export function ReservationScreen() {
 
   async function submitReservation() {
     setConfirmation(null);
+    setFeedback({ tone: "saving", message: "Confirmando sua reserva..." });
     setIsSubmitting(true);
 
     try {
@@ -95,12 +97,12 @@ export function ReservationScreen() {
         scheduledAt,
       });
 
-      Alert.alert(
-        "Reserva confirmada",
-        "Sua reserva foi registrada com sucesso.",
-      );
+      setFeedback({
+        tone: "success",
+        message: "Reserva confirmada com sucesso.",
+      });
     } catch (error) {
-      Alert.alert("Não foi possível reservar", getApiErrorMessage(error));
+      setFeedback({ tone: "error", message: getApiErrorMessage(error) });
     } finally {
       setIsSubmitting(false);
     }
@@ -209,6 +211,11 @@ export function ReservationScreen() {
             disabled={isSubmitting}
             label={isSubmitting ? "Confirmando..." : "Confirmar reserva"}
             onPress={submitReservation}
+          />
+
+          <FeedbackBanner
+            message={feedback.message}
+            tone={feedback.tone}
           />
 
           {confirmation ? (
