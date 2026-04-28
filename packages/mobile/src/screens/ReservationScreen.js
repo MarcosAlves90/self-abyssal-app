@@ -94,6 +94,7 @@ export function ReservationScreen() {
       setConfirmation({
         branchName: selectedBranch?.name || "Unidade selecionada",
         guests: Number(reservationForm.guests),
+        depthLevel: reservationForm.depthLevel,
         scheduledAt,
       });
 
@@ -215,26 +216,24 @@ export function ReservationScreen() {
 
           <FeedbackBanner
             message={feedback.message}
+            details={
+              feedback.tone === "success" && confirmation ? (
+                <View style={styles.confirmationDetails}>
+                  <Text style={styles.confirmationDetail}>
+                    {confirmation.branchName}
+                  </Text>
+                  <Text style={styles.confirmationDetail}>
+                    {new Date(confirmation.scheduledAt).toLocaleString("pt-BR")}
+                  </Text>
+                  <Text style={styles.confirmationDetail}>
+                    {confirmation.guests} pessoas
+                    {confirmation.depthLevel ? ` • ${confirmation.depthLevel}` : ""}
+                  </Text>
+                </View>
+              ) : null
+            }
             tone={feedback.tone}
           />
-
-          {confirmation ? (
-            <View style={styles.successCard}>
-              <View style={styles.successHeader}>
-                <MaterialCommunityIcons
-                  color={theme.colors.accent}
-                  name="check-decagram-outline"
-                  size={18}
-                />
-                <Text style={styles.successTitle}>Reserva confirmada</Text>
-              </View>
-              <Text style={styles.successText}>{confirmation.branchName}</Text>
-              <Text style={styles.successText}>
-                {new Date(confirmation.scheduledAt).toLocaleString("pt-BR")} •{" "}
-                {confirmation.guests} pessoas
-              </Text>
-            </View>
-          ) : null}
         </View>
       </View>
     </KeyboardScrollScreen>
@@ -455,25 +454,11 @@ const styles = StyleSheet.create({
   primaryButtonLoader: {
     width: 18,
   },
-  successCard: {
-    backgroundColor: "rgba(49,231,255,0.08)",
-    borderColor: theme.colors.accent,
-    borderWidth: 1,
-    marginTop: theme.spacing.md,
-    padding: theme.spacing.md,
+  confirmationDetails: {
+    gap: 4,
+    marginTop: 4,
   },
-  successHeader: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 8,
-    marginBottom: 8,
-  },
-  successTitle: {
-    color: theme.colors.text,
-    fontFamily: theme.fonts.bodyBold,
-    fontSize: 14,
-  },
-  successText: {
+  confirmationDetail: {
     color: theme.colors.textMuted,
     fontFamily: theme.fonts.body,
     fontSize: 13,

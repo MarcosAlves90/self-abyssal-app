@@ -5,7 +5,7 @@ import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
 import { theme } from "../theme/tokens";
 
-export function FeedbackBanner({ tone, message }) {
+export function FeedbackBanner({ details, tone, message }) {
   if (tone === "idle" || !message) {
     return null;
   }
@@ -29,7 +29,13 @@ export function FeedbackBanner({ tone, message }) {
   };
 
   return (
-    <View style={[styles.container, resolvedTone.container]}>
+    <View
+      style={[
+        styles.container,
+        resolvedTone.container,
+        details && styles.containerWithDetails,
+      ]}
+    >
       {tone === "saving" ? (
         <ActivityIndicator color={resolvedTone.icon} size="small" />
       ) : (
@@ -39,12 +45,16 @@ export function FeedbackBanner({ tone, message }) {
           size={18}
         />
       )}
-      <Text style={styles.message}>{message}</Text>
+      <View style={styles.textBlock}>
+        <Text style={styles.message}>{message}</Text>
+        {details ? <View style={styles.details}>{details}</View> : null}
+      </View>
     </View>
   );
 }
 
 FeedbackBanner.propTypes = {
+  details: PropTypes.node,
   message: PropTypes.string.isRequired,
   tone: PropTypes.oneOf(["idle", "saving", "success", "error"]).isRequired,
 };
@@ -60,6 +70,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing.md,
     paddingVertical: 12,
   },
+  containerWithDetails: {
+    alignItems: "flex-start",
+  },
   success: {
     backgroundColor: "rgba(114, 240, 184, 0.08)",
     borderColor: theme.colors.success,
@@ -74,9 +87,15 @@ const styles = StyleSheet.create({
   },
   message: {
     color: theme.colors.text,
-    flex: 1,
     fontFamily: theme.fonts.body,
     fontSize: 13,
     lineHeight: 20,
+  },
+  textBlock: {
+    flex: 1,
+  },
+  details: {
+    gap: 4,
+    marginTop: 8,
   },
 });
