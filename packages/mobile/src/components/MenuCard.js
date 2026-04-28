@@ -41,22 +41,8 @@ function getArtworkInitial(item) {
   return source.charAt(0).toUpperCase();
 }
 
-function getAvailabilityLabels(item) {
-  const labels = [];
-
-  if (item.availableForDineIn) {
-    labels.push("Salão");
-  }
-
-  if (item.availableForDelivery) {
-    labels.push("Delivery");
-  }
-
-  if (!labels.length) {
-    labels.push("Sob consulta");
-  }
-
-  return labels;
+function getCardAccentColor(item) {
+  return item.accentColor || theme.colors.warning;
 }
 
 function getMediaMetrics(layout) {
@@ -100,13 +86,13 @@ function MenuCardMedia({ imageHintLabel, item, layout, mediaHeight, initialSize,
       ) : null}
 
       <LinearGradient
-        colors={["rgba(4, 11, 23, 0.08)", "rgba(4, 11, 23, 0.44)", "rgba(4, 11, 23, 0.92)"]}
+        colors={["rgba(255, 217, 138, 0.04)", "rgba(4, 11, 23, 0.46)", "rgba(4, 11, 23, 0.92)"]}
         end={{ x: 1, y: 1 }}
         start={{ x: 0, y: 0 }}
         style={StyleSheet.absoluteFillObject}
       />
 
-      <View style={[styles.mediaGlow, { backgroundColor: item.accentColor || theme.colors.accent }]} />
+      <View style={[styles.mediaGlow, { backgroundColor: getCardAccentColor(item) }]} />
 
       <View style={styles.mediaTopRow}>
         <View style={styles.badgeStack}>
@@ -122,7 +108,6 @@ function MenuCardMedia({ imageHintLabel, item, layout, mediaHeight, initialSize,
       </View>
 
       <View style={styles.mediaBottom}>
-        <Text style={styles.mediaKicker}>Imagem do prato</Text>
         <Text numberOfLines={1} style={styles.mediaHint}>
           {imageHintLabel}
         </Text>
@@ -135,7 +120,7 @@ function MenuCardFooter({ item, layout, onAdd, shouldStackFooter, showAddButton 
   return (
     <View style={[styles.footer, shouldStackFooter && styles.footerStack]}>
       <View style={styles.priceBlock}>
-        <Text style={styles.priceLabel}>Uma escolha da casa</Text>
+        <Text style={styles.priceLabel}>Investimento</Text>
         <Text style={styles.price}>{formatCurrency(item.priceCents)}</Text>
       </View>
 
@@ -149,10 +134,10 @@ function MenuCardFooter({ item, layout, onAdd, shouldStackFooter, showAddButton 
           }}
           style={[styles.addButton, layout.isCompact && styles.addButtonCompact]}
         >
-          <Text style={styles.addText}>Selecionar</Text>
+          <Text style={styles.addText}>Adicionar à seleção</Text>
         </Pressable>
       ) : (
-        <Text style={styles.footerHint}>Toque para conhecer a experiência.</Text>
+        <Text style={styles.footerHint}>Toque para abrir o prato.</Text>
       )}
     </View>
   );
@@ -197,7 +182,7 @@ export function MenuCard({ item, onAdd, onPress, showAddButton = false, style })
       style={[styles.card, style]}
     >
       <LinearGradient
-        colors={["rgba(11, 20, 35, 0.94)", "rgba(7, 14, 26, 0.98)", "rgba(4, 11, 23, 1)"]}
+        colors={["rgba(17, 35, 64, 0.98)", "rgba(11, 20, 35, 0.99)", "rgba(4, 11, 23, 1)"]}
         end={{ x: 1, y: 1 }}
         start={{ x: 0, y: 0 }}
         style={styles.panel}
@@ -226,14 +211,6 @@ export function MenuCard({ item, onAdd, onPress, showAddButton = false, style })
           <Text numberOfLines={layout.isTiny ? 3 : 2} style={styles.description}>
             {item.description}
           </Text>
-
-          <View style={styles.chipRow}>
-            {getAvailabilityLabels(item).map((label) => (
-              <View key={label} style={styles.chip}>
-                <Text style={styles.chipText}>{label}</Text>
-              </View>
-            ))}
-          </View>
 
           <MenuCardFooter
             item={item}
@@ -270,7 +247,7 @@ const styles = StyleSheet.create({
     width: "100%"
   },
   panel: {
-    borderColor: "rgba(141, 249, 255, 0.12)",
+    borderColor: "rgba(255, 217, 138, 0.12)",
     borderWidth: 1,
     overflow: "hidden",
     padding: theme.spacing.md,
@@ -281,7 +258,7 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.md,
     overflow: "hidden",
     position: "relative",
-    borderColor: "rgba(141, 249, 255, 0.08)",
+    borderColor: "rgba(255, 217, 138, 0.1)",
     borderWidth: 1,
     minHeight: 180
   },
@@ -314,13 +291,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 8,
-    maxWidth: "72%"
+    maxWidth: "82%"
   },
   categoryBadge: {
     alignItems: "center",
     alignSelf: "flex-start",
-    backgroundColor: "rgba(4, 11, 23, 0.18)",
-    borderColor: "rgba(141, 249, 255, 0.12)",
+    backgroundColor: "rgba(4, 11, 23, 0.28)",
+    borderColor: "rgba(255, 217, 138, 0.16)",
     borderWidth: 1,
     minHeight: 30,
     justifyContent: "center",
@@ -335,12 +312,12 @@ const styles = StyleSheet.create({
     textTransform: "uppercase"
   },
   featuredStarText: {
-    color: theme.colors.accentSoft,
+    color: theme.colors.warning,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 30,
     includeFontPadding: false,
     lineHeight: 24,
-    textShadowColor: "rgba(141, 249, 255, 0.5)",
+    textShadowColor: "rgba(255, 217, 138, 0.42)",
     textShadowOffset: {
       width: 0,
       height: 0
@@ -359,8 +336,8 @@ const styles = StyleSheet.create({
   },
   mediaShell: {
     alignItems: "center",
-    backgroundColor: "rgba(4, 11, 23, 0.12)",
-    borderColor: "rgba(141, 249, 255, 0.12)",
+    backgroundColor: "rgba(4, 11, 23, 0.2)",
+    borderColor: "rgba(255, 217, 138, 0.14)",
     borderWidth: 1,
     justifyContent: "center",
     minHeight: 104,
@@ -372,14 +349,6 @@ const styles = StyleSheet.create({
     paddingBottom: theme.spacing.md,
     position: "relative",
     zIndex: 2
-  },
-  mediaKicker: {
-    color: theme.colors.accentSoft,
-    fontFamily: theme.fonts.bodyBold,
-    fontSize: 11,
-    letterSpacing: 1.2,
-    marginBottom: 4,
-    textTransform: "uppercase"
   },
   mediaHint: {
     color: theme.colors.text,
@@ -395,31 +364,11 @@ const styles = StyleSheet.create({
     fontFamily: theme.fonts.display
   },
   description: {
-    color: "rgba(214, 232, 240, 0.82)",
+    color: "rgba(214, 232, 240, 0.9)",
     fontFamily: theme.fonts.body,
     fontSize: 15,
     lineHeight: 24,
     minHeight: 48
-  },
-  chipRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8
-  },
-  chip: {
-    alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.03)",
-    borderColor: "rgba(141, 249, 255, 0.1)",
-    borderWidth: 1,
-    minHeight: 32,
-    justifyContent: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 6
-  },
-  chipText: {
-    color: "rgba(245, 251, 255, 0.9)",
-    fontFamily: theme.fonts.body,
-    fontSize: 12
   },
   footer: {
     alignItems: "center",
@@ -436,7 +385,7 @@ const styles = StyleSheet.create({
     flexShrink: 1
   },
   priceLabel: {
-    color: theme.colors.accentSoft,
+    color: theme.colors.warning,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 10,
     letterSpacing: 1.1,
@@ -444,7 +393,7 @@ const styles = StyleSheet.create({
     textTransform: "uppercase"
   },
   price: {
-    color: "rgba(245, 251, 255, 0.72)",
+    color: theme.colors.text,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 14
   },
@@ -458,8 +407,8 @@ const styles = StyleSheet.create({
   addButton: {
     alignItems: "center",
     alignSelf: "flex-end",
-    backgroundColor: "rgba(141, 249, 255, 0.12)",
-    borderColor: "rgba(141, 249, 255, 0.22)",
+    backgroundColor: "rgba(255, 217, 138, 0.12)",
+    borderColor: "rgba(255, 217, 138, 0.24)",
     borderWidth: 1,
     justifyContent: "center",
     minHeight: 44,
