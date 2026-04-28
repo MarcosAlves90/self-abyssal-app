@@ -14,6 +14,7 @@ import {
 import { FeedbackBanner } from "../components/FeedbackBanner";
 import { FormFieldLabel } from "../components/FormFieldLabel";
 import { KeyboardScrollScreen } from "../components/KeyboardScrollScreen";
+import { TopHeroCard } from "../components/TopHeroCard";
 import {
   createReservation,
   fetchBranches,
@@ -155,24 +156,12 @@ export function ReservationScreen() {
       style={styles.screen}
     >
       <View style={[styles.shell, { maxWidth: layout.contentMaxWidth }]}>
-        <View style={styles.heroCard}>
-          <View style={styles.heroGlow} />
-          <View style={styles.heroRow}>
-            <View style={styles.heroIconShell}>
-              <MaterialCommunityIcons
-                color={theme.colors.warning}
-                name="calendar-star"
-                size={20}
-              />
-            </View>
-            <Text style={styles.heroEyebrow}>Reserva</Text>
-          </View>
-          <Text style={styles.heroTitle}>Escolha sua mesa</Text>
-          <Text style={styles.heroCopy}>
-            Reserve sua mesa e escolha o ambiente ideal para aproveitar a
-            experiência da casa.
-          </Text>
-        </View>
+        <TopHeroCard
+          copy="Reserve sua mesa e escolha o ambiente ideal para aproveitar a experiência da casa."
+          eyebrow="Reserva"
+          iconName="calendar-star"
+          title="Escolha sua mesa."
+        />
 
         <View style={[styles.panel, layout.isCompact && styles.panelCompact]}>
           <Text
@@ -485,65 +474,6 @@ const styles = StyleSheet.create({
   },
   shell: {
     width: "100%",
-  },
-  heroCard: {
-    backgroundColor: theme.colors.surfaceRaised,
-    borderColor: "rgba(255, 217, 138, 0.14)",
-    borderWidth: 1,
-    marginBottom: theme.spacing.md,
-    overflow: "hidden",
-    padding: theme.spacing.lg,
-    position: "relative",
-  },
-  heroGlow: {
-    backgroundColor: "rgba(255, 217, 138, 0.16)",
-    height: 180,
-    opacity: 0.18,
-    position: "absolute",
-    right: -40,
-    top: -40,
-    width: 180,
-  },
-  heroRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 10,
-    marginBottom: 10,
-    position: "relative",
-    zIndex: 1,
-  },
-  heroIconShell: {
-    alignItems: "center",
-    backgroundColor: "rgba(4, 11, 23, 0.24)",
-    borderColor: "rgba(255, 217, 138, 0.18)",
-    borderWidth: 1,
-    height: 34,
-    justifyContent: "center",
-    width: 34,
-  },
-  heroEyebrow: {
-    color: theme.colors.warning,
-    fontFamily: theme.fonts.bodyBold,
-    fontSize: 11,
-    letterSpacing: 1.3,
-    textTransform: "uppercase",
-  },
-  heroTitle: {
-    color: theme.colors.text,
-    fontFamily: theme.fonts.display,
-    fontSize: 28,
-    lineHeight: 32,
-    marginBottom: 8,
-    position: "relative",
-    zIndex: 1,
-  },
-  heroCopy: {
-    color: theme.colors.textMuted,
-    fontFamily: theme.fonts.body,
-    fontSize: 14,
-    lineHeight: 22,
-    position: "relative",
-    zIndex: 1,
   },
   panel: {
     backgroundColor: theme.colors.surface,
