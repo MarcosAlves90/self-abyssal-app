@@ -80,7 +80,7 @@ public class CatalogSeeder implements ApplicationRunner {
   private List<MenuItemEntity> sampleMenuItems() {
     return List.of(
       menuItem(new MenuItemSeed("Ostra Neon", "ostra-neon", MenuCategory.ENTRADAS, 4200, true, "ostra", true, true, ACCENT_BLUE, imageUrl("v1777411035/ostra-neon_ve7zy8.png"))),
-      menuItem(new MenuItemSeed("Ceviche de Lulas Prismatica", "ceviche-lulas-prismatica", MenuCategory.ENTRADAS, 4800, true, "lulas", false, true, ACCENT_LIGHT_BLUE, imageUrl("v1777411032/ceviche-de-lula-prismatica_so2mz7l.png"))),
+      menuItem(new MenuItemSeed("Ceviche de Lulas Prismatica", "ceviche-lulas-prismatica", MenuCategory.ENTRADAS, 4800, true, "lulas", false, true, ACCENT_LIGHT_BLUE, imageUrl("v1777411032/ceviche-de-lula-prismatica_so2mz7.png"))),
       menuItem(new MenuItemSeed("Bao de Camarao Fantasma", "bao-camarao-fantasma", MenuCategory.ENTRADAS, 3600, false, "bao", true, true, ACCENT_TEAL, imageUrl("v1777411031/bao-de-camarao-fantasma_qyyica.png"))),
       menuItem(new MenuItemSeed("Tartare de Atum Obscuro", "tartare-atum-obscuro", MenuCategory.ENTRADAS, 5100, false, "atum", false, true, ACCENT_SKY, imageUrl("v1777411040/tartare-de-atum-obscuro_sywz7l.png"))),
       menuItem(new MenuItemSeed("Lagosta Bioluminescente", "lagosta-bioluminescente", MenuCategory.PRINCIPAIS, 12900, true, "lagosta", true, true, ACCENT_BLUE, imageUrl("v1777411034/lagosta-bioluminescente_jm3yho.png"))),
