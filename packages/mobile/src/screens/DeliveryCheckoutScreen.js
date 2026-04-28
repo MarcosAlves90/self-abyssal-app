@@ -12,6 +12,7 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 
 import { AddressFields } from "../components/AddressFields";
 import { FormFieldLabel } from "../components/FormFieldLabel";
@@ -114,8 +115,8 @@ export function DeliveryCheckoutScreen({ navigation }) {
 
     if (!items.length) {
       Alert.alert(
-        "Carrinho vazio",
-        "Adicione itens do menu antes de enviar o pedido.",
+        "Seleção vazia",
+        "Adicione pratos do menu antes de concluir o pedido.",
       );
       return;
     }
@@ -213,8 +214,37 @@ export function DeliveryCheckoutScreen({ navigation }) {
       style={styles.screen}
     >
       <View style={[styles.shell, { maxWidth: layout.contentMaxWidth }]}>
+        <View style={styles.heroCard}>
+          <LinearGradient
+            colors={[
+              "rgba(255,217,138,0.18)",
+              "rgba(17,35,64,0.94)",
+              "rgba(7,18,38,1)",
+            ]}
+            end={{ x: 1, y: 1 }}
+            start={{ x: 0, y: 0 }}
+            style={StyleSheet.absoluteFillObject}
+          />
+          <View style={styles.heroGlow} />
+          <View style={styles.heroRow}>
+            <View style={styles.heroIconShell}>
+              <MaterialCommunityIcons
+                color={theme.colors.warning}
+                name="silverware-fork-knife"
+                size={20}
+              />
+            </View>
+            <Text style={styles.heroEyebrow}>Finalização</Text>
+          </View>
+          <Text style={styles.heroTitle}>Concluir pedido</Text>
+          <Text style={styles.heroCopy}>
+            Revise a seleção, confirme o endereço e finalize com discrição e
+            precisão.
+          </Text>
+        </View>
+
         <View style={[styles.panel, layout.isCompact && styles.panelCompact]}>
-          <Text style={styles.panelEyebrow}>Delivery</Text>
+          <Text style={styles.panelEyebrow}>Mesa pronta</Text>
           <Text
             style={[
               styles.panelTitle,
@@ -224,10 +254,11 @@ export function DeliveryCheckoutScreen({ navigation }) {
               },
             ]}
           >
-            Confirme seu pedido.
+            Ajuste os detalhes finais.
           </Text>
           <Text style={styles.panelCopy}>
-            Revise itens, endereço e pagamento antes de enviar para a cozinha.
+            Revise os pratos, o endereço e a forma de pagamento antes de
+            encaminhar para a cozinha.
           </Text>
 
           {primaryAddress ? (
@@ -238,7 +269,7 @@ export function DeliveryCheckoutScreen({ navigation }) {
           ) : null}
 
           <View style={styles.deliverySummaryRow}>
-            <Text style={styles.deliverySummaryLabel}>Itens no carrinho</Text>
+            <Text style={styles.deliverySummaryLabel}>Pratos selecionados</Text>
             <Text style={styles.deliverySummaryValue}>{itemCount}</Text>
             <Text style={styles.deliverySummaryDivider}>•</Text>
             <Text style={styles.deliverySummaryLabel}>Total</Text>
@@ -267,21 +298,21 @@ export function DeliveryCheckoutScreen({ navigation }) {
             </View>
           ) : (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyTitle}>Carrinho vazio.</Text>
+              <Text style={styles.emptyTitle}>Seleção vazia.</Text>
               <Text style={styles.emptyCopy}>
-                Adicione pratos no menu para continuar.
+                Escolha pratos no menu para continuar a finalização.
               </Text>
               <Pressable
                 accessibilityRole="button"
                 onPress={() => navigation.navigate("Menu")}
                 style={styles.secondaryButton}
               >
-                <Text style={styles.secondaryButtonText}>Ir para o menu</Text>
+                <Text style={styles.secondaryButtonText}>Ir ao cardápio</Text>
               </Pressable>
             </View>
           )}
 
-          <Field label="Nome para entrega" required>
+          <Field label="Nome para a entrega" required>
             <StyledInput
               onChangeText={(value) =>
                 setDeliveryForm((current) => ({
@@ -289,7 +320,7 @@ export function DeliveryCheckoutScreen({ navigation }) {
                   contactName: value,
                 }))
               }
-              placeholder="Nome do recebedor"
+              placeholder="Nome de quem vai receber"
               value={deliveryForm.contactName}
             />
           </Field>
@@ -298,7 +329,7 @@ export function DeliveryCheckoutScreen({ navigation }) {
             <>
               {primaryAddress ? (
                 <Text style={styles.addressEditorEyebrow}>
-                  Novo endereço para este pedido
+                  Novo endereço para esta mesa
                 </Text>
               ) : null}
               <AddressFields
@@ -314,14 +345,14 @@ export function DeliveryCheckoutScreen({ navigation }) {
                   style={styles.addressEditorCancelButton}
                 >
                   <Text style={styles.addressEditorCancelText}>
-                    Usar endereço salvo
+                    Usar endereço principal
                   </Text>
                 </Pressable>
               ) : null}
             </>
           ) : null}
 
-          <Field label="Pagamento" required>
+          <Field label="Forma de pagamento" required>
             <View style={styles.chipWrap}>
               {paymentOptions.map(([value, label]) => (
                 <SelectionChip
@@ -341,7 +372,7 @@ export function DeliveryCheckoutScreen({ navigation }) {
 
           <PrimaryButton
             disabled={isSubmitting}
-            label={isSubmitting ? "Enviando..." : "Enviar pedido"}
+            label={isSubmitting ? "Enviando..." : "Concluir pedido"}
             onPress={submitDeliveryOrder}
           />
         </View>
@@ -372,7 +403,7 @@ function AddressSummaryCard({ onEditAddress, primaryAddress }) {
         <View style={styles.addressSummaryContent}>
           <View style={styles.addressSummaryTitleRow}>
             <MaterialCommunityIcons
-              color={theme.colors.accentSoft}
+              color={theme.colors.warning}
               name="map-marker-check-outline"
               size={18}
             />
@@ -385,7 +416,7 @@ function AddressSummaryCard({ onEditAddress, primaryAddress }) {
           </Text>
         </View>
         <MaterialCommunityIcons
-          color={theme.colors.accentSoft}
+          color={theme.colors.warning}
           name="home-heart"
           size={22}
         />
@@ -396,12 +427,12 @@ function AddressSummaryCard({ onEditAddress, primaryAddress }) {
         style={styles.addressSummaryEditButton}
       >
         <MaterialCommunityIcons
-          color={theme.colors.accentSoft}
+          color={theme.colors.warning}
           name="pencil"
           size={16}
         />
         <Text style={styles.addressSummaryEditButtonText}>
-          Editar endereço
+          Ajustar endereço
         </Text>
       </Pressable>
     </View>
@@ -520,6 +551,64 @@ const styles = StyleSheet.create({
   shell: {
     width: "100%",
   },
+  heroCard: {
+    borderColor: "rgba(255,217,138,0.18)",
+    borderWidth: 1,
+    marginBottom: theme.spacing.md,
+    overflow: "hidden",
+    padding: theme.spacing.lg,
+    position: "relative",
+  },
+  heroGlow: {
+    backgroundColor: "rgba(255,217,138,0.18)",
+    height: 180,
+    opacity: 0.22,
+    position: "absolute",
+    right: -36,
+    top: -36,
+    width: 180,
+  },
+  heroRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 10,
+    position: "relative",
+    zIndex: 1,
+  },
+  heroIconShell: {
+    alignItems: "center",
+    backgroundColor: "rgba(4, 11, 23, 0.24)",
+    borderColor: "rgba(255,217,138,0.18)",
+    borderWidth: 1,
+    height: 34,
+    justifyContent: "center",
+    width: 34,
+  },
+  heroEyebrow: {
+    color: theme.colors.warning,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 11,
+    letterSpacing: 1.3,
+    textTransform: "uppercase",
+  },
+  heroTitle: {
+    color: theme.colors.text,
+    fontFamily: theme.fonts.display,
+    fontSize: 28,
+    lineHeight: 32,
+    marginBottom: 8,
+    position: "relative",
+    zIndex: 1,
+  },
+  heroCopy: {
+    color: theme.colors.textMuted,
+    fontFamily: theme.fonts.body,
+    fontSize: 14,
+    lineHeight: 22,
+    position: "relative",
+    zIndex: 1,
+  },
   panel: {
     backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,
@@ -530,7 +619,7 @@ const styles = StyleSheet.create({
     padding: theme.spacing.md,
   },
   panelEyebrow: {
-    color: theme.colors.accentWarm,
+    color: theme.colors.warning,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 12,
     letterSpacing: 1.2,
@@ -599,7 +688,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   addressEditorEyebrow: {
-    color: theme.colors.accentWarm,
+    color: theme.colors.warning,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 12,
     letterSpacing: 1.2,
@@ -664,7 +753,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   cartPreviewValue: {
-    color: theme.colors.accentSoft,
+    color: theme.colors.warning,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 13,
   },
@@ -724,8 +813,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
   },
   selectionChipActive: {
-    backgroundColor: "rgba(49,231,255,0.12)",
-    borderColor: theme.colors.accent,
+    backgroundColor: "rgba(255,217,138,0.12)",
+    borderColor: theme.colors.warning,
   },
   selectionChipText: {
     color: theme.colors.textMuted,
@@ -748,7 +837,7 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     alignItems: "center",
-    backgroundColor: theme.colors.accent,
+    backgroundColor: theme.colors.warning,
     justifyContent: "center",
     minHeight: 52,
   },
