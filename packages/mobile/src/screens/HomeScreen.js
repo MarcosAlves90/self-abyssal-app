@@ -10,6 +10,7 @@ import {
   View
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { BranchCard } from "../components/BranchCard";
 import { LoadingOverlay } from "../components/LoadingOverlay";
@@ -66,16 +67,19 @@ export function HomeScreen({ navigation }) {
       description: itemCount
         ? `${itemCount} itens prontos para finalizar.`
         : "Veja os pratos em destaque e monte o carrinho.",
+      icon: itemCount ? "cart-outline" : "silverware-fork-knife",
       label: itemCount ? "Finalizar pedido" : "Explorar cardápio",
       onPress: () => navigation.navigate(itemCount ? "Reserva" : "Menu")
     },
     {
       description: "Escolha data, horário e unidade em poucos passos.",
+      icon: "calendar-month-outline",
       label: "Reservar mesa",
       onPress: () => navigation.navigate("Reserva")
     },
     {
       description: "Confira endereço, horários e opções de atendimento.",
+      icon: "storefront-outline",
       label: "Ver unidades",
       onPress: () => navigation.navigate("Reserva")
     }
@@ -127,10 +131,8 @@ export function HomeScreen({ navigation }) {
         </LinearGradient>
 
         <SectionHeader
-          actionLabel={itemCount ? `Carrinho • ${itemCount}` : undefined}
           description="Atalhos rápidos para decidir e seguir sem perder tempo."
           eyebrow="Acesso rápido"
-          onActionPress={() => navigation.navigate("Reserva")}
           title="Comece por aqui"
         />
         <View style={styles.actionGrid}>
@@ -138,6 +140,7 @@ export function HomeScreen({ navigation }) {
             <QuickActionCard
               key={action.label}
               description={action.description}
+              icon={action.icon}
               label={action.label}
               onPress={action.onPress}
               wide={layout.isTablet && index === 0}
@@ -277,14 +280,17 @@ function MetricCard({ compact = false, label, minWidth, value }) {
   );
 }
 
-function QuickActionCard({ description, label, onPress, wide }) {
+function QuickActionCard({ description, icon, label, onPress, wide }) {
   return (
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
       style={[styles.quickActionCard, wide && styles.quickActionCardWide]}
     >
-      <Text style={styles.quickActionLabel}>{label}</Text>
+      <View style={styles.quickActionHeader}>
+        <MaterialCommunityIcons color={theme.colors.accentSoft} name={icon} size={18} />
+        <Text style={styles.quickActionLabel}>{label}</Text>
+      </View>
       <Text style={styles.quickActionDescription}>{description}</Text>
     </Pressable>
   );
@@ -305,6 +311,7 @@ MetricCard.propTypes = {
 
 QuickActionCard.propTypes = {
   description: PropTypes.string.isRequired,
+  icon: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
   onPress: PropTypes.func.isRequired,
   wide: PropTypes.bool
@@ -396,31 +403,36 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 12,
-    marginBottom: theme.spacing.xl,
-    marginTop: 4
+    marginBottom: theme.spacing.lg,
+    marginTop: 2
   },
   quickActionCard: {
     backgroundColor: "rgba(255,255,255,0.06)",
     borderColor: "rgba(255,255,255,0.07)",
     borderWidth: 1,
-    minHeight: 114,
-    padding: 16,
+    padding: 12,
     width: "100%"
   },
   quickActionCardWide: {
     width: "31.9%"
   },
+  quickActionHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 6,
+    marginBottom: 6
+  },
   quickActionLabel: {
     color: theme.colors.text,
     fontFamily: theme.fonts.bodyBold,
-    fontSize: 16,
-    marginBottom: 8
+    fontSize: 14,
+    marginBottom: 0
   },
   quickActionDescription: {
     color: theme.colors.textMuted,
     fontFamily: theme.fonts.body,
-    fontSize: 13,
-    lineHeight: 20
+    fontSize: 12,
+    lineHeight: 18
   },
   highlightCard: {
     backgroundColor: theme.colors.surface,
