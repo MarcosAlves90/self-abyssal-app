@@ -31,7 +31,7 @@ export function CartFab({ currentRouteName, navigation }) {
       ]}
     >
       <Pressable
-        accessibilityLabel={`Abrir carrinho com ${itemCount} itens`}
+        accessibilityLabel={`Abrir seleção da mesa com ${itemCount} itens`}
         accessibilityRole="button"
         onPress={() => navigation.navigate("Cart")}
         style={styles.button}
@@ -48,13 +48,13 @@ export function CartFab({ currentRouteName, navigation }) {
           <View style={styles.iconShell}>
             <MaterialCommunityIcons
               color="#FFFFFF"
-              name="cart-outline"
+              name="silverware-fork-knife"
               size={22}
             />
           </View>
           <View style={styles.copy}>
-            <Text style={styles.label}>Carrinho</Text>
-            <Text style={styles.hint}>Toque para revisar</Text>
+            <Text style={styles.label}>Seleção</Text>
+            <Text style={styles.hint}>Toque para revisar os pratos</Text>
           </View>
           <View style={styles.badge}>
             <Text style={styles.badgeText}>{itemCount}</Text>
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
   },
   button: {
     alignItems: "center",
-    borderColor: "rgba(255,255,255,0.12)",
+    borderColor: "rgba(255,217,138,0.14)",
     borderWidth: 1,
     justifyContent: "center",
     minHeight: 66,
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
   },
   accentOverlay: {
-    backgroundColor: "rgba(141, 249, 255, 0.28)",
+    backgroundColor: "rgba(255,217,138,0.18)",
     ...StyleSheet.absoluteFillObject,
   },
   contentRow: {
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
   iconShell: {
     alignItems: "center",
     backgroundColor: "rgba(4, 11, 23, 0.24)",
-    borderColor: "rgba(255,255,255,0.12)",
+    borderColor: "rgba(255,217,138,0.18)",
     borderWidth: 1,
     height: 42,
     justifyContent: "center",
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
   },
   badge: {
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.82)",
+    backgroundColor: theme.colors.warning,
     justifyContent: "center",
     minHeight: 28,
     minWidth: 28,
