@@ -8,7 +8,6 @@ import {
   useWindowDimensions,
   View
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 
 import { useCart } from "../context/CartContext";
 import { getResponsiveLayout } from "../theme/layout";
@@ -66,35 +65,6 @@ export function CartScreen({ navigation }) {
       style={styles.screen}
     >
       <View style={[styles.shell, { maxWidth: layout.contentMaxWidth }]}> 
-        <LinearGradient
-          colors={[
-            "rgba(8, 23, 44, 0.98)",
-            "rgba(12, 34, 60, 0.98)",
-            "rgba(19, 52, 91, 0.98)"
-          ]}
-          end={{ x: 1, y: 1 }}
-          start={{ x: 0, y: 0 }}
-          style={styles.hero}
-        >
-          <Text style={styles.heroEyebrow}>Carrinho</Text>
-          <Text
-            style={[
-              styles.heroTitle,
-              {
-                fontSize: layout.heroTitleSize,
-                lineHeight: layout.heroTitleLineHeight
-              }
-            ]}
-          >
-            {itemCount ? "Seu pedido está quase pronto." : "Seu carrinho está vazio."}
-          </Text>
-          <Text style={styles.heroSubtitle}>
-            {itemCount
-              ? `${itemCount} itens selecionados somando ${formatCurrency(totalCents)}.`
-              : "Adicione pratos no menu para montar o pedido em uma tela limpa."}
-          </Text>
-        </LinearGradient>
-
         {itemCount ? (
           <>
             <View style={styles.summaryCard}>
@@ -177,31 +147,6 @@ const styles = StyleSheet.create({
   },
   shell: {
     width: "100%"
-  },
-  hero: {
-    marginBottom: theme.spacing.lg,
-    padding: theme.spacing.xl
-  },
-  heroEyebrow: {
-    color: theme.colors.accentSoft,
-    fontFamily: theme.fonts.bodyBold,
-    fontSize: 12,
-    letterSpacing: 1.4,
-    textTransform: "uppercase"
-  },
-  heroTitle: {
-    color: theme.colors.text,
-    fontFamily: theme.fonts.display,
-    marginTop: 8,
-    maxWidth: 640
-  },
-  heroSubtitle: {
-    color: theme.colors.textMuted,
-    fontFamily: theme.fonts.body,
-    fontSize: 15,
-    lineHeight: 24,
-    marginTop: 10,
-    maxWidth: 640
   },
   summaryCard: {
     backgroundColor: theme.colors.surface,

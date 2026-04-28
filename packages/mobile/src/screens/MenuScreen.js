@@ -10,7 +10,6 @@ import {
   useWindowDimensions,
   View
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { LoadingOverlay } from "../components/LoadingOverlay";
@@ -116,33 +115,6 @@ export function MenuScreen({ navigation }) {
         style={styles.scroll}
       >
         <View style={[styles.shell, { maxWidth: layout.contentMaxWidth }]}> 
-          <LinearGradient
-            colors={["#08172c", "#0c223c", "#13345b"]}
-            end={{ x: 1, y: 1 }}
-            start={{ x: 0, y: 0 }}
-            style={[styles.hero, layout.isCompact && styles.heroCompact]}
-          >
-            <View style={styles.heroTop}>
-              <View style={styles.heroCopy}>
-                <Text style={styles.heroEyebrow}>Cardápio</Text>
-                <Text
-                  style={[
-                    styles.heroTitle,
-                    {
-                      fontSize: layout.heroTitleSize,
-                      lineHeight: layout.heroTitleLineHeight
-                    }
-                  ]}
-                >
-                  Escolha o que pedir agora.
-                </Text>
-                <Text style={styles.heroSubtitle}>
-                  Filtre rápido e adicione os pratos mais atrativos em poucos toques.
-                </Text>
-              </View>
-            </View>
-          </LinearGradient>
-
           <SectionHeader
             description={menuHeaderDescription}
             eyebrow="Filtros"
@@ -209,39 +181,6 @@ const styles = StyleSheet.create({
   },
   shell: {
     width: "100%"
-  },
-  hero: {
-    marginBottom: theme.spacing.xl,
-    padding: theme.spacing.xl
-  },
-  heroCompact: {
-    padding: theme.spacing.lg
-  },
-  heroTop: {
-    gap: 20
-  },
-  heroCopy: {
-    flex: 1,
-    maxWidth: 560
-  },
-  heroEyebrow: {
-    color: theme.colors.accentSoft,
-    fontFamily: theme.fonts.bodyBold,
-    fontSize: 12,
-    letterSpacing: 1.4,
-    textTransform: "uppercase"
-  },
-  heroTitle: {
-    color: theme.colors.text,
-    fontFamily: theme.fonts.display,
-    marginTop: 8
-  },
-  heroSubtitle: {
-    color: theme.colors.textMuted,
-    fontFamily: theme.fonts.body,
-    fontSize: 15,
-    lineHeight: 24,
-    marginTop: 10
   },
   filters: {
     flexDirection: "row",

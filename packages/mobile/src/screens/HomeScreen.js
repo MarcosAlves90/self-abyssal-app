@@ -9,7 +9,6 @@ import {
   useWindowDimensions,
   View
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { BranchCard } from "../components/BranchCard";
@@ -91,45 +90,6 @@ export function HomeScreen({ navigation }) {
       contentContainerStyle={[styles.content, { padding: layout.contentPadding }]}
     >
       <View style={[styles.shell, { maxWidth: layout.contentMaxWidth }]}>
-        <LinearGradient
-          colors={["#08172c", "#0b203d", "#133053"]}
-          end={{ x: 1, y: 1 }}
-          start={{ x: 0, y: 0 }}
-          style={[styles.hero, layout.isCompact && styles.heroCompact]}
-        >
-          <View style={[styles.heroTop, layout.isWide && styles.heroTopWide]}>
-            <View style={styles.heroCopyBlock}>
-              <Text style={styles.heroEyebrow}>Início</Text>
-              <Text
-                style={[
-                  styles.heroTitle,
-                  {
-                    fontSize: layout.heroTitleSize,
-                    lineHeight: layout.heroTitleLineHeight
-                  }
-                ]}
-              >
-                Sua próxima escolha começa aqui.
-              </Text>
-            </View>
-
-            <View style={[styles.heroMetrics, layout.isCompact && styles.heroMetricsCompact]}>
-              <MetricCard
-                compact={layout.isCompact}
-                label="Carrinho"
-                minWidth={layout.statCardMinWidth}
-                value={String(itemCount)}
-              />
-              <MetricCard
-                compact={layout.isCompact}
-                label="Reservas"
-                minWidth={layout.statCardMinWidth}
-                value={String(reservations.length)}
-              />
-            </View>
-          </View>
-        </LinearGradient>
-
         <SectionHeader
           description="Atalhos rápidos para decidir e seguir sem perder tempo."
           eyebrow="Acesso rápido"
@@ -265,21 +225,6 @@ export function HomeScreen({ navigation }) {
   );
 }
 
-function MetricCard({ compact = false, label, minWidth, value }) {
-  return (
-    <View
-      style={[
-        styles.metricCard,
-        compact && styles.metricCardCompact,
-        { minWidth: compact ? 0 : minWidth }
-      ]}
-    >
-      <Text style={[styles.metricValue, compact && styles.metricValueCompact]}>{value}</Text>
-      <Text style={styles.metricLabel}>{label}</Text>
-    </View>
-  );
-}
-
 function QuickActionCard({ description, icon, label, onPress, wide }) {
   return (
     <Pressable
@@ -302,13 +247,6 @@ HomeScreen.propTypes = {
   }).isRequired
 };
 
-MetricCard.propTypes = {
-  compact: PropTypes.bool,
-  label: PropTypes.string.isRequired,
-  minWidth: PropTypes.number.isRequired,
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired
-};
-
 QuickActionCard.propTypes = {
   description: PropTypes.string.isRequired,
   icon: PropTypes.string.isRequired,
@@ -328,76 +266,6 @@ const styles = StyleSheet.create({
   },
   shell: {
     width: "100%"
-  },
-  hero: {
-    marginBottom: theme.spacing.xl,
-    padding: theme.spacing.xl
-  },
-  heroCompact: {
-    padding: theme.spacing.lg
-  },
-  heroTop: {
-    gap: 20
-  },
-  heroTopWide: {
-    alignItems: "flex-start",
-    flexDirection: "row",
-    justifyContent: "space-between"
-  },
-  heroCopyBlock: {
-    flex: 1,
-    maxWidth: 560
-  },
-  heroEyebrow: {
-    color: theme.colors.accentSoft,
-    fontFamily: theme.fonts.bodyBold,
-    fontSize: 12,
-    letterSpacing: 1.5,
-    textTransform: "uppercase"
-  },
-  heroTitle: {
-    color: theme.colors.text,
-    fontFamily: theme.fonts.display,
-    marginTop: 8
-  },
-  heroSubtitle: {
-    color: theme.colors.textMuted,
-    fontFamily: theme.fonts.body,
-    fontSize: 15,
-    lineHeight: 24,
-    marginTop: 8
-  },
-  heroMetrics: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 12
-  },
-  heroMetricsCompact: {
-    width: "100%"
-  },
-  metricCard: {
-    backgroundColor: "rgba(255,255,255,0.04)",
-    minHeight: 92,
-    justifyContent: "center",
-    minWidth: 138,
-    padding: 14
-  },
-  metricCardCompact: {
-    flexGrow: 1,
-    flexBasis: "47%"
-  },
-  metricValue: {
-    color: theme.colors.text,
-    fontFamily: theme.fonts.display,
-    fontSize: 34
-  },
-  metricValueCompact: {
-    fontSize: 28
-  },
-  metricLabel: {
-    color: theme.colors.textMuted,
-    fontFamily: theme.fonts.body,
-    fontSize: 13
   },
   actionGrid: {
     flexDirection: "row",

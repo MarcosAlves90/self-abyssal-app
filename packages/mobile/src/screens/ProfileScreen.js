@@ -201,7 +201,6 @@ function ProfileContent({
 
         <ProfileMetrics
           hasAddress={Boolean(primaryAddress)}
-          layout={layout}
           ordersCount={orders.length}
           reservationsCount={reservations.length}
         />
@@ -346,7 +345,7 @@ ProfileHero.propTypes = {
   })
 };
 
-function ProfileMetrics({ hasAddress, layout, ordersCount, reservationsCount }) {
+function ProfileMetrics({ hasAddress, ordersCount, reservationsCount }) {
   return (
     <View style={styles.metricsRow}>
       <MetricCard icon="receipt-text-outline" label="Pedidos" value={String(ordersCount)} />
@@ -362,18 +361,6 @@ function ProfileMetrics({ hasAddress, layout, ordersCount, reservationsCount }) 
 
 ProfileMetrics.propTypes = {
   hasAddress: PropTypes.bool.isRequired,
-  layout: PropTypes.shape({
-    contentPadding: PropTypes.number.isRequired
-  }).isRequired,
-  ordersCount: PropTypes.number.isRequired,
-  reservationsCount: PropTypes.number.isRequired
-};
-
-ProfileMetrics.propTypes = {
-  hasAddress: PropTypes.bool.isRequired,
-  layout: PropTypes.shape({
-    contentPadding: PropTypes.number.isRequired
-  }).isRequired,
   ordersCount: PropTypes.number.isRequired,
   reservationsCount: PropTypes.number.isRequired
 };

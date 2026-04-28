@@ -9,7 +9,6 @@ import {
   useWindowDimensions,
   View
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 
 import { AddressFields } from "../components/AddressFields";
 import { KeyboardScrollScreen } from "../components/KeyboardScrollScreen";
@@ -221,31 +220,6 @@ export function ReservationScreen({ navigation }) {
       style={styles.screen}
     >
       <View style={[styles.shell, { maxWidth: layout.contentMaxWidth }]}>
-        <LinearGradient
-          colors={["#07172b", "#0b203d", "#123558"]}
-          end={{ x: 1, y: 1 }}
-          start={{ x: 0, y: 0 }}
-          style={[styles.hero, layout.isCompact && styles.heroCompact]}
-        >
-          <Text style={styles.heroEyebrow}>Reserva e delivery</Text>
-          <Text
-            style={[
-              styles.heroTitle,
-              {
-                fontSize: layout.heroTitleSize,
-                lineHeight: layout.heroTitleLineHeight
-              }
-            ]}
-          >
-            {mode === "reservation"
-              ? "Escolha a mesa e confirme sem ruído."
-              : "Finalize seu pedido com a mesma calma."}
-          </Text>
-          <Text style={styles.heroSubtitle}>
-            Uma tela única, mais leve, com o essencial no lugar certo.
-          </Text>
-        </LinearGradient>
-
         <View style={[styles.modeRow, layout.isCompact && styles.modeRowStack]}>
           <ModeButton
             active={mode === "reservation"}
@@ -581,33 +555,6 @@ const styles = StyleSheet.create({
   },
   shell: {
     width: "100%"
-  },
-  hero: {
-    marginBottom: theme.spacing.lg,
-    padding: theme.spacing.xl
-  },
-  heroCompact: {
-    padding: theme.spacing.lg
-  },
-  heroEyebrow: {
-    color: theme.colors.accentSoft,
-    fontFamily: theme.fonts.bodyBold,
-    fontSize: 12,
-    letterSpacing: 1.4,
-    textTransform: "uppercase"
-  },
-  heroTitle: {
-    color: theme.colors.text,
-    fontFamily: theme.fonts.display,
-    marginTop: 8,
-    maxWidth: 640
-  },
-  heroSubtitle: {
-    color: theme.colors.textMuted,
-    fontFamily: theme.fonts.body,
-    fontSize: 15,
-    lineHeight: 24,
-    marginTop: 10
   },
   modeRow: {
     flexDirection: "row",
