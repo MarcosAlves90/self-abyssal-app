@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState } from "react";
 
+import { buildCartItemContract } from "../contracts/publicContracts";
+
 const CartContext = createContext(undefined);
 
 export function CartProvider({ children }) {
@@ -19,13 +21,7 @@ export function CartProvider({ children }) {
 
       return [
         ...currentItems,
-        {
-          id: menuItem.id,
-          name: menuItem.name,
-          priceCents: menuItem.priceCents,
-          quantity: 1,
-          note: ""
-        }
+        buildCartItemContract(menuItem)
       ];
     });
   }

@@ -20,8 +20,6 @@ import { fetchMenu, getApiErrorMessage } from "../services/api";
 import { getResponsiveLayout } from "../theme/layout";
 import { getCategoryLabel, theme } from "../theme/tokens";
 
-const filters = ["todos", "entradas", "principais", "sobremesas", "bebidas"];
-
 export function MenuScreen({ navigation }) {
   const { addItem } = useCart();
   const { width } = useWindowDimensions();
@@ -45,6 +43,17 @@ export function MenuScreen({ navigation }) {
     loadMenu();
   }, []);
 
+  useEffect(() => {
+    if (!items.length) {
+      return;
+    }
+
+    const validFilters = new Set(items.map((item) => item.category));
+    if (activeFilter !== "todos" && !validFilters.has(activeFilter)) {
+      setActiveFilter("todos");
+    }
+  }, [activeFilter, items]);
+
   if (isLoading) {
     return <LoadingOverlay label="Carregando cardápio..." />;
   }
@@ -59,8 +68,14 @@ export function MenuScreen({ navigation }) {
     : filteredItems;
 
   const layout = getResponsiveLayout(width);
+  const dynamicFilters = [
+    "todos",
+    ...Array.from(
+      new Set(items.map((item) => item.category).filter(Boolean)),
+    ),
+  ];
   const menuHeaderDescription = `Mostrando ${visibleItems.length} itens neste filtro. Adicione sem sair da tela.`;
-  const filterButtons = filters.map((filter) => {
+  const filterButtons = dynamicFilters.map((filter) => {
     const isActive = activeFilter === filter;
     const itemTotal =
       filter === "todos"

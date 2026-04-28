@@ -1,6 +1,18 @@
 import axios from "axios";
 import { Platform } from "react-native";
 
+import {
+  buildAddressPayloadContract,
+  buildAuthPayloadContract,
+  buildOrderPayloadContract,
+  buildReservationPayloadContract,
+  normalizeAuthSessionContract,
+  normalizeBranchContract,
+  normalizeMenuItemContract,
+  normalizeOrderContract,
+  normalizeReservationContract,
+  normalizeUserContract,
+} from "../contracts/publicContracts";
 import { formatPostalCode, normalizePostalCode } from "../utils/address";
 
 const isDevelopment = __DEV__;
@@ -90,53 +102,59 @@ export function getApiErrorMessage(error) {
 }
 
 export async function registerAccount(payload) {
-  const { data } = await api.post("/auth/register", payload);
-  return data;
+  const { data } = await api.post("/auth/register", buildAuthPayloadContract(payload));
+  return normalizeAuthSessionContract(data);
 }
 
 export async function loginAccount(payload) {
-  const { data } = await api.post("/auth/login", payload);
-  return data;
+  const { data } = await api.post("/auth/login", buildAuthPayloadContract(payload));
+  return normalizeAuthSessionContract(data);
 }
 
 export async function fetchMe() {
   const { data } = await api.get("/auth/me");
-  return data.user;
+  return normalizeUserContract(data.user);
 }
 
 export async function savePrimaryAddress(payload) {
-  const { data } = await api.put("/auth/me/address", payload);
-  return data.user;
+  const { data } = await api.put(
+    "/auth/me/address",
+    buildAddressPayloadContract(payload)
+  );
+  return normalizeUserContract(data.user);
 }
 
 export async function fetchBranches() {
   const { data } = await api.get("/branches");
-  return data.branches;
+  return (data.branches || []).map(normalizeBranchContract);
 }
 
 export async function fetchMenu(params = {}) {
   const { data } = await api.get("/menu", { params });
-  return data.items;
+  return (data.items || []).map(normalizeMenuItemContract);
 }
 
 export async function fetchReservations() {
   const { data } = await api.get("/reservations");
-  return data.reservations;
+  return (data.reservations || []).map(normalizeReservationContract);
 }
 
 export async function createReservation(payload) {
-  const { data } = await api.post("/reservations", payload);
-  return data.reservation;
+  const { data } = await api.post(
+    "/reservations",
+    buildReservationPayloadContract(payload)
+  );
+  return normalizeReservationContract(data.reservation);
 }
 
 export async function fetchOrders() {
   const { data } = await api.get("/orders");
-  return data.orders;
+  return (data.orders || []).map(normalizeOrderContract);
 }
 
 export async function createOrder(payload) {
-  const { data } = await api.post("/orders", payload);
-  return data.order;
+  const { data } = await api.post("/orders", buildOrderPayloadContract(payload));
+  return normalizeOrderContract(data.order);
 }
 
 export async function lookupPostalCode(postalCode) {
