@@ -7,7 +7,7 @@ import {
   StyleSheet,
   Text,
   useWindowDimensions,
-  View
+  View,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
@@ -20,7 +20,7 @@ import {
   fetchBranches,
   fetchMenu,
   fetchReservations,
-  getApiErrorMessage
+  getApiErrorMessage,
 } from "../services/api";
 import { getResponsiveLayout } from "../theme/layout";
 import { theme } from "../theme/tokens";
@@ -34,25 +34,40 @@ export function HomeScreen({ navigation }) {
   const [reservations, setReservations] = useState([]);
 
   useEffect(() => {
+    let isMounted = true;
+
     async function loadHome() {
       try {
-        const [nextBranches, nextFeaturedItems, nextReservations] = await Promise.all([
-          fetchBranches(),
-          fetchMenu({ featured: true }),
-          fetchReservations()
-        ]);
+        const [nextBranches, nextFeaturedItems, nextReservations] =
+          await Promise.all([
+            fetchBranches(),
+            fetchMenu({ featured: true }),
+            fetchReservations(),
+          ]);
+
+        if (!isMounted) {
+          return;
+        }
 
         setBranches(nextBranches);
         setFeaturedItems(nextFeaturedItems.slice(0, 4));
         setReservations(nextReservations.slice(0, 2));
       } catch (error) {
-        Alert.alert("Falha ao carregar a home", getApiErrorMessage(error));
+        if (isMounted) {
+          Alert.alert("Falha ao carregar a home", getApiErrorMessage(error));
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
 
     loadHome();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   if (isLoading) {
@@ -68,20 +83,20 @@ export function HomeScreen({ navigation }) {
         : "Veja os pratos em destaque e monte o carrinho.",
       icon: itemCount ? "cart-outline" : "silverware-fork-knife",
       label: itemCount ? "Finalizar pedido" : "Explorar cardápio",
-      onPress: () => navigation.navigate(itemCount ? "Reserva" : "Menu")
+      onPress: () => navigation.navigate(itemCount ? "Cart" : "Menu"),
     },
     {
       description: "Escolha data, horário e unidade em poucos passos.",
       icon: "calendar-month-outline",
       label: "Reservar mesa",
-      onPress: () => navigation.navigate("Reserva")
+      onPress: () => navigation.navigate("Reserva"),
     },
     {
       description: "Confira endereço, horários e opções de atendimento.",
       icon: "storefront-outline",
       label: "Ver unidades",
-      onPress: () => navigation.navigate("Reserva")
-    }
+      onPress: () => navigation.navigate("Reserva"),
+    },
   ];
 
   return (
@@ -89,7 +104,10 @@ export function HomeScreen({ navigation }) {
       style={styles.screen}
       contentContainerStyle={[
         styles.content,
-        { paddingHorizontal: layout.contentPadding, paddingTop: layout.contentPadding }
+        {
+          paddingHorizontal: layout.contentPadding,
+          paddingTop: layout.contentPadding,
+        },
       ]}
     >
       <View style={[styles.shell, { maxWidth: layout.contentMaxWidth }]}>
@@ -124,15 +142,16 @@ export function HomeScreen({ navigation }) {
                   styles.highlightTitle,
                   {
                     fontSize: layout.featureTitleSize,
-                    lineHeight: layout.featureTitleLineHeight
-                  }
+                    lineHeight: layout.featureTitleLineHeight,
+                  },
                 ]}
               >
                 {nextReservation.branchName}
               </Text>
               <Text style={styles.highlightCopy}>
-                {new Date(nextReservation.scheduledAt).toLocaleString("pt-BR")} •{" "}
-                {nextReservation.depthLevel} • {nextReservation.guests} pessoas
+                {new Date(nextReservation.scheduledAt).toLocaleString("pt-BR")}{" "}
+                • {nextReservation.depthLevel} • {nextReservation.guests}{" "}
+                pessoas
               </Text>
             </>
           ) : (
@@ -142,8 +161,8 @@ export function HomeScreen({ navigation }) {
                   styles.highlightTitle,
                   {
                     fontSize: layout.featureTitleSize,
-                    lineHeight: layout.featureTitleLineHeight
-                  }
+                    lineHeight: layout.featureTitleLineHeight,
+                  },
                 ]}
               >
                 Sem reservas agendadas.
@@ -199,14 +218,19 @@ export function HomeScreen({ navigation }) {
             reservations.map((reservation) => (
               <View
                 key={reservation.id}
-                style={[styles.reservationCard, layout.isTablet && styles.reservationCardWide]}
+                style={[
+                  styles.reservationCard,
+                  layout.isTablet && styles.reservationCardWide,
+                ]}
               >
-                <Text style={styles.reservationBranch}>{reservation.branchName}</Text>
+                <Text style={styles.reservationBranch}>
+                  {reservation.branchName}
+                </Text>
                 <Text style={styles.reservationMeta}>
                   {new Date(reservation.scheduledAt).toLocaleString("pt-BR")}
                 </Text>
                 <Text style={styles.reservationMeta}>
-                    {reservation.depthLevel} • {reservation.guests} pessoas
+                  {reservation.depthLevel} • {reservation.guests} pessoas
                 </Text>
               </View>
             ))
@@ -216,7 +240,9 @@ export function HomeScreen({ navigation }) {
               onPress={() => navigation.navigate("Reserva")}
               style={styles.emptyCard}
             >
-              <Text style={styles.emptyTitle}>Nenhuma reserva registrada ainda.</Text>
+              <Text style={styles.emptyTitle}>
+                Nenhuma reserva registrada ainda.
+              </Text>
               <Text style={styles.emptyCopy}>
                 Use a aba Reserva para agendar sua primeira mesa.
               </Text>
@@ -236,7 +262,11 @@ function QuickActionCard({ description, icon, label, onPress, wide }) {
       style={[styles.quickActionCard, wide && styles.quickActionCardWide]}
     >
       <View style={styles.quickActionHeader}>
-        <MaterialCommunityIcons color={theme.colors.accentSoft} name={icon} size={18} />
+        <MaterialCommunityIcons
+          color={theme.colors.accentSoft}
+          name={icon}
+          size={18}
+        />
         <Text style={styles.quickActionLabel}>{label}</Text>
       </View>
       <Text style={styles.quickActionDescription}>{description}</Text>
@@ -246,8 +276,8 @@ function QuickActionCard({ description, icon, label, onPress, wide }) {
 
 HomeScreen.propTypes = {
   navigation: PropTypes.shape({
-    navigate: PropTypes.func.isRequired
-  }).isRequired
+    navigate: PropTypes.func.isRequired,
+  }).isRequired,
 };
 
 QuickActionCard.propTypes = {
@@ -255,62 +285,62 @@ QuickActionCard.propTypes = {
   icon: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
   onPress: PropTypes.func.isRequired,
-  wide: PropTypes.bool
+  wide: PropTypes.bool,
 };
 
 const styles = StyleSheet.create({
   screen: {
-    backgroundColor: theme.colors.background
+    backgroundColor: theme.colors.background,
   },
   content: {
     alignItems: "center",
     padding: theme.spacing.lg,
-    paddingBottom: theme.overlays.scrollBottomSafeArea
+    paddingBottom: theme.overlays.scrollBottomSafeArea,
   },
   shell: {
-    width: "100%"
+    width: "100%",
   },
   actionGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 12,
     marginBottom: theme.spacing.lg,
-    marginTop: 2
+    marginTop: 2,
   },
   quickActionCard: {
     backgroundColor: "rgba(255,255,255,0.06)",
     borderColor: "rgba(255,255,255,0.07)",
     borderWidth: 1,
     padding: 12,
-    width: "100%"
+    width: "100%",
   },
   quickActionCardWide: {
-    width: "31.9%"
+    width: "31.9%",
   },
   quickActionHeader: {
     alignItems: "center",
     flexDirection: "row",
     gap: 6,
-    marginBottom: 6
+    marginBottom: 6,
   },
   quickActionLabel: {
     color: theme.colors.text,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 14,
-    marginBottom: 0
+    marginBottom: 0,
   },
   quickActionDescription: {
     color: theme.colors.textMuted,
     fontFamily: theme.fonts.body,
     fontSize: 12,
-    lineHeight: 18
+    lineHeight: 18,
   },
   highlightCard: {
     backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,
     borderWidth: 1,
     marginBottom: theme.spacing.xl,
-    padding: theme.spacing.lg
+    padding: theme.spacing.lg,
   },
   highlightEyebrow: {
     color: theme.colors.accentWarm,
@@ -318,81 +348,81 @@ const styles = StyleSheet.create({
     fontSize: 12,
     letterSpacing: 1.2,
     marginBottom: 8,
-    textTransform: "uppercase"
+    textTransform: "uppercase",
   },
   highlightTitle: {
     color: theme.colors.text,
     fontFamily: theme.fonts.display,
-    marginBottom: 8
+    marginBottom: 8,
   },
   highlightCopy: {
     color: theme.colors.textMuted,
     fontFamily: theme.fonts.body,
     fontSize: 14,
-    lineHeight: 22
+    lineHeight: 22,
   },
   featuredGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 16,
-    marginBottom: theme.spacing.xl
+    marginBottom: theme.spacing.xl,
   },
   featuredCardWide: {
-    width: "48.9%"
+    width: "48.9%",
   },
   branchGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 16,
-    marginBottom: theme.spacing.xl
+    marginBottom: theme.spacing.xl,
   },
   branchCardWide: {
-    width: "48.9%"
+    width: "48.9%",
   },
   reservationGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 16
+    gap: 16,
   },
   reservationCard: {
     backgroundColor: theme.colors.surfaceRaised,
     borderColor: "rgba(255,255,255,0.04)",
     borderWidth: 1,
     padding: theme.spacing.lg,
-    width: "100%"
+    width: "100%",
   },
   reservationCardWide: {
-    width: "48.9%"
+    width: "48.9%",
   },
   reservationBranch: {
     color: theme.colors.text,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 17,
-    marginBottom: 6
+    marginBottom: 6,
   },
   reservationMeta: {
     color: theme.colors.textMuted,
     fontFamily: theme.fonts.body,
     fontSize: 14,
-    lineHeight: 21
+    lineHeight: 21,
   },
   emptyCard: {
     backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,
     borderWidth: 1,
     padding: theme.spacing.lg,
-    width: "100%"
+    width: "100%",
   },
   emptyTitle: {
     color: theme.colors.text,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 17,
-    marginBottom: 8
+    marginBottom: 8,
   },
   emptyCopy: {
     color: theme.colors.textMuted,
     fontFamily: theme.fonts.body,
     fontSize: 14,
-    lineHeight: 22
-  }
+    lineHeight: 22,
+  },
 });

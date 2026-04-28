@@ -11,6 +11,7 @@ import { DishDetailsScreen } from "../screens/DishDetailsScreen";
 import { HomeScreen } from "../screens/HomeScreen";
 import { MenuScreen } from "../screens/MenuScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
+import { DeliveryCheckoutScreen } from "../screens/DeliveryCheckoutScreen";
 import { ReservationScreen } from "../screens/ReservationScreen";
 
 const Stack = createNativeStackNavigator();
@@ -21,7 +22,7 @@ function iconForRoute(routeName, color, size) {
     Inicio: "waves",
     Menu: "fishbowl",
     Reserva: "calendar-month",
-    Perfil: "account-circle"
+    Perfil: "account-circle",
   };
 
   return (
@@ -45,13 +46,13 @@ function MainTabs() {
           borderTopColor: theme.colors.border,
           height: 82,
           paddingBottom: 12,
-          paddingTop: 12
+          paddingTop: 12,
         },
         tabBarLabelStyle: {
           fontFamily: theme.fonts.body,
-          fontSize: 12
+          fontSize: 12,
         },
-        tabBarIcon: ({ color, size }) => iconForRoute(route.name, color, size)
+        tabBarIcon: ({ color, size }) => iconForRoute(route.name, color, size),
       })}
     >
       <Tabs.Screen component={HomeScreen} name="Inicio" />
@@ -69,30 +70,47 @@ export function RootNavigator() {
     <Stack.Navigator
       screenOptions={{
         contentStyle: {
-          backgroundColor: theme.colors.background
+          backgroundColor: theme.colors.background,
         },
         headerBackTitleVisible: false,
         headerStyle: {
-          backgroundColor: theme.colors.backgroundAlt
+          backgroundColor: theme.colors.backgroundAlt,
         },
         headerTintColor: theme.colors.text,
         headerTitleStyle: {
-          fontFamily: theme.fonts.bodyBold
-        }
+          fontFamily: theme.fonts.bodyBold,
+        },
       }}
     >
       {isAuthenticated ? (
         <>
-          <Stack.Screen component={MainTabs} name="MainTabs" options={{ headerShown: false }} />
+          <Stack.Screen
+            component={MainTabs}
+            name="MainTabs"
+            options={{ headerShown: false }}
+          />
           <Stack.Screen
             component={DishDetailsScreen}
             name="DishDetails"
             options={{ title: "Detalhes do prato" }}
           />
-          <Stack.Screen component={CartScreen} name="Cart" options={{ title: "Carrinho" }} />
+          <Stack.Screen
+            component={CartScreen}
+            name="Cart"
+            options={{ title: "Carrinho" }}
+          />
+          <Stack.Screen
+            component={DeliveryCheckoutScreen}
+            name="DeliveryCheckout"
+            options={{ title: "Finalizar delivery" }}
+          />
         </>
       ) : (
-        <Stack.Screen component={AuthScreen} name="Auth" options={{ headerShown: false }} />
+        <Stack.Screen
+          component={AuthScreen}
+          name="Auth"
+          options={{ headerShown: false }}
+        />
       )}
     </Stack.Navigator>
   );

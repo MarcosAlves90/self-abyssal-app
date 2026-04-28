@@ -6,7 +6,7 @@ import {
   StyleSheet,
   Text,
   useWindowDimensions,
-  View
+  View,
 } from "react-native";
 
 import { useCart } from "../context/CartContext";
@@ -21,20 +21,34 @@ function CartRow({ item, onRemove, onDecrease, onIncrease }) {
           <Text numberOfLines={1} style={styles.itemName}>
             {item.name}
           </Text>
-          <Text style={styles.itemPrice}>{formatCurrency(item.priceCents)}</Text>
+          <Text style={styles.itemPrice}>
+            {formatCurrency(item.priceCents)}
+          </Text>
         </View>
 
-        <Pressable accessibilityRole="button" onPress={onRemove} style={styles.removeButton}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onRemove}
+          style={styles.removeButton}
+        >
           <Text style={styles.removeButtonText}>Remover</Text>
         </Pressable>
       </View>
 
       <View style={styles.quantityRow}>
-        <Pressable accessibilityRole="button" onPress={onDecrease} style={styles.quantityButton}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onDecrease}
+          style={styles.quantityButton}
+        >
           <Text style={styles.quantityButtonText}>-</Text>
         </Pressable>
         <Text style={styles.quantityValue}>{item.quantity}</Text>
-        <Pressable accessibilityRole="button" onPress={onIncrease} style={styles.quantityButton}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onIncrease}
+          style={styles.quantityButton}
+        >
           <Text style={styles.quantityButtonText}>+</Text>
         </Pressable>
       </View>
@@ -47,15 +61,22 @@ CartRow.propTypes = {
     id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     name: PropTypes.string.isRequired,
     priceCents: PropTypes.number.isRequired,
-    quantity: PropTypes.number.isRequired
+    quantity: PropTypes.number.isRequired,
   }).isRequired,
   onDecrease: PropTypes.func.isRequired,
   onIncrease: PropTypes.func.isRequired,
-  onRemove: PropTypes.func.isRequired
+  onRemove: PropTypes.func.isRequired,
 };
 
 export function CartScreen({ navigation }) {
-  const { clearCart, itemCount, items, removeItem, totalCents, updateItemQuantity } = useCart();
+  const {
+    clearCart,
+    itemCount,
+    items,
+    removeItem,
+    totalCents,
+    updateItemQuantity,
+  } = useCart();
   const { width } = useWindowDimensions();
   const layout = getResponsiveLayout(width);
 
@@ -63,11 +84,14 @@ export function CartScreen({ navigation }) {
     <ScrollView
       contentContainerStyle={[
         styles.content,
-        { paddingHorizontal: layout.contentPadding, paddingTop: layout.contentPadding }
+        {
+          paddingHorizontal: layout.contentPadding,
+          paddingTop: layout.contentPadding,
+        },
       ]}
       style={styles.screen}
     >
-      <View style={[styles.shell, { maxWidth: layout.contentMaxWidth }]}> 
+      <View style={[styles.shell, { maxWidth: layout.contentMaxWidth }]}>
         {itemCount ? (
           <>
             <View style={styles.summaryCard}>
@@ -77,27 +101,35 @@ export function CartScreen({ navigation }) {
               </View>
               <View style={styles.summaryBlock}>
                 <Text style={styles.summaryLabel}>Total</Text>
-                <Text style={styles.summaryValue}>{formatCurrency(totalCents)}</Text>
+                <Text style={styles.summaryValue}>
+                  {formatCurrency(totalCents)}
+                </Text>
               </View>
             </View>
 
-            <View style={styles.list}>{items.map((item) => (
-              <CartRow
-                key={item.id}
-                item={item}
-                onDecrease={() => updateItemQuantity(item.id, item.quantity - 1)}
-                onIncrease={() => updateItemQuantity(item.id, item.quantity + 1)}
-                onRemove={() => removeItem(item.id)}
-              />
-            ))}</View>
+            <View style={styles.list}>
+              {items.map((item) => (
+                <CartRow
+                  key={item.id}
+                  item={item}
+                  onDecrease={() =>
+                    updateItemQuantity(item.id, item.quantity - 1)
+                  }
+                  onIncrease={() =>
+                    updateItemQuantity(item.id, item.quantity + 1)
+                  }
+                  onRemove={() => removeItem(item.id)}
+                />
+              ))}
+            </View>
 
             <View style={styles.actionCard}>
               <Pressable
                 accessibilityRole="button"
-                onPress={() => navigation.navigate("Reserva")}
+                onPress={() => navigation.navigate("DeliveryCheckout")}
                 style={styles.primaryButton}
               >
-                <Text style={styles.primaryButtonText}>Continuar para reserva</Text>
+                <Text style={styles.primaryButtonText}>Finalizar delivery</Text>
               </Pressable>
 
               <Pressable
@@ -105,10 +137,16 @@ export function CartScreen({ navigation }) {
                 onPress={() => navigation.navigate("Menu")}
                 style={styles.secondaryButton}
               >
-                <Text style={styles.secondaryButtonText}>Adicionar mais itens</Text>
+                <Text style={styles.secondaryButtonText}>
+                  Adicionar mais itens
+                </Text>
               </Pressable>
 
-              <Pressable accessibilityRole="button" onPress={clearCart} style={styles.textButton}>
+              <Pressable
+                accessibilityRole="button"
+                onPress={clearCart}
+                style={styles.textButton}
+              >
                 <Text style={styles.textButtonText}>Limpar carrinho</Text>
               </Pressable>
             </View>
@@ -117,7 +155,8 @@ export function CartScreen({ navigation }) {
           <View style={styles.emptyCard}>
             <Text style={styles.emptyTitle}>Ainda não há nada aqui.</Text>
             <Text style={styles.emptyCopy}>
-              Abra o menu, selecione pratos e volte para finalizar com mais calma.
+              Abra o menu, selecione pratos e volte para finalizar com mais
+              calma.
             </Text>
             <Pressable
               accessibilityRole="button"
@@ -135,21 +174,21 @@ export function CartScreen({ navigation }) {
 
 CartScreen.propTypes = {
   navigation: PropTypes.shape({
-    navigate: PropTypes.func.isRequired
-  }).isRequired
+    navigate: PropTypes.func.isRequired,
+  }).isRequired,
 };
 
 const styles = StyleSheet.create({
   screen: {
     backgroundColor: theme.colors.background,
-    flex: 1
+    flex: 1,
   },
   content: {
     alignItems: "center",
-    paddingBottom: theme.overlays.scrollBottomSafeArea
+    paddingBottom: theme.overlays.scrollBottomSafeArea,
   },
   shell: {
-    width: "100%"
+    width: "100%",
   },
   summaryCard: {
     backgroundColor: theme.colors.surface,
@@ -158,148 +197,148 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: theme.spacing.md,
-    padding: theme.spacing.lg
+    padding: theme.spacing.lg,
   },
   summaryBlock: {
-    gap: 4
+    gap: 4,
   },
   summaryLabel: {
     color: theme.colors.textMuted,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 11,
     letterSpacing: 1.2,
-    textTransform: "uppercase"
+    textTransform: "uppercase",
   },
   summaryValue: {
     color: theme.colors.text,
     fontFamily: theme.fonts.display,
-    fontSize: 28
+    fontSize: 28,
   },
   list: {
     gap: 12,
-    marginBottom: theme.spacing.lg
+    marginBottom: theme.spacing.lg,
   },
   itemCard: {
     backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,
     borderWidth: 1,
-    padding: theme.spacing.lg
+    padding: theme.spacing.lg,
   },
   itemTopRow: {
     alignItems: "flex-start",
     flexDirection: "row",
     gap: 12,
     justifyContent: "space-between",
-    marginBottom: 12
+    marginBottom: 12,
   },
   itemCopy: {
     flex: 1,
-    gap: 2
+    gap: 2,
   },
   itemName: {
     color: theme.colors.text,
     fontFamily: theme.fonts.bodyBold,
-    fontSize: 15
+    fontSize: 15,
   },
   itemPrice: {
     color: theme.colors.textMuted,
     fontFamily: theme.fonts.body,
-    fontSize: 12
+    fontSize: 12,
   },
   removeButton: {
     alignItems: "center",
     backgroundColor: "rgba(255,255,255,0.04)",
     justifyContent: "center",
     minHeight: 34,
-    paddingHorizontal: 12
+    paddingHorizontal: 12,
   },
   removeButtonText: {
     color: theme.colors.textMuted,
     fontFamily: theme.fonts.bodyBold,
-    fontSize: 12
+    fontSize: 12,
   },
   quantityRow: {
     alignItems: "center",
     flexDirection: "row",
-    gap: 12
+    gap: 12,
   },
   quantityButton: {
     alignItems: "center",
     backgroundColor: "rgba(255,255,255,0.05)",
     height: 34,
     justifyContent: "center",
-    width: 34
+    width: 34,
   },
   quantityButtonText: {
     color: theme.colors.text,
     fontFamily: theme.fonts.bodyBold,
-    fontSize: 18
+    fontSize: 18,
   },
   quantityValue: {
     color: theme.colors.text,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 15,
     minWidth: 18,
-    textAlign: "center"
+    textAlign: "center",
   },
   actionCard: {
     backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,
     borderWidth: 1,
     gap: 10,
-    padding: theme.spacing.lg
+    padding: theme.spacing.lg,
   },
   primaryButton: {
     alignItems: "center",
     backgroundColor: theme.colors.accent,
     justifyContent: "center",
     minHeight: 52,
-    paddingHorizontal: theme.spacing.lg
+    paddingHorizontal: theme.spacing.lg,
   },
   primaryButtonText: {
     color: theme.colors.background,
     fontFamily: theme.fonts.bodyBold,
-    fontSize: 15
+    fontSize: 15,
   },
   secondaryButton: {
     alignItems: "center",
     backgroundColor: "rgba(255,255,255,0.04)",
     justifyContent: "center",
     minHeight: 48,
-    paddingHorizontal: theme.spacing.lg
+    paddingHorizontal: theme.spacing.lg,
   },
   secondaryButtonText: {
     color: theme.colors.text,
     fontFamily: theme.fonts.bodyBold,
-    fontSize: 14
+    fontSize: 14,
   },
   textButton: {
     alignItems: "center",
     justifyContent: "center",
-    minHeight: 36
+    minHeight: 36,
   },
   textButtonText: {
     color: theme.colors.textMuted,
     fontFamily: theme.fonts.body,
-    fontSize: 12
+    fontSize: 12,
   },
   emptyCard: {
     backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,
     borderWidth: 1,
-    padding: theme.spacing.xl
+    padding: theme.spacing.xl,
   },
   emptyTitle: {
     color: theme.colors.text,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 18,
-    marginBottom: 8
+    marginBottom: 8,
   },
   emptyCopy: {
     color: theme.colors.textMuted,
     fontFamily: theme.fonts.body,
     fontSize: 14,
     lineHeight: 22,
-    marginBottom: theme.spacing.lg
-  }
+    marginBottom: theme.spacing.lg,
+  },
 });

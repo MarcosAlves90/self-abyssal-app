@@ -257,9 +257,7 @@ export function DishDetailsScreen({ route, navigation }) {
             accessibilityLabel={`Selecionar ${item.name}`}
             onPress={() => {
               addItem(item);
-              navigation.navigate("MainTabs", {
-                screen: "Reserva",
-              });
+              navigation.navigate("Cart");
             }}
             style={styles.primaryButton}
           >
@@ -267,7 +265,7 @@ export function DishDetailsScreen({ route, navigation }) {
           </Pressable>
 
           <Text style={styles.actionHint}>
-            Vai para a reserva com o prato já incluído.
+            Vai para o carrinho para finalizar o delivery.
           </Text>
         </View>
       </View>
