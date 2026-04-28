@@ -16,7 +16,7 @@ export function CartFab({ currentRouteName, navigation }) {
   const { itemCount } = useCart();
   const { isAuthenticated } = useAuth();
   const insets = useSafeAreaInsets();
-  const hiddenRoutes = new Set(["Cart", "DeliveryCheckout"]);
+  const hiddenRoutes = new Set(["Cart", "DeliveryCheckout", "DishDetails"]);
 
   if (!isAuthenticated || !itemCount || hiddenRoutes.has(currentRouteName)) {
     return null;
