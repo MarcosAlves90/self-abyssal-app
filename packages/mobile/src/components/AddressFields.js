@@ -10,6 +10,7 @@ import {
   View
 } from "react-native";
 
+import { FormFieldLabel } from "../components/FormFieldLabel";
 import { getResponsiveLayout } from "../theme/layout";
 import { theme } from "../theme/tokens";
 import { formatPostalCode } from "../utils/address";
@@ -27,7 +28,7 @@ export function AddressFields({
 
   return (
     <View style={styles.container}>
-      <Field label="CEP">
+      <Field label="CEP" required>
         <View style={[styles.cepRow, shouldStackPostalCode && styles.cepRowStack]}>
           <TextInput
             keyboardType="number-pad"
@@ -65,7 +66,7 @@ export function AddressFields({
       </Field>
 
       <View style={[styles.row, isCompact && styles.rowStack]}>
-        <Field label="Rua" style={styles.grow}>
+        <Field label="Rua" required style={styles.grow}>
           <TextInput
             autoCapitalize="words"
             onChangeText={(value) => onChangeField("street", value)}
@@ -75,7 +76,7 @@ export function AddressFields({
             value={address.street}
           />
         </Field>
-        <Field label="Numero" style={[styles.numberField, isCompact && styles.fullWidthField]}>
+        <Field label="Numero" required style={[styles.numberField, isCompact && styles.fullWidthField]}>
           <TextInput
             keyboardType="number-pad"
             onChangeText={(value) => onChangeField("number", value)}
@@ -98,7 +99,7 @@ export function AddressFields({
         />
       </Field>
 
-      <Field label="Bairro">
+      <Field label="Bairro" required>
         <TextInput
           autoCapitalize="words"
           onChangeText={(value) => onChangeField("neighborhood", value)}
@@ -110,7 +111,7 @@ export function AddressFields({
       </Field>
 
       <View style={[styles.row, isCompact && styles.rowStack]}>
-        <Field label="Cidade" style={styles.grow}>
+        <Field label="Cidade" required style={styles.grow}>
           <TextInput
             autoCapitalize="words"
             onChangeText={(value) => onChangeField("city", value)}
@@ -120,7 +121,7 @@ export function AddressFields({
             value={address.city}
           />
         </Field>
-        <Field label="UF" style={[styles.stateField, isCompact && styles.fullWidthField]}>
+        <Field label="UF" required style={[styles.stateField, isCompact && styles.fullWidthField]}>
           <TextInput
             autoCapitalize="characters"
             maxLength={2}
@@ -151,10 +152,10 @@ AddressFields.propTypes = {
   onLookupPostalCode: PropTypes.func.isRequired
 };
 
-function Field({ children, label, style }) {
+function Field({ children, label, required, style }) {
   return (
     <View style={[styles.field, style]}>
-      <Text style={styles.label}>{label}</Text>
+      <FormFieldLabel label={label} required={required} />
       {children}
     </View>
   );
@@ -163,6 +164,7 @@ function Field({ children, label, style }) {
 Field.propTypes = {
   children: PropTypes.node.isRequired,
   label: PropTypes.string.isRequired,
+  required: PropTypes.bool,
   style: PropTypes.any
 };
 
@@ -172,12 +174,6 @@ const styles = StyleSheet.create({
   },
   field: {
     flex: 1
-  },
-  label: {
-    color: theme.colors.text,
-    fontFamily: theme.fonts.body,
-    fontSize: 13,
-    marginBottom: 8
   },
   input: {
     backgroundColor: theme.colors.backgroundAlt,

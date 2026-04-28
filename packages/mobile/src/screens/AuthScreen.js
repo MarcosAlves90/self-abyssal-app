@@ -13,6 +13,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 
 import { FeedbackBanner } from "../components/FeedbackBanner";
+import { FormFieldLabel } from "../components/FormFieldLabel";
 import { KeyboardScrollScreen } from "../components/KeyboardScrollScreen";
 import { SeaShellIcon } from "../components/icons/SeaShellIcon";
 import { useAuth } from "../context/AuthContext";
@@ -187,6 +188,7 @@ export function AuthScreen() {
                 autoComplete="name"
                 inputRef={nameInputRef}
                 label="Nome"
+                required
                 onChangeText={(value) => updateField("name", value)}
                 onSubmitEditing={() => emailInputRef.current?.focus()}
                 placeholder="Seu nome"
@@ -202,6 +204,7 @@ export function AuthScreen() {
               inputRef={emailInputRef}
               keyboardType="email-address"
               label="E-mail"
+              required
               onChangeText={(value) => updateField("email", value)}
               onSubmitEditing={() => passwordInputRef.current?.focus()}
               placeholder="voce@abyssal.app"
@@ -215,6 +218,7 @@ export function AuthScreen() {
               autoCorrect={false}
               inputRef={passwordInputRef}
               label="Senha"
+              required
               onChangeText={(value) => updateField("password", value)}
               onSubmitEditing={() => {
                 if (isRegister) {
@@ -236,6 +240,7 @@ export function AuthScreen() {
                 inputRef={phoneInputRef}
                 keyboardType="phone-pad"
                 label="Telefone"
+                required
                 maxLength={15}
                 onChangeText={(value) => updateField("phone", formatPhoneNumber(value))}
                 onSubmitEditing={handleSubmit}
@@ -277,10 +282,10 @@ export function AuthScreen() {
   );
 }
 
-function FormField({ inputRef, label, ...inputProps }) {
+function FormField({ inputRef, label, required, ...inputProps }) {
   return (
     <View style={styles.field}>
-      <Text style={styles.label}>{label}</Text>
+      <FormFieldLabel label={label} required={required} />
       <TextInput
         ref={inputRef}
         placeholderTextColor={theme.colors.textMuted}
@@ -297,7 +302,8 @@ FormField.propTypes = {
     PropTypes.func,
     PropTypes.shape({ current: PropTypes.instanceOf(TextInput) })
   ]),
-  label: PropTypes.string.isRequired
+  label: PropTypes.string.isRequired,
+  required: PropTypes.bool
 };
 
 const styles = StyleSheet.create({
@@ -389,12 +395,6 @@ const styles = StyleSheet.create({
   },
   field: {
     marginBottom: 14
-  },
-  label: {
-    color: theme.colors.text,
-    fontFamily: theme.fonts.body,
-    fontSize: 13,
-    marginBottom: 8
   },
   input: {
     backgroundColor: "#0f1d35",

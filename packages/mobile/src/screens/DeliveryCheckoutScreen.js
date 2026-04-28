@@ -11,6 +11,7 @@ import {
 } from "react-native";
 
 import { AddressFields } from "../components/AddressFields";
+import { FormFieldLabel } from "../components/FormFieldLabel";
 import { KeyboardScrollScreen } from "../components/KeyboardScrollScreen";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
@@ -223,7 +224,7 @@ export function DeliveryCheckoutScreen({ navigation }) {
             </View>
           )}
 
-          <Field label="Nome para entrega">
+          <Field label="Nome para entrega" required>
             <StyledInput
               onChangeText={(value) =>
                 setDeliveryForm((current) => ({
@@ -243,7 +244,7 @@ export function DeliveryCheckoutScreen({ navigation }) {
             onLookupPostalCode={handleDeliveryPostalCodeLookup}
           />
 
-          <Field label="Pagamento">
+          <Field label="Pagamento" required>
             <View style={styles.chipWrap}>
               {paymentOptions.map(([value, label]) => (
                 <SelectionChip
@@ -278,10 +279,10 @@ DeliveryCheckoutScreen.propTypes = {
   }).isRequired,
 };
 
-function Field({ children, label }) {
+function Field({ children, label, required }) {
   return (
     <View style={styles.field}>
-      <Text style={styles.fieldLabel}>{label}</Text>
+      <FormFieldLabel label={label} required={required} />
       {children}
     </View>
   );
@@ -290,6 +291,7 @@ function Field({ children, label }) {
 Field.propTypes = {
   children: PropTypes.node.isRequired,
   label: PropTypes.string.isRequired,
+  required: PropTypes.bool,
 };
 
 function SelectionChip({ active, label, onPress }) {
@@ -483,12 +485,6 @@ const styles = StyleSheet.create({
   },
   field: {
     marginBottom: 16,
-  },
-  fieldLabel: {
-    color: theme.colors.text,
-    fontFamily: theme.fonts.body,
-    fontSize: 13,
-    marginBottom: 8,
   },
   chipWrap: {
     flexDirection: "row",

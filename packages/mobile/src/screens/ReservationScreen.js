@@ -12,6 +12,7 @@ import {
 } from "react-native";
 
 import { FeedbackBanner } from "../components/FeedbackBanner";
+import { FormFieldLabel } from "../components/FormFieldLabel";
 import { KeyboardScrollScreen } from "../components/KeyboardScrollScreen";
 import {
   createReservation,
@@ -135,7 +136,7 @@ export function ReservationScreen() {
             Reservar mesa
           </Text>
 
-          <Field icon="storefront-outline" label="Filial">
+          <Field icon="storefront-outline" label="Filial" required>
             <View style={styles.chipWrap}>
               {branches.map((branch) => (
                 <SelectionChip
@@ -160,7 +161,7 @@ export function ReservationScreen() {
               layout.isCompact && styles.dualFieldRowStack,
             ]}
           >
-            <Field icon="calendar-month-outline" label="Data">
+            <Field icon="calendar-month-outline" label="Data" required>
               <StyledInput
                 onChangeText={(value) =>
                   setReservationForm((current) => ({ ...current, date: value }))
@@ -169,7 +170,7 @@ export function ReservationScreen() {
                 value={reservationForm.date}
               />
             </Field>
-            <Field icon="clock-outline" label="Horário">
+            <Field icon="clock-outline" label="Horário" required>
               <StyledInput
                 onChangeText={(value) =>
                   setReservationForm((current) => ({ ...current, time: value }))
@@ -180,7 +181,7 @@ export function ReservationScreen() {
             </Field>
           </View>
 
-          <Field icon="account-group-outline" label="Convidados">
+          <Field icon="account-group-outline" label="Convidados" required>
             <StyledInput
               keyboardType="number-pad"
               onChangeText={(value) =>
@@ -190,7 +191,7 @@ export function ReservationScreen() {
             />
           </Field>
 
-          <Field icon="layers-outline" label="Nível">
+          <Field icon="layers-outline" label="Nível" required>
             <View style={styles.chipWrap}>
               {(selectedBranch?.reservationDepths || []).map((depth) => (
                 <SelectionChip
@@ -240,7 +241,7 @@ export function ReservationScreen() {
   );
 }
 
-function Field({ children, icon, label }) {
+function Field({ children, icon, label, required }) {
   return (
     <View style={styles.field}>
       <View style={styles.fieldLabelRow}>
@@ -249,7 +250,7 @@ function Field({ children, icon, label }) {
           name={icon}
           size={16}
         />
-        <Text style={styles.fieldLabel}>{label}</Text>
+        <FormFieldLabel label={label} required={required} style={styles.inlineLabel} />
       </View>
       {children}
     </View>
@@ -323,6 +324,7 @@ Field.propTypes = {
   children: PropTypes.node.isRequired,
   icon: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
+  required: PropTypes.bool,
 };
 
 SelectionChip.propTypes = {
@@ -387,10 +389,8 @@ const styles = StyleSheet.create({
     gap: 6,
     marginBottom: 8,
   },
-  fieldLabel: {
-    color: theme.colors.text,
-    fontFamily: theme.fonts.body,
-    fontSize: 13,
+  inlineLabel: {
+    marginBottom: 0,
   },
   chipWrap: {
     flexDirection: "row",
