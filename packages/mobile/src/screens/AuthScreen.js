@@ -25,17 +25,17 @@ const AUTH_BACKGROUND_IMAGE = require("../../assets/images/auth/login-hero.png")
 
 const AUTH_MODES = {
   login: {
-    eyebrow: "Bem-vindo",
-    title: "Acesse sua conta.",
-    subtitle: "Rápido, seguro e sem ruído.",
+    eyebrow: "Sua experiência",
+    title: "Entre para continuar.",
+    subtitle: "Pedidos, reservas e perfil em um só lugar.",
     submitLabel: "Entrar",
     switchLabel: "Ainda não tem conta?",
     switchAction: "Criar agora"
   },
   register: {
-    eyebrow: "Comece agora",
+    eyebrow: "Comece por aqui",
     title: "Crie sua conta.",
-    subtitle: "Leva menos de um minuto.",
+    subtitle: "Leva menos de um minuto para seguir.",
     submitLabel: "Criar conta",
     switchLabel: "Já tem conta?",
     switchAction: "Entrar"
@@ -347,7 +347,10 @@ const styles = StyleSheet.create({
     marginTop: 6
   },
   modeRow: {
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: "rgba(255,255,255,0.03)",
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.pill,
+    borderWidth: 1,
     flexDirection: "row",
     marginBottom: 20,
     padding: 6
@@ -355,11 +358,12 @@ const styles = StyleSheet.create({
   modeButton: {
     alignItems: "center",
     flex: 1,
+    borderRadius: theme.radius.pill,
     minHeight: 46,
     justifyContent: "center"
   },
   modeButtonActive: {
-    backgroundColor: "rgba(49,231,255,0.16)"
+    backgroundColor: "rgba(255,217,138,0.16)"
   },
   modeButtonText: {
     color: theme.colors.textMuted,
@@ -373,7 +377,7 @@ const styles = StyleSheet.create({
     marginBottom: 20
   },
   panelEyebrow: {
-    color: theme.colors.accentWarm,
+    color: theme.colors.warning,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 12,
     letterSpacing: 1.3,
@@ -383,23 +387,24 @@ const styles = StyleSheet.create({
   panelTitle: {
     color: theme.colors.text,
     fontFamily: theme.fonts.bodyBold,
-    fontSize: 24,
-    lineHeight: 30,
+    fontSize: 26,
+    lineHeight: 32,
     marginBottom: 8
   },
   panelCopy: {
     color: theme.colors.textMuted,
     fontFamily: theme.fonts.body,
-    fontSize: 14,
-    lineHeight: 22
+    fontSize: 15,
+    lineHeight: 23
   },
   field: {
     marginBottom: 14
   },
   input: {
-    backgroundColor: "#0f1d35",
+    backgroundColor: theme.colors.surfaceRaised,
     borderColor: theme.colors.border,
     borderWidth: 1,
+    borderRadius: theme.radius.md,
     color: theme.colors.text,
     fontFamily: theme.fonts.body,
     fontSize: 15,
@@ -410,6 +415,7 @@ const styles = StyleSheet.create({
   submitButton: {
     alignItems: "center",
     backgroundColor: theme.colors.accent,
+    borderRadius: theme.radius.lg,
     justifyContent: "center",
     marginTop: 18,
     minHeight: 54
@@ -434,7 +440,7 @@ const styles = StyleSheet.create({
     fontSize: 13
   },
   switchActionLink: {
-    color: theme.colors.accentSoft,
+    color: theme.colors.warning,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 14
   },
