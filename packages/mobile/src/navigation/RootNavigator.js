@@ -2,6 +2,8 @@ import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { StyleSheet } from "react-native";
 
 import { useAuth } from "../context/AuthContext";
 import { theme } from "../theme/tokens";
@@ -20,9 +22,9 @@ const Tabs = createBottomTabNavigator();
 function iconForRoute(routeName, color, size) {
   const iconMap = {
     Inicio: "waves",
-    Menu: "fishbowl",
-    Reserva: "calendar-month",
-    Perfil: "account-circle",
+    Menu: "silverware-fork-knife",
+    Reserva: "calendar-star",
+    Perfil: "account-circle-outline",
   };
 
   return (
@@ -39,18 +41,41 @@ function MainTabs() {
     <Tabs.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: theme.colors.accent,
+        tabBarActiveTintColor: theme.colors.warning,
         tabBarInactiveTintColor: theme.colors.textMuted,
+        tabBarBackground: () => (
+          <LinearGradient
+            colors={[
+              "rgba(7, 18, 38, 0.98)",
+              "rgba(9, 24, 46, 0.98)",
+              "rgba(4, 11, 23, 0.99)",
+            ]}
+            end={{ x: 1, y: 1 }}
+            start={{ x: 0, y: 0 }}
+            style={StyleSheet.absoluteFillObject}
+          />
+        ),
+        tabBarHideOnKeyboard: true,
+        tabBarItemStyle: {
+          paddingBottom: 4,
+          paddingTop: 4,
+        },
         tabBarStyle: {
-          backgroundColor: "#061121",
-          borderTopColor: theme.colors.border,
-          height: 82,
-          paddingBottom: 12,
-          paddingTop: 12,
+          backgroundColor: "transparent",
+          borderTopColor: "rgba(255, 217, 138, 0.16)",
+          borderTopWidth: 1,
+          height: 84,
+          elevation: 0,
+          paddingBottom: 10,
+          paddingTop: 10,
         },
         tabBarLabelStyle: {
           fontFamily: theme.fonts.body,
-          fontSize: 12,
+          fontSize: 11,
+          letterSpacing: 0.4,
+        },
+        tabBarIconStyle: {
+          marginTop: 1,
         },
         tabBarIcon: ({ color, size }) => iconForRoute(route.name, color, size),
       })}
