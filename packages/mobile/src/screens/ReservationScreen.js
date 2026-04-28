@@ -544,6 +544,109 @@ PrimaryButton.propTypes = {
   onPress: PropTypes.func.isRequired,
 };
 
+ReservationContent.propTypes = {
+  branches: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      reservationDepths: PropTypes.arrayOf(PropTypes.string).isRequired,
+    }),
+  ).isRequired,
+  confirmation: PropTypes.shape({
+    branchName: PropTypes.string,
+    guests: PropTypes.number,
+    depthLevel: PropTypes.string,
+    scheduledAt: PropTypes.string,
+  }),
+  feedback: PropTypes.shape({
+    tone: PropTypes.string,
+    message: PropTypes.string,
+  }).isRequired,
+  hasReservations: PropTypes.bool.isRequired,
+  isCompact: PropTypes.bool.isRequired,
+  isLoadingReservations: PropTypes.bool.isRequired,
+  isSubmitting: PropTypes.bool.isRequired,
+  onBranchPress: PropTypes.func.isRequired,
+  onCancelReservationCreation: PropTypes.func.isRequired,
+  onDateChange: PropTypes.func.isRequired,
+  onDepthChange: PropTypes.func.isRequired,
+  onGuestsChange: PropTypes.func.isRequired,
+  onReservationFormToggle: PropTypes.func.isRequired,
+  onSubmitReservation: PropTypes.func.isRequired,
+  onTimeChange: PropTypes.func.isRequired,
+  reservationForm: PropTypes.shape({
+    branchId: PropTypes.string.isRequired,
+    date: PropTypes.string.isRequired,
+    time: PropTypes.string.isRequired,
+    guests: PropTypes.string.isRequired,
+    depthLevel: PropTypes.string.isRequired,
+  }).isRequired,
+  reservations: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      branchName: PropTypes.string.isRequired,
+      scheduledAt: PropTypes.string.isRequired,
+      depthLevel: PropTypes.string.isRequired,
+      guests: PropTypes.number.isRequired,
+    }),
+  ).isRequired,
+  selectedBranch: PropTypes.shape({
+    id: PropTypes.string,
+    name: PropTypes.string,
+    reservationDepths: PropTypes.arrayOf(PropTypes.string),
+  }),
+  shouldShowReservationForm: PropTypes.bool.isRequired,
+};
+
+ReservationsSummary.propTypes = {
+  hasReservations: PropTypes.bool.isRequired,
+  isLoadingReservations: PropTypes.bool.isRequired,
+  onReservationFormToggle: PropTypes.func.isRequired,
+  reservations: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      branchName: PropTypes.string.isRequired,
+      scheduledAt: PropTypes.string.isRequired,
+      depthLevel: PropTypes.string.isRequired,
+      guests: PropTypes.number.isRequired,
+    }),
+  ).isRequired,
+  shouldShowReservationForm: PropTypes.bool.isRequired,
+};
+
+ReservationForm.propTypes = {
+  branches: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      reservationDepths: PropTypes.arrayOf(PropTypes.string).isRequired,
+    }),
+  ).isRequired,
+  hasReservations: PropTypes.bool.isRequired,
+  isCompact: PropTypes.bool.isRequired,
+  isSubmitting: PropTypes.bool.isRequired,
+  onBranchPress: PropTypes.func.isRequired,
+  onCancelReservationCreation: PropTypes.func.isRequired,
+  onDateChange: PropTypes.func.isRequired,
+  onDepthChange: PropTypes.func.isRequired,
+  onGuestsChange: PropTypes.func.isRequired,
+  onSubmitReservation: PropTypes.func.isRequired,
+  onTimeChange: PropTypes.func.isRequired,
+  reservationForm: PropTypes.shape({
+    branchId: PropTypes.string.isRequired,
+    date: PropTypes.string.isRequired,
+    time: PropTypes.string.isRequired,
+    guests: PropTypes.string.isRequired,
+    depthLevel: PropTypes.string.isRequired,
+  }).isRequired,
+  selectedBranch: PropTypes.shape({
+    id: PropTypes.string,
+    name: PropTypes.string,
+    reservationDepths: PropTypes.arrayOf(PropTypes.string),
+  }),
+  shouldShowReservationForm: PropTypes.bool.isRequired,
+};
+
 const styles = StyleSheet.create({
   screen: {
     backgroundColor: theme.colors.background,
