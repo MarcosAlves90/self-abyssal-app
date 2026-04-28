@@ -314,8 +314,8 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   quickActionCard: {
-    backgroundColor: theme.colors.surfaceRaised,
-    borderColor: "rgba(255,217,138,0.12)",
+    backgroundColor: theme.colors.backgroundAlt,
+    borderColor: "rgba(255,255,255,0.08)",
     borderWidth: 1,
     padding: 12,
     width: "100%",
@@ -336,7 +336,7 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
   quickActionDescription: {
-    color: theme.colors.textMuted,
+    color: "rgba(150,183,201,0.88)",
     fontFamily: theme.fonts.body,
     fontSize: 12,
     lineHeight: 18,
