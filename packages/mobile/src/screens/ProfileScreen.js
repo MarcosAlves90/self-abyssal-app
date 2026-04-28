@@ -238,10 +238,9 @@ function ProfileContent({
       style={styles.screen}
     >
       <View style={[styles.shell, { maxWidth: layout.contentMaxWidth }]}>
-        <ProfileHero loadProfile={loadProfile} user={user} />
+        <ProfileHero user={user} />
 
         <ProfileMetrics
-          hasAddress={Boolean(primaryAddress)}
           ordersCount={orders.length}
           reservationsCount={reservations.length}
         />
@@ -361,7 +360,7 @@ ProfileContent.propTypes = {
   }),
 };
 
-function ProfileHero({ loadProfile, user }) {
+function ProfileHero({ user }) {
   return (
     <LinearGradient
       colors={["#08172c", "#0b203d", "#13345b"]}
@@ -376,27 +375,19 @@ function ProfileHero({ loadProfile, user }) {
           <Text style={styles.email}>{user?.email}</Text>
         </View>
 
-        <View style={styles.heroActions}>
-          <ActionButton
-            label="Atualizar"
-            icon="refresh"
-            onPress={loadProfile}
-          />
-        </View>
       </View>
     </LinearGradient>
   );
 }
 
 ProfileHero.propTypes = {
-  loadProfile: PropTypes.func.isRequired,
   user: PropTypes.shape({
     email: PropTypes.string,
     name: PropTypes.string,
   }),
 };
 
-function ProfileMetrics({ hasAddress, ordersCount, reservationsCount }) {
+function ProfileMetrics({ ordersCount, reservationsCount }) {
   return (
     <View style={styles.metricsRow}>
       <MetricCard
@@ -409,17 +400,11 @@ function ProfileMetrics({ hasAddress, ordersCount, reservationsCount }) {
         label="Reservas"
         value={String(reservationsCount)}
       />
-      <MetricCard
-        icon={hasAddress ? "map-marker-check" : "map-marker-off-outline"}
-        label="Endereço"
-        value={hasAddress ? "Pronto" : "Pendente"}
-      />
     </View>
   );
 }
 
 ProfileMetrics.propTypes = {
-  hasAddress: PropTypes.bool.isRequired,
   ordersCount: PropTypes.number.isRequired,
   reservationsCount: PropTypes.number.isRequired,
 };

@@ -15,6 +15,7 @@ describe("contracts", () => {
       user: {
         id: "u1",
         name: "Marcos",
+        email: "MARCOS@MAIL.COM",
         role: "customer",
         savedAddresses: [],
       },
@@ -24,6 +25,7 @@ describe("contracts", () => {
     expect(result.user).toEqual({
       id: "u1",
       name: "Marcos",
+      email: "marcos@mail.com",
       role: "customer",
       savedAddresses: [],
     });

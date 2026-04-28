@@ -17,6 +17,7 @@ export function normalizeUserResponse(raw) {
   return {
     id: requiredId(raw?.id, { entity: ENTITY_USER, field: "id" }),
     name: requiredString(raw?.name, { entity: ENTITY_USER, field: "name" }),
+    email: requiredEmail(raw?.email, { entity: ENTITY_USER, field: "email" }),
     role: requiredString(raw?.role, { entity: ENTITY_USER, field: "role" }),
     savedAddresses: asArray(raw?.savedAddresses).map(normalizeAddressResponse),
   };
