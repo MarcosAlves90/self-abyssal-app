@@ -24,7 +24,7 @@ import {
   savePrimaryAddress,
 } from "../services/api";
 import { getResponsiveLayout } from "../theme/layout";
-import { formatCurrency, theme } from "../theme/tokens";
+import { theme } from "../theme/tokens";
 import {
   createEmptyAddress,
   isAddressComplete,
@@ -267,7 +267,7 @@ function ProfileContent({
 
           <View style={styles.secondaryColumn}>
             <SectionHeader
-              description="Resumo enxuto das últimas interações da conta, sem poluir a tela."
+              description="Últimas interações resumidas, sem ocupar espaço demais."
               eyebrow="Resumo"
               title="Últimos movimentos"
             />
@@ -279,7 +279,6 @@ function ProfileContent({
                 icon="receipt-text-outline"
                 label="Pedido recente"
                 meta={formatOrderMeta(latestOrder)}
-                subtitle={formatOrderSubtitle(latestOrder)}
                 title={formatOrderTitle(latestOrder)}
               />
 
@@ -289,7 +288,6 @@ function ProfileContent({
                 icon="calendar-month-outline"
                 label="Reserva recente"
                 meta={formatReservationMeta(latestReservation)}
-                subtitle={formatReservationSubtitle(latestReservation)}
                 title={formatReservationTitle(latestReservation)}
               />
             </View>
@@ -363,16 +361,19 @@ ProfileContent.propTypes = {
 function ProfileHero({ user }) {
   return (
     <LinearGradient
-      colors={["#08172c", "#0b203d", "#13345b"]}
+      colors={["#07111f", "#0b1b31", "#132847"]}
       end={{ x: 1, y: 1 }}
       start={{ x: 0, y: 0 }}
       style={styles.hero}
     >
       <View style={styles.heroTop}>
         <View style={styles.identityCopy}>
-          <Text style={styles.heroEyebrow}>Perfil</Text>
+          <Text style={styles.heroEyebrow}>Conta</Text>
           <Text style={styles.name}>{user?.name}</Text>
           <Text style={styles.email}>{user?.email}</Text>
+          <Text style={styles.heroCopy}>
+            Endereço principal, pedidos recentes e reservas, tudo em um lugar.
+          </Text>
         </View>
 
       </View>
@@ -417,11 +418,6 @@ function ProfileQuickActions({ loadProfile }) {
         label="Sincronizar conta"
         onPress={loadProfile}
       />
-      <QuickAction
-        icon="shield-account-outline"
-        label="Conta segura"
-        disabled
-      />
     </View>
   );
 }
@@ -453,7 +449,7 @@ function AddressSection({
   return (
     <>
       <SectionHeader
-        description="Seu endereço principal fica visível em destaque, com edição quando você quiser."
+        description="Seu endereço principal fica em destaque e pode ser ajustado quando preciso."
         eyebrow="Entrega"
         title="Endereço principal"
       />
@@ -468,7 +464,7 @@ function AddressSection({
         ) : (
           <View style={styles.emptyCard}>
             <MaterialCommunityIcons
-              color={theme.colors.accentSoft}
+              color={theme.colors.warning}
               name="map-marker"
               size={28}
             />
@@ -561,8 +557,7 @@ function AddressEditorPanel({
     <View style={styles.addressPanel}>
       <Text style={styles.panelTitle}>Editar endereço</Text>
       <Text style={styles.panelCopy}>
-        O CEP preenche automaticamente os campos principais. Você só revisa o
-        que importa.
+        O CEP completa os campos principais. Você só confirma o restante.
       </Text>
 
       <AddressFields
@@ -573,7 +568,7 @@ function AddressEditorPanel({
       />
 
       <Text style={styles.addressHint}>
-        Cep, rua e bairro entram rápido. Número e complemento continuam sob seu
+        CEP, rua e bairro entram rápido. Número e complemento seguem sob seu
         controle.
       </Text>
 
@@ -696,10 +691,9 @@ function CompactActivityCard({
   icon,
   label,
   meta,
-  subtitle,
   title,
 }) {
-  const isEmpty = !title && !subtitle && !meta;
+  const isEmpty = !title && !meta;
 
   return (
     <View style={styles.activityCard}>
@@ -726,7 +720,6 @@ function CompactActivityCard({
       ) : (
         <>
           <Text style={styles.activityTitle}>{title}</Text>
-          <Text style={styles.activitySubtitle}>{subtitle}</Text>
           <Text style={styles.activityMeta}>{meta}</Text>
         </>
       )}
@@ -740,46 +733,14 @@ CompactActivityCard.propTypes = {
   icon: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
   meta: PropTypes.string.isRequired,
-  subtitle: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,
-};
-
-function ActionButton({ danger = false, icon, label, onPress }) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={onPress}
-      style={[styles.actionButton, danger && styles.actionButtonDanger]}
-    >
-      <MaterialCommunityIcons
-        color={danger ? theme.colors.danger : theme.colors.text}
-        name={icon}
-        size={18}
-      />
-      <Text
-        style={[
-          styles.actionButtonText,
-          danger && styles.actionButtonTextDanger,
-        ]}
-      >
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
-ActionButton.propTypes = {
-  danger: PropTypes.bool,
-  icon: PropTypes.string.isRequired,
-  label: PropTypes.string.isRequired,
-  onPress: PropTypes.func.isRequired,
 };
 
 function MetricCard({ icon, label, value }) {
   return (
     <View style={styles.metricCard}>
       <MaterialCommunityIcons
-        color={theme.colors.accentSoft}
+        color={theme.colors.warning}
         name={icon}
         size={18}
       />
@@ -805,7 +766,7 @@ function QuickAction({ disabled = false, icon, label, onPress }) {
       style={[styles.quickAction, disabled && styles.quickActionDisabled]}
     >
       <MaterialCommunityIcons
-        color={theme.colors.accentSoft}
+        color={theme.colors.warning}
         name={icon}
         size={18}
       />
@@ -839,14 +800,6 @@ function formatOrderTitle(order) {
   return `${fulfillmentLabel} • ${order.status}`;
 }
 
-function formatOrderSubtitle(order) {
-  if (!order) {
-    return "";
-  }
-
-  return formatCurrency(order.totalCents);
-}
-
 function formatOrderMeta(order) {
   if (!order) {
     return "";
@@ -857,10 +810,6 @@ function formatOrderMeta(order) {
 
 function formatReservationTitle(reservation) {
   return reservation?.branchName || "";
-}
-
-function formatReservationSubtitle(reservation) {
-  return reservation?.depthLevel || "";
 }
 
 function formatReservationMeta(reservation) {
@@ -885,17 +834,17 @@ const styles = StyleSheet.create({
   hero: {
     borderRadius: 0,
     marginBottom: theme.spacing.lg,
-    padding: theme.spacing.xl,
+    padding: theme.spacing.lg,
   },
   heroTop: {
-    gap: 18,
+    gap: 12,
   },
   identityCopy: {
     flex: 1,
-    gap: 2,
+    gap: 4,
   },
   heroEyebrow: {
-    color: theme.colors.accentSoft,
+    color: theme.colors.warning,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 12,
     letterSpacing: 1.2,
@@ -913,33 +862,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 2,
   },
-  heroActions: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-  },
-  actionButton: {
-    alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.05)",
-    borderColor: theme.colors.border,
-    borderRadius: 0,
-    borderWidth: 1,
-    flexDirection: "row",
-    gap: 8,
-    justifyContent: "center",
-    minHeight: 46,
-    paddingHorizontal: 16,
-  },
-  actionButtonDanger: {
-    borderColor: "rgba(255,139,156,0.28)",
-  },
-  actionButtonText: {
-    color: theme.colors.text,
-    fontFamily: theme.fonts.bodyBold,
+  heroCopy: {
+    color: "rgba(245,251,255,0.74)",
+    fontFamily: theme.fonts.body,
     fontSize: 13,
-  },
-  actionButtonTextDanger: {
-    color: theme.colors.danger,
+    lineHeight: 20,
+    marginTop: 8,
+    maxWidth: 520,
   },
   metricsRow: {
     flexDirection: "row",
@@ -956,13 +885,13 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 6,
     minWidth: 132,
-    padding: 16,
+    padding: 14,
   },
   metricValue: {
     color: theme.colors.text,
     fontFamily: theme.fonts.display,
-    fontSize: 28,
-    lineHeight: 30,
+    fontSize: 26,
+    lineHeight: 28,
   },
   metricLabel: {
     color: theme.colors.textMuted,
@@ -1230,12 +1159,6 @@ const styles = StyleSheet.create({
     fontFamily: theme.fonts.bodyBold,
     fontSize: 15,
     lineHeight: 21,
-  },
-  activitySubtitle: {
-    color: theme.colors.textMuted,
-    fontFamily: theme.fonts.body,
-    fontSize: 14,
-    lineHeight: 20,
   },
   activityMeta: {
     color: theme.colors.textMuted,
