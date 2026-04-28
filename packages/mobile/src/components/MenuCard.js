@@ -21,34 +21,9 @@ const menuItemShape = {
   priceCents: PropTypes.number.isRequired
 };
 
-function formatImageHint(imageHint) {
-  if (!imageHint) {
-    return "Assinatura da casa";
-  }
-
-  let label = imageHint.replaceAll("-", " ").replaceAll("_", " ");
-
-  while (label.includes("  ")) {
-    label = label.replaceAll("  ", " ");
-  }
-
-  return label.trim();
-}
-
-function getArtworkInitial(item) {
-  const source = (item.imageHint || item.name || item.category).trim();
-
-  return source.charAt(0).toUpperCase();
-}
-
-function getCardAccentColor(item) {
-  return item.accentColor || theme.colors.warning;
-}
-
 function getMediaMetrics(layout) {
   if (layout.isTiny) {
     return {
-      initialSize: 84,
       mediaHeight: 164,
       shellSize: 66
     };
@@ -56,29 +31,22 @@ function getMediaMetrics(layout) {
 
   if (layout.isCompact) {
     return {
-      initialSize: 96,
       mediaHeight: 176,
       shellSize: 74
     };
   }
 
   return {
-    initialSize: 108,
     mediaHeight: 188,
     shellSize: 84
   };
 }
 
-function MenuCardMedia({ imageHintLabel, item, layout, mediaHeight, initialSize, shellSize }) {
+function MenuCardMedia({ item, mediaHeight, shellSize }) {
   return (
-    <View style={[styles.media, { minHeight: mediaHeight }]}> 
+    <View style={[styles.media, { minHeight: mediaHeight }]}>
       <View style={styles.mediaFallback}>
-        <Text style={[styles.mediaInitial, { fontSize: initialSize, lineHeight: initialSize }]}> 
-          {getArtworkInitial(item)}
-        </Text>
-        <View style={[styles.mediaShell, { padding: layout.isTiny ? 10 : 12 }]}> 
-          <SeaShellIcon color={theme.colors.text} size={shellSize} />
-        </View>
+        <SeaShellIcon color={theme.colors.text} size={shellSize} />
       </View>
 
       {item.imageUrl ? (
@@ -92,8 +60,6 @@ function MenuCardMedia({ imageHintLabel, item, layout, mediaHeight, initialSize,
         style={StyleSheet.absoluteFillObject}
       />
 
-      <View style={[styles.mediaGlow, { backgroundColor: getCardAccentColor(item) }]} />
-
       <View style={styles.mediaTopRow}>
         <View style={styles.badgeStack}>
           <View style={styles.categoryBadge}>
@@ -105,12 +71,6 @@ function MenuCardMedia({ imageHintLabel, item, layout, mediaHeight, initialSize,
             ★
           </Text>
         ) : null}
-      </View>
-
-      <View style={styles.mediaBottom}>
-        <Text numberOfLines={1} style={styles.mediaHint}>
-          {imageHintLabel}
-        </Text>
       </View>
     </View>
   );
@@ -144,13 +104,7 @@ function MenuCardFooter({ item, layout, onAdd, shouldStackFooter, showAddButton 
 }
 
 MenuCardMedia.propTypes = {
-  imageHintLabel: PropTypes.string.isRequired,
-  initialSize: PropTypes.number.isRequired,
   item: PropTypes.shape(menuItemShape).isRequired,
-  layout: PropTypes.shape({
-    isCompact: PropTypes.bool.isRequired,
-    isTiny: PropTypes.bool.isRequired
-  }).isRequired,
   mediaHeight: PropTypes.number.isRequired,
   shellSize: PropTypes.number.isRequired
 };
@@ -169,8 +123,7 @@ MenuCardFooter.propTypes = {
 export function MenuCard({ item, onAdd, onPress, showAddButton = false, style }) {
   const { width } = useWindowDimensions();
   const layout = getResponsiveLayout(width);
-  const imageHintLabel = formatImageHint(item.imageHint);
-  const { initialSize, mediaHeight, shellSize } = getMediaMetrics(layout);
+  const { mediaHeight, shellSize } = getMediaMetrics(layout);
   const shouldStackFooter = showAddButton && layout.isCompact;
 
   return (
@@ -188,10 +141,7 @@ export function MenuCard({ item, onAdd, onPress, showAddButton = false, style })
         style={styles.panel}
       >
         <MenuCardMedia
-          imageHintLabel={imageHintLabel}
-          initialSize={initialSize}
           item={item}
-          layout={layout}
           mediaHeight={mediaHeight}
           shellSize={shellSize}
         />
@@ -270,14 +220,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center"
   },
-  mediaGlow: {
-    height: 172,
-    opacity: 0.16,
-    position: "absolute",
-    right: -44,
-    top: -38,
-    width: 172
-  },
   mediaTopRow: {
     alignItems: "flex-start",
     flexDirection: "row",
@@ -325,36 +267,6 @@ const styles = StyleSheet.create({
     textShadowRadius: 12,
     textAlignVertical: "center",
     transform: [{ translateY: -3 }]
-  },
-  mediaInitial: {
-    color: "rgba(245, 251, 255, 0.09)",
-    fontFamily: theme.fonts.display,
-    left: 8,
-    letterSpacing: -8,
-    position: "absolute",
-    top: -8
-  },
-  mediaShell: {
-    alignItems: "center",
-    backgroundColor: "rgba(4, 11, 23, 0.2)",
-    borderColor: "rgba(255, 217, 138, 0.14)",
-    borderWidth: 1,
-    justifyContent: "center",
-    minHeight: 104,
-    minWidth: 104,
-    position: "relative"
-  },
-  mediaBottom: {
-    paddingHorizontal: theme.spacing.md,
-    paddingBottom: theme.spacing.md,
-    position: "relative",
-    zIndex: 2
-  },
-  mediaHint: {
-    color: theme.colors.text,
-    fontFamily: theme.fonts.bodyBold,
-    fontSize: 14,
-    letterSpacing: 0.2
   },
   body: {
     gap: 14
