@@ -3,8 +3,9 @@ import { Platform } from "react-native";
 
 import {
   buildAddressRequest,
-  buildAuthRequest,
+  buildLoginRequest,
   buildOrderRequest,
+  buildRegisterRequest,
   buildReservationRequest,
   normalizeAuthSessionResponse,
   normalizeBranchResponse,
@@ -107,12 +108,12 @@ export function getApiErrorMessage(error) {
 }
 
 export async function registerAccount(payload) {
-  const { data } = await api.post("/auth/register", buildAuthRequest(payload));
+  const { data } = await api.post("/auth/register", buildRegisterRequest(payload));
   return normalizeAuthSessionResponse(data);
 }
 
 export async function loginAccount(payload) {
-  const { data } = await api.post("/auth/login", buildAuthRequest(payload));
+  const { data } = await api.post("/auth/login", buildLoginRequest(payload));
   return normalizeAuthSessionResponse(data);
 }
 

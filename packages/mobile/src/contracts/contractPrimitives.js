@@ -41,6 +41,38 @@ export function requiredString(value, { entity, field, trim = true }) {
   return parsed;
 }
 
+export function requiredStringWithLength(value, { entity, field, min, max, trim = true }) {
+  const parsed = requiredString(value, { entity, field, trim });
+
+  if (typeof min === "number" && parsed.length < min) {
+    fail({ entity, field, code: "INVALID_LENGTH", message: `${entity}.${field} invalido.` });
+  }
+
+  if (typeof max === "number" && parsed.length > max) {
+    fail({ entity, field, code: "INVALID_LENGTH", message: `${entity}.${field} invalido.` });
+  }
+
+  return parsed;
+}
+
+export function optionalStringWithLength(value, { entity, field, min, max }) {
+  const parsed = optionalString(value);
+
+  if (parsed === undefined) {
+    return undefined;
+  }
+
+  if (typeof min === "number" && parsed.length < min) {
+    fail({ entity, field, code: "INVALID_LENGTH", message: `${entity}.${field} invalido.` });
+  }
+
+  if (typeof max === "number" && parsed.length > max) {
+    fail({ entity, field, code: "INVALID_LENGTH", message: `${entity}.${field} invalido.` });
+  }
+
+  return parsed;
+}
+
 export function optionalString(value) {
   return asOptionalString(value);
 }
@@ -74,11 +106,31 @@ export function requiredPositiveInteger(value, { entity, field }) {
   return parsed;
 }
 
+export function requiredIntegerInRange(value, { entity, field, min, max }) {
+  const parsed = requiredPositiveInteger(value, { entity, field });
+
+  if (parsed < min || parsed > max) {
+    fail({ entity, field, code: "INVALID_NUMBER", message: `${entity}.${field} invalido.` });
+  }
+
+  return parsed;
+}
+
 export function requiredIsoDate(value, { entity, field }) {
   const parsed = requiredString(value, { entity, field });
 
   if (Number.isNaN(Date.parse(parsed))) {
     fail({ entity, field, code: "INVALID_DATE", message: `${entity}.${field} invalido.` });
+  }
+
+  return parsed;
+}
+
+export function requiredPattern(value, { entity, field, regex }) {
+  const parsed = requiredString(value, { entity, field });
+
+  if (!regex.test(parsed)) {
+    fail({ entity, field, code: "INVALID_PATTERN", message: `${entity}.${field} invalido.` });
   }
 
   return parsed;

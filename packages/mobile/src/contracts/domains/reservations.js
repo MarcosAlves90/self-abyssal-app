@@ -1,9 +1,10 @@
 import {
-  optionalString,
+  optionalStringWithLength,
   requiredId,
+  requiredIntegerInRange,
   requiredIsoDate,
-  requiredPositiveInteger,
   requiredString,
+  requiredStringWithLength,
 } from "../contractPrimitives";
 
 const ENTITY_RESERVATION = "Reservation";
@@ -15,9 +16,23 @@ export function normalizeReservationResponse(raw) {
     branchId: requiredId(raw?.branchId, { entity: ENTITY_RESERVATION, field: "branchId" }),
     branchName: requiredString(raw?.branchName, { entity: ENTITY_RESERVATION, field: "branchName" }),
     scheduledAt: requiredIsoDate(raw?.scheduledAt, { entity: ENTITY_RESERVATION, field: "scheduledAt" }),
-    guests: requiredPositiveInteger(raw?.guests, { entity: ENTITY_RESERVATION, field: "guests" }),
-    depthLevel: requiredString(raw?.depthLevel, { entity: ENTITY_RESERVATION, field: "depthLevel" }),
-    specialRequest: optionalString(raw?.specialRequest) || "",
+    guests: requiredIntegerInRange(raw?.guests, {
+      entity: ENTITY_RESERVATION,
+      field: "guests",
+      min: 1,
+      max: 12,
+    }),
+    depthLevel: requiredStringWithLength(raw?.depthLevel, {
+      entity: ENTITY_RESERVATION,
+      field: "depthLevel",
+      min: 3,
+      max: 40,
+    }),
+    specialRequest: optionalStringWithLength(raw?.specialRequest, {
+      entity: ENTITY_RESERVATION,
+      field: "specialRequest",
+      max: 200,
+    }) || "",
     status: requiredString(raw?.status, { entity: ENTITY_RESERVATION, field: "status" }),
   };
 }
@@ -26,8 +41,22 @@ export function buildReservationRequest(input) {
   return {
     branchId: requiredId(input?.branchId, { entity: ENTITY_RESERVATION_REQUEST, field: "branchId" }),
     scheduledAt: requiredIsoDate(input?.scheduledAt, { entity: ENTITY_RESERVATION_REQUEST, field: "scheduledAt" }),
-    guests: requiredPositiveInteger(input?.guests, { entity: ENTITY_RESERVATION_REQUEST, field: "guests" }),
-    depthLevel: requiredString(input?.depthLevel, { entity: ENTITY_RESERVATION_REQUEST, field: "depthLevel" }),
-    specialRequest: optionalString(input?.specialRequest),
+    guests: requiredIntegerInRange(input?.guests, {
+      entity: ENTITY_RESERVATION_REQUEST,
+      field: "guests",
+      min: 1,
+      max: 12,
+    }),
+    depthLevel: requiredStringWithLength(input?.depthLevel, {
+      entity: ENTITY_RESERVATION_REQUEST,
+      field: "depthLevel",
+      min: 3,
+      max: 40,
+    }),
+    specialRequest: optionalStringWithLength(input?.specialRequest, {
+      entity: ENTITY_RESERVATION_REQUEST,
+      field: "specialRequest",
+      max: 200,
+    }),
   };
 }

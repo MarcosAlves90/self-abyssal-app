@@ -45,7 +45,7 @@ describe("api contract integration", () => {
 
     client.post.mockResolvedValueOnce({ data: { user: { id: "u1", name: "Ana", role: "customer" } } });
 
-    await expect(loginAccount({ email: "ana@mail.com", password: "123" })).rejects.toMatchObject({
+    await expect(loginAccount({ email: "ana@mail.com", password: "12345678" })).rejects.toMatchObject({
       name: "ContractError",
       field: "token",
     });

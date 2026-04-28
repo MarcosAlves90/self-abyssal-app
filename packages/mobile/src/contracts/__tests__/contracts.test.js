@@ -1,6 +1,7 @@
 import {
   ContractError,
-  buildAuthRequest,
+  buildLoginRequest,
+  buildRegisterRequest,
   buildOrderRequest,
   normalizeAuthSessionResponse,
   normalizeMenuItemResponse,
@@ -46,14 +47,25 @@ describe("contracts", () => {
     expect(result.specialRequest).toBe("");
   });
 
-  it("normaliza request de auth", () => {
-    const request = buildAuthRequest({
+  it("normaliza request de login", () => {
+    const request = buildLoginRequest({
       email: " USER@MAIL.COM ",
-      password: "123456",
+      password: "12345678",
     });
 
     expect(request.email).toBe("user@mail.com");
-    expect(request.name).toBeUndefined();
+  });
+
+  it("normaliza request de cadastro", () => {
+    const request = buildRegisterRequest({
+      name: "  Ana Clara  ",
+      email: " ANA@MAIL.COM ",
+      password: "12345678",
+      phone: "11999998888",
+    });
+
+    expect(request.name).toBe("Ana Clara");
+    expect(request.email).toBe("ana@mail.com");
   });
 
   it("bloqueia item de pedido invalido", () => {

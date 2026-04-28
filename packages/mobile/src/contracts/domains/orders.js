@@ -1,10 +1,13 @@
 import {
   asArray,
-  optionalString,
+  optionalStringWithLength,
   requiredId,
+  requiredIntegerInRange,
   requiredIsoDate,
   requiredPositiveInteger,
+  requiredPattern,
   requiredString,
+  requiredStringWithLength,
 } from "../contractPrimitives";
 
 const ENTITY_ORDER = "Order";
@@ -21,15 +24,52 @@ export function normalizeOrderResponse(raw) {
 }
 
 export function buildOrderRequest(input) {
+  const fulfillmentType = requiredPattern(input?.fulfillmentType, {
+    entity: ENTITY_ORDER_REQUEST,
+    field: "fulfillmentType",
+    regex: /^(delivery|dine_in)$/,
+  });
+
   return {
-    fulfillmentType: requiredString(input?.fulfillmentType, { entity: ENTITY_ORDER_REQUEST, field: "fulfillmentType" }),
-    paymentMethod: requiredString(input?.paymentMethod, { entity: ENTITY_ORDER_REQUEST, field: "paymentMethod" }),
-    contactName: requiredString(input?.contactName, { entity: ENTITY_ORDER_REQUEST, field: "contactName" }),
-    deliveryAddress: requiredString(input?.deliveryAddress, { entity: ENTITY_ORDER_REQUEST, field: "deliveryAddress" }),
+    fulfillmentType,
+    paymentMethod: requiredPattern(input?.paymentMethod, {
+      entity: ENTITY_ORDER_REQUEST,
+      field: "paymentMethod",
+      regex: /^(in_app_card_tokenized|card_on_delivery|on_site)$/,
+    }),
+    contactName: optionalStringWithLength(input?.contactName, {
+      entity: ENTITY_ORDER_REQUEST,
+      field: "contactName",
+      min: 3,
+      max: 80,
+    }),
+    deliveryAddress:
+      fulfillmentType === "delivery"
+        ? requiredStringWithLength(input?.deliveryAddress, {
+            entity: ENTITY_ORDER_REQUEST,
+            field: "deliveryAddress",
+            min: 10,
+            max: 200,
+          })
+        : optionalStringWithLength(input?.deliveryAddress, {
+            entity: ENTITY_ORDER_REQUEST,
+            field: "deliveryAddress",
+            min: 10,
+            max: 200,
+          }),
     items: asArray(input?.items).map((item) => ({
       menuItemId: requiredId(item?.menuItemId, { entity: ENTITY_ORDER_REQUEST, field: "items.menuItemId" }),
-      quantity: requiredPositiveInteger(item?.quantity, { entity: ENTITY_ORDER_REQUEST, field: "items.quantity" }),
-      note: optionalString(item?.note),
+      quantity: requiredIntegerInRange(item?.quantity, {
+        entity: ENTITY_ORDER_REQUEST,
+        field: "items.quantity",
+        min: 1,
+        max: 20,
+      }),
+      note: optionalStringWithLength(item?.note, {
+        entity: ENTITY_ORDER_REQUEST,
+        field: "items.note",
+        max: 120,
+      }),
     })),
   };
 }

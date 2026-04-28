@@ -5,7 +5,8 @@ export {
 } from "./contractPrimitives";
 
 export {
-  buildAuthRequest,
+  buildLoginRequest,
+  buildRegisterRequest,
   normalizeAuthSessionResponse,
   normalizeUserResponse,
 } from "./domains/auth";

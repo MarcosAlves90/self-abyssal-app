@@ -1,15 +1,17 @@
 import {
   asArray,
-  optionalString,
   requiredEmail,
   requiredId,
+  requiredPattern,
   requiredString,
+  requiredStringWithLength,
 } from "../contractPrimitives";
 import { normalizeAddressResponse } from "./address";
 
 const ENTITY_USER = "User";
 const ENTITY_AUTH_SESSION = "AuthSession";
-const ENTITY_AUTH_REQUEST = "AuthRequest";
+const ENTITY_LOGIN_REQUEST = "LoginRequest";
+const ENTITY_REGISTER_REQUEST = "RegisterRequest";
 
 export function normalizeUserResponse(raw) {
   return {
@@ -27,11 +29,39 @@ export function normalizeAuthSessionResponse(raw) {
   };
 }
 
-export function buildAuthRequest(input) {
+export function buildLoginRequest(input) {
   return {
-    name: optionalString(input?.name),
-    email: requiredEmail(input?.email, { entity: ENTITY_AUTH_REQUEST, field: "email" }),
-    password: requiredString(input?.password, { entity: ENTITY_AUTH_REQUEST, field: "password", trim: false }),
-    phone: optionalString(input?.phone),
+    email: requiredEmail(input?.email, { entity: ENTITY_LOGIN_REQUEST, field: "email" }),
+    password: requiredStringWithLength(input?.password, {
+      entity: ENTITY_LOGIN_REQUEST,
+      field: "password",
+      min: 8,
+      max: 128,
+      trim: false,
+    }),
+  };
+}
+
+export function buildRegisterRequest(input) {
+  return {
+    name: requiredStringWithLength(input?.name, {
+      entity: ENTITY_REGISTER_REQUEST,
+      field: "name",
+      min: 3,
+      max: 80,
+    }),
+    email: requiredEmail(input?.email, { entity: ENTITY_REGISTER_REQUEST, field: "email" }),
+    password: requiredStringWithLength(input?.password, {
+      entity: ENTITY_REGISTER_REQUEST,
+      field: "password",
+      min: 8,
+      max: 128,
+      trim: false,
+    }),
+    phone: requiredPattern(input?.phone, {
+      entity: ENTITY_REGISTER_REQUEST,
+      field: "phone",
+      regex: /^\d{10,11}$/,
+    }),
   };
 }
