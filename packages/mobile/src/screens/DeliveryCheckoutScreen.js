@@ -31,8 +31,8 @@ import {
 } from "../utils/address";
 
 const paymentOptions = [
-  ["in_app_card_tokenized", "Cartao tokenizado"],
-  ["card_on_delivery", "Cartao na entrega"],
+  ["in_app_card_tokenized", "Cartão tokenizado"],
+  ["card_on_delivery", "Cartão na entrega"],
 ];
 
 export function DeliveryCheckoutScreen({ navigation }) {

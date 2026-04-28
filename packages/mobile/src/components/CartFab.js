@@ -16,15 +16,19 @@ export function CartFab({ currentRouteName, navigation }) {
   const { itemCount } = useCart();
   const { isAuthenticated } = useAuth();
   const insets = useSafeAreaInsets();
+  const hiddenRoutes = new Set(["Cart", "DeliveryCheckout"]);
 
-  if (!isAuthenticated || !itemCount || currentRouteName === "Cart") {
+  if (!isAuthenticated || !itemCount || hiddenRoutes.has(currentRouteName)) {
     return null;
   }
 
   return (
     <View
       pointerEvents="box-none"
-      style={[styles.container, { bottom: insets.bottom + TAB_BAR_HEIGHT - TAB_BAR_OVERLAP }]}
+      style={[
+        styles.container,
+        { bottom: insets.bottom + TAB_BAR_HEIGHT - TAB_BAR_OVERLAP },
+      ]}
     >
       <Pressable
         accessibilityLabel={`Abrir carrinho com ${itemCount} itens`}
@@ -32,13 +36,21 @@ export function CartFab({ currentRouteName, navigation }) {
         onPress={() => navigation.navigate("Cart")}
         style={styles.button}
       >
-        <BlurView intensity={32} tint="light" style={StyleSheet.absoluteFillObject} />
+        <BlurView
+          intensity={32}
+          tint="light"
+          style={StyleSheet.absoluteFillObject}
+        />
         <View style={styles.accentOverlay} />
         <View style={styles.backdrop} />
 
         <View style={styles.contentRow}>
           <View style={styles.iconShell}>
-            <MaterialCommunityIcons color="#FFFFFF" name="cart-outline" size={22} />
+            <MaterialCommunityIcons
+              color="#FFFFFF"
+              name="cart-outline"
+              size={22}
+            />
           </View>
           <View style={styles.copy}>
             <Text style={styles.label}>Carrinho</Text>
@@ -56,8 +68,8 @@ export function CartFab({ currentRouteName, navigation }) {
 CartFab.propTypes = {
   currentRouteName: PropTypes.string,
   navigation: PropTypes.shape({
-    navigate: PropTypes.func.isRequired
-  }).isRequired
+    navigate: PropTypes.func.isRequired,
+  }).isRequired,
 };
 
 const styles = StyleSheet.create({
@@ -65,7 +77,7 @@ const styles = StyleSheet.create({
     left: 0,
     position: "absolute",
     right: 0,
-    zIndex: 50
+    zIndex: 50,
   },
   button: {
     alignItems: "center",
@@ -78,19 +90,19 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
-      height: 10
+      height: 10,
     },
     shadowOpacity: 0.28,
     shadowRadius: 18,
-    elevation: 12
+    elevation: 12,
   },
   backdrop: {
     backgroundColor: "rgba(4, 11, 23, 0.08)",
-    ...StyleSheet.absoluteFillObject
+    ...StyleSheet.absoluteFillObject,
   },
   accentOverlay: {
     backgroundColor: "rgba(141, 249, 255, 0.28)",
-    ...StyleSheet.absoluteFillObject
+    ...StyleSheet.absoluteFillObject,
   },
   contentRow: {
     alignItems: "center",
@@ -101,7 +113,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     position: "relative",
     width: "100%",
-    zIndex: 1
+    zIndex: 1,
   },
   iconShell: {
     alignItems: "center",
@@ -110,35 +122,35 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     height: 42,
     justifyContent: "center",
-    width: 42
+    width: 42,
   },
   copy: {
-    flex: 1
+    flex: 1,
   },
   label: {
     color: "#FFFFFF",
     fontFamily: theme.fonts.bodyBold,
     fontSize: 13,
     letterSpacing: 0.8,
-    textTransform: "uppercase"
+    textTransform: "uppercase",
   },
   hint: {
     color: "rgba(255,255,255,0.82)",
     fontFamily: theme.fonts.body,
     fontSize: 12,
-    marginTop: 2
+    marginTop: 2,
   },
   badge: {
     alignItems: "center",
     backgroundColor: "rgba(255,255,255,0.82)",
     justifyContent: "center",
     minHeight: 28,
-    minWidth: 28
+    minWidth: 28,
   },
   badgeText: {
     color: "#000000",
     fontFamily: theme.fonts.bodyBold,
     fontSize: 12,
-    lineHeight: 12
-  }
+    lineHeight: 12,
+  },
 });
