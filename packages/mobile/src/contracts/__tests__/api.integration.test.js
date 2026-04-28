@@ -41,7 +41,7 @@ describe("api contract integration", () => {
   it("falha rapido para resposta invalida de login", async () => {
     const axios = require("axios").default;
     const { loginAccount } = require("../../services/api");
-    const client = axios.create.mock.results[0].value;
+    const client = axios.create.mock.results[1].value;
 
     client.post.mockResolvedValueOnce({ data: { user: { id: "u1", name: "Ana", role: "customer" } } });
 

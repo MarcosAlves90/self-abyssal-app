@@ -88,6 +88,11 @@ export const api = axios.create({
   timeout: 12000
 });
 
+export const authApi = axios.create({
+  baseURL,
+  timeout: 12000
+});
+
 export function setAuthToken(token) {
   if (token) {
     api.defaults.headers.common.Authorization = `Bearer ${token}`;
@@ -108,12 +113,12 @@ export function getApiErrorMessage(error) {
 }
 
 export async function registerAccount(payload) {
-  const { data } = await api.post("/auth/register", buildRegisterRequest(payload));
+  const { data } = await authApi.post("/auth/register", buildRegisterRequest(payload));
   return normalizeAuthSessionResponse(data);
 }
 
 export async function loginAccount(payload) {
-  const { data } = await api.post("/auth/login", buildLoginRequest(payload));
+  const { data } = await authApi.post("/auth/login", buildLoginRequest(payload));
   return normalizeAuthSessionResponse(data);
 }
 
