@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { CommonActions } from "@react-navigation/native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
+  ActivityIndicator,
   Alert,
   Pressable,
   StyleSheet,
@@ -26,7 +28,6 @@ import { formatCurrency, theme } from "../theme/tokens";
 import {
   buildAddressSummary,
   createEmptyAddress,
-  hasAddressData,
   isAddressComplete,
   mapSavedAddressToForm,
   normalizePostalCode,
@@ -39,6 +40,7 @@ const paymentOptions = [
 
 export function DeliveryCheckoutScreen({ navigation }) {
   const { user } = useAuth();
+  const primaryAddress = user?.savedAddresses?.[0];
   const {
     clearCart,
     itemCount,
@@ -49,6 +51,7 @@ export function DeliveryCheckoutScreen({ navigation }) {
   const { width } = useWindowDimensions();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLookingUpPostalCode, setIsLookingUpPostalCode] = useState(false);
+  const [showAddressEditor, setShowAddressEditor] = useState(false);
   const [deliveryForm, setDeliveryForm] = useState({
     contactName: "",
     address: createEmptyAddress(),
@@ -59,11 +62,11 @@ export function DeliveryCheckoutScreen({ navigation }) {
     setDeliveryForm((current) => ({
       ...current,
       contactName: current.contactName || user?.name || "",
-      address: hasAddressData(current.address)
-        ? current.address
-        : mapSavedAddressToForm(user?.savedAddresses?.[0]),
+      address: primaryAddress
+        ? mapSavedAddressToForm(primaryAddress)
+        : current.address,
     }));
-  }, [user]);
+  }, [primaryAddress, user]);
 
   const layout = getResponsiveLayout(width);
 
@@ -107,6 +110,8 @@ export function DeliveryCheckoutScreen({ navigation }) {
   }
 
   async function submitDeliveryOrder() {
+    const shouldUseAddressEditor = !primaryAddress || showAddressEditor;
+
     if (!items.length) {
       Alert.alert(
         "Carrinho vazio",
@@ -120,13 +125,17 @@ export function DeliveryCheckoutScreen({ navigation }) {
       return;
     }
 
-    if (!isAddressComplete(deliveryForm.address)) {
+    if (shouldUseAddressEditor && !isAddressComplete(deliveryForm.address)) {
       Alert.alert(
         "Endereço incompleto",
         "Preencha CEP, rua, número, bairro, cidade e UF para concluir o pedido.",
       );
       return;
     }
+
+    const deliveryAddress = shouldUseAddressEditor
+      ? buildAddressSummary(deliveryForm.address)
+      : primaryAddress?.summary;
 
     setIsSubmitting(true);
 
@@ -139,7 +148,7 @@ export function DeliveryCheckoutScreen({ navigation }) {
           note: item.note,
         })),
         paymentMethod: deliveryForm.paymentMethod,
-        deliveryAddress: buildAddressSummary(deliveryForm.address),
+        deliveryAddress,
         contactName: deliveryForm.contactName.trim(),
       });
 
@@ -221,6 +230,13 @@ export function DeliveryCheckoutScreen({ navigation }) {
             Revise itens, endereço e pagamento antes de enviar para a cozinha.
           </Text>
 
+          {primaryAddress ? (
+            <AddressSummaryCard
+              onEditAddress={() => setShowAddressEditor(true)}
+              primaryAddress={primaryAddress}
+            />
+          ) : null}
+
           <View style={styles.deliverySummaryRow}>
             <Text style={styles.deliverySummaryLabel}>Itens no carrinho</Text>
             <Text style={styles.deliverySummaryValue}>{itemCount}</Text>
@@ -278,12 +294,32 @@ export function DeliveryCheckoutScreen({ navigation }) {
             />
           </Field>
 
-          <AddressFields
-            address={deliveryForm.address}
-            isLookingUpPostalCode={isLookingUpPostalCode}
-            onChangeField={updateDeliveryAddressField}
-            onLookupPostalCode={handleDeliveryPostalCodeLookup}
-          />
+          {!primaryAddress || showAddressEditor ? (
+            <>
+              {primaryAddress ? (
+                <Text style={styles.addressEditorEyebrow}>
+                  Novo endereço para este pedido
+                </Text>
+              ) : null}
+              <AddressFields
+                address={deliveryForm.address}
+                isLookingUpPostalCode={isLookingUpPostalCode}
+                onChangeField={updateDeliveryAddressField}
+                onLookupPostalCode={handleDeliveryPostalCodeLookup}
+              />
+              {primaryAddress ? (
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => setShowAddressEditor(false)}
+                  style={styles.addressEditorCancelButton}
+                >
+                  <Text style={styles.addressEditorCancelText}>
+                    Usar endereço salvo
+                  </Text>
+                </Pressable>
+              ) : null}
+            </>
+          ) : null}
 
           <Field label="Pagamento" required>
             <View style={styles.chipWrap}>
@@ -320,6 +356,57 @@ DeliveryCheckoutScreen.propTypes = {
     navigate: PropTypes.func.isRequired,
   }).isRequired,
 };
+
+AddressSummaryCard.propTypes = {
+  onEditAddress: PropTypes.func.isRequired,
+  primaryAddress: PropTypes.shape({
+    label: PropTypes.string,
+    summary: PropTypes.string,
+  }),
+};
+
+function AddressSummaryCard({ onEditAddress, primaryAddress }) {
+  return (
+    <View style={styles.addressSummaryCard}>
+      <View style={styles.addressSummaryTop}>
+        <View style={styles.addressSummaryContent}>
+          <View style={styles.addressSummaryTitleRow}>
+            <MaterialCommunityIcons
+              color={theme.colors.accentSoft}
+              name="map-marker-check-outline"
+              size={18}
+            />
+            <Text style={styles.addressSummaryTitle}>
+              {primaryAddress?.label || "Endereço principal"}
+            </Text>
+          </View>
+          <Text style={styles.addressSummaryCopy}>
+            {primaryAddress?.summary}
+          </Text>
+        </View>
+        <MaterialCommunityIcons
+          color={theme.colors.accentSoft}
+          name="home-heart"
+          size={22}
+        />
+      </View>
+      <Pressable
+        accessibilityRole="button"
+        onPress={onEditAddress}
+        style={styles.addressSummaryEditButton}
+      >
+        <MaterialCommunityIcons
+          color={theme.colors.accentSoft}
+          name="pencil"
+          size={16}
+        />
+        <Text style={styles.addressSummaryEditButtonText}>
+          Editar endereço
+        </Text>
+      </Pressable>
+    </View>
+  );
+}
 
 function getDeliveryFailureReason(error) {
   const message = getApiErrorMessage(error);
@@ -461,6 +548,78 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 22,
     marginBottom: theme.spacing.lg,
+  },
+  addressSummaryCard: {
+    backgroundColor: theme.colors.surface,
+    borderColor: theme.colors.border,
+    borderWidth: 1,
+    marginBottom: theme.spacing.lg,
+    padding: theme.spacing.md,
+  },
+  addressSummaryTop: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    gap: 12,
+    justifyContent: "space-between",
+  },
+  addressSummaryContent: {
+    flex: 1,
+    gap: 6,
+  },
+  addressSummaryTitleRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 8,
+  },
+  addressSummaryTitle: {
+    color: theme.colors.text,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 14,
+  },
+  addressSummaryCopy: {
+    color: theme.colors.textMuted,
+    fontFamily: theme.fonts.body,
+    fontSize: 13,
+    lineHeight: 20,
+  },
+  addressSummaryEditButton: {
+    alignItems: "center",
+    borderColor: theme.colors.border,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 8,
+    justifyContent: "center",
+    marginTop: 12,
+    minHeight: 44,
+    paddingHorizontal: 14,
+  },
+  addressSummaryEditButtonText: {
+    color: theme.colors.text,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 13,
+  },
+  addressEditorEyebrow: {
+    color: theme.colors.accentWarm,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 12,
+    letterSpacing: 1.2,
+    marginBottom: 10,
+    textTransform: "uppercase",
+  },
+  addressEditorCancelButton: {
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.03)",
+    borderColor: theme.colors.border,
+    borderWidth: 1,
+    justifyContent: "center",
+    marginTop: 10,
+    minHeight: 44,
+    paddingHorizontal: 14,
+  },
+  addressEditorCancelText: {
+    color: theme.colors.textMuted,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 13,
   },
   deliverySummaryRow: {
     alignItems: "center",
