@@ -76,7 +76,7 @@ export function ProfileScreen() {
       setOrders(nextOrders);
       setReservations(nextReservations);
       setAddressForm(mapSavedAddressToForm(currentUser?.savedAddresses?.[0]));
-      setShowAddressEditor(Boolean(currentUser?.savedAddresses?.[0]));
+      setShowAddressEditor(false);
     } catch (error) {
       Alert.alert("Falha ao carregar perfil", getApiErrorMessage(error));
     }
@@ -148,7 +148,7 @@ export function ProfileScreen() {
 
       const currentUser = await refreshUser();
       setAddressForm(mapSavedAddressToForm(currentUser.savedAddresses?.[0]));
-      setShowAddressEditor(true);
+      setShowAddressEditor(false);
       setAddressSaveFeedback({
         tone: "success",
         message: "Endereço principal salvo com sucesso.",
@@ -165,6 +165,18 @@ export function ProfileScreen() {
     }
   }
 
+  function handleStartAddressEditor() {
+    setAddressSaveFeedback({ tone: "idle", message: "" });
+    setAddressForm(mapSavedAddressToForm(user?.savedAddresses?.[0]));
+    setShowAddressEditor(true);
+  }
+
+  function handleCancelAddressEditor() {
+    setAddressSaveFeedback({ tone: "idle", message: "" });
+    setAddressForm(mapSavedAddressToForm(user?.savedAddresses?.[0]));
+    setShowAddressEditor(false);
+  }
+
   return (
     <ProfileContent
       addressForm={addressForm}
@@ -175,9 +187,10 @@ export function ProfileScreen() {
       latestReservation={latestReservation}
       loadProfile={loadProfile}
       logout={logout}
+      onCancelAddressEditor={handleCancelAddressEditor}
       onLookupPostalCode={handlePostalCodeLookup}
       onSavePrimaryAddress={handleSavePrimaryAddress}
-      onToggleAddressEditor={() => setShowAddressEditor((current) => !current)}
+      onStartAddressEditor={handleStartAddressEditor}
       onUpdateAddressField={updateAddressField}
       orders={orders}
       primaryAddress={primaryAddress}
@@ -197,9 +210,10 @@ function ProfileContent({
   latestReservation,
   loadProfile,
   logout,
+  onCancelAddressEditor,
   onLookupPostalCode,
   onSavePrimaryAddress,
-  onToggleAddressEditor,
+  onStartAddressEditor,
   onUpdateAddressField,
   orders,
   primaryAddress,
@@ -232,11 +246,7 @@ function ProfileContent({
           reservationsCount={reservations.length}
         />
 
-        <ProfileQuickActions
-          hasAddress={Boolean(primaryAddress)}
-          loadProfile={loadProfile}
-          onToggleAddressEditor={onToggleAddressEditor}
-        />
+        <ProfileQuickActions loadProfile={loadProfile} />
 
         <View style={styles.mainGrid}>
           <View style={styles.primaryColumn}>
@@ -246,9 +256,10 @@ function ProfileContent({
               hasAddress={Boolean(primaryAddress)}
               isLookingUpPostalCode={isLookingUpPostalCode}
               isSavingAddress={isSavingAddress}
+              onCancelAddressEditor={onCancelAddressEditor}
               onLookupPostalCode={onLookupPostalCode}
               onSavePrimaryAddress={onSavePrimaryAddress}
-              onToggleAddressEditor={onToggleAddressEditor}
+              onStartAddressEditor={onStartAddressEditor}
               onUpdateAddressField={onUpdateAddressField}
               primaryAddress={primaryAddress}
               shouldShowAddressEditor={shouldShowAddressEditor}
@@ -332,9 +343,10 @@ ProfileContent.propTypes = {
   }),
   loadProfile: PropTypes.func.isRequired,
   logout: PropTypes.func.isRequired,
+  onCancelAddressEditor: PropTypes.func.isRequired,
   onLookupPostalCode: PropTypes.func.isRequired,
   onSavePrimaryAddress: PropTypes.func.isRequired,
-  onToggleAddressEditor: PropTypes.func.isRequired,
+  onStartAddressEditor: PropTypes.func.isRequired,
   onUpdateAddressField: PropTypes.func.isRequired,
   orders: PropTypes.array.isRequired,
   primaryAddress: PropTypes.shape({
@@ -412,18 +424,9 @@ ProfileMetrics.propTypes = {
   reservationsCount: PropTypes.number.isRequired,
 };
 
-function ProfileQuickActions({
-  hasAddress,
-  loadProfile,
-  onToggleAddressEditor,
-}) {
+function ProfileQuickActions({ loadProfile }) {
   return (
     <View style={styles.quickActionsCard}>
-      <QuickAction
-        icon="map-marker-radius"
-        label={hasAddress ? "Editar endereço" : "Adicionar endereço"}
-        onPress={onToggleAddressEditor}
-      />
       <QuickAction
         icon="cached"
         label="Sincronizar conta"
@@ -439,9 +442,7 @@ function ProfileQuickActions({
 }
 
 ProfileQuickActions.propTypes = {
-  hasAddress: PropTypes.bool.isRequired,
   loadProfile: PropTypes.func.isRequired,
-  onToggleAddressEditor: PropTypes.func.isRequired,
 };
 
 function AddressSection({
@@ -450,13 +451,20 @@ function AddressSection({
   hasAddress,
   isLookingUpPostalCode,
   isSavingAddress,
+  onCancelAddressEditor,
   onLookupPostalCode,
   onSavePrimaryAddress,
-  onToggleAddressEditor,
+  onStartAddressEditor,
   onUpdateAddressField,
   primaryAddress,
   shouldShowAddressEditor,
 }) {
+  const showSummaryEditButton = hasAddress && shouldShowAddressEditor === false;
+  const showEditor = shouldShowAddressEditor;
+  const showCancelButton = hasAddress;
+  const showAddressFeedback =
+    addressSaveFeedback.tone === "idle" ? false : true;
+
   return (
     <>
       <SectionHeader
@@ -467,23 +475,11 @@ function AddressSection({
 
       <View style={styles.cardBlock}>
         {hasAddress ? (
-          <View style={styles.addressSummaryCard}>
-            <View style={styles.addressSummaryTop}>
-              <View>
-                <Text style={styles.addressSummaryTitle}>
-                  {primaryAddress?.label || "Principal"}
-                </Text>
-                <Text style={styles.addressSummaryCopy}>
-                  {primaryAddress?.summary}
-                </Text>
-              </View>
-              <MaterialCommunityIcons
-                color={theme.colors.accentSoft}
-                name="home-heart"
-                size={22}
-              />
-            </View>
-          </View>
+          <AddressSummaryCard
+            onStartAddressEditor={onStartAddressEditor}
+            primaryAddress={primaryAddress}
+            showSummaryEditButton={showSummaryEditButton}
+          />
         ) : (
           <View style={styles.emptyCard}>
             <MaterialCommunityIcons
@@ -498,90 +494,152 @@ function AddressSection({
           </View>
         )}
 
-        {shouldShowAddressEditor ? (
-          <View style={styles.addressPanel}>
-            <Text style={styles.panelTitle}>Editar endereço</Text>
-            <Text style={styles.panelCopy}>
-              O CEP preenche automaticamente os campos principais. Você só
-              revisa o que importa.
-            </Text>
-
-            <AddressFields
-              address={addressForm}
-              isLookingUpPostalCode={isLookingUpPostalCode}
-              onChangeField={onUpdateAddressField}
-              onLookupPostalCode={onLookupPostalCode}
-            />
-
-            <Text style={styles.addressHint}>
-              Cep, rua e bairro entram rápido. Número e complemento continuam
-              sob seu controle.
-            </Text>
-
-            {addressSaveFeedback.tone !== "idle" ? (
-              <View
-                style={[
-                  styles.addressFeedback,
-                  addressSaveFeedback.tone === "success" &&
-                    styles.addressFeedbackSuccess,
-                  addressSaveFeedback.tone === "error" &&
-                    styles.addressFeedbackError,
-                ]}
-              >
-                {addressSaveFeedback.tone === "saving" ? (
-                  <ActivityIndicator
-                    color={theme.colors.accentSoft}
-                    size="small"
-                  />
-                ) : null}
-                <Text style={styles.addressFeedbackText}>
-                  {addressSaveFeedback.message}
-                </Text>
-              </View>
-            ) : null}
-
-            <Pressable
-              accessibilityRole="button"
-              disabled={isSavingAddress}
-              onPress={onSavePrimaryAddress}
-              style={[
-                styles.primaryButton,
-                isSavingAddress && styles.buttonDisabled,
-              ]}
-            >
-              <View style={styles.primaryButtonContent}>
-                {isSavingAddress ? (
-                  <ActivityIndicator
-                    color={theme.colors.background}
-                    size="small"
-                  />
-                ) : null}
-                <Text style={styles.primaryButtonText}>
-                  {isSavingAddress
-                    ? "Salvando..."
-                    : "Salvar endereço principal"}
-                </Text>
-              </View>
-            </Pressable>
-          </View>
-        ) : (
-          <Pressable
-            accessibilityRole="button"
-            onPress={onToggleAddressEditor}
-            style={styles.inlineSecondaryButton}
-          >
-            <MaterialCommunityIcons
-              color={theme.colors.accentSoft}
-              name="pencil"
-              size={18}
-            />
-            <Text style={styles.inlineSecondaryButtonText}>
-              Editar endereço
-            </Text>
-          </Pressable>
-        )}
+        {showEditor ? (
+          <AddressEditorPanel
+            addressForm={addressForm}
+            addressSaveFeedback={addressSaveFeedback}
+            isLookingUpPostalCode={isLookingUpPostalCode}
+            isSavingAddress={isSavingAddress}
+            onCancelAddressEditor={onCancelAddressEditor}
+            onLookupPostalCode={onLookupPostalCode}
+            onSavePrimaryAddress={onSavePrimaryAddress}
+            onUpdateAddressField={onUpdateAddressField}
+            showAddressFeedback={showAddressFeedback}
+            showCancelButton={showCancelButton}
+          />
+        ) : null}
       </View>
     </>
+  );
+}
+
+function AddressSummaryCard({
+  onStartAddressEditor,
+  primaryAddress,
+  showSummaryEditButton,
+}) {
+  return (
+    <View style={styles.addressSummaryCard}>
+      <View style={styles.addressSummaryTop}>
+        <View style={styles.addressSummaryContent}>
+          <View style={styles.addressSummaryTitleRow}>
+            <MaterialCommunityIcons
+              color={theme.colors.accentSoft}
+              name="map-marker-check-outline"
+              size={18}
+            />
+            <Text style={styles.addressSummaryTitle}>
+              {primaryAddress?.label || "Principal"}
+            </Text>
+          </View>
+          <Text style={styles.addressSummaryCopy}>
+            {primaryAddress?.summary}
+          </Text>
+        </View>
+        <MaterialCommunityIcons
+          color={theme.colors.accentSoft}
+          name="home-heart"
+          size={22}
+        />
+      </View>
+      {showSummaryEditButton ? (
+        <Pressable
+          accessibilityRole="button"
+          onPress={onStartAddressEditor}
+          style={styles.addressSummaryEditButton}
+        >
+          <MaterialCommunityIcons
+            color={theme.colors.accentSoft}
+            name="pencil"
+            size={16}
+          />
+          <Text style={styles.addressSummaryEditButtonText}>Editar</Text>
+        </Pressable>
+      ) : null}
+    </View>
+  );
+}
+
+function AddressEditorPanel({
+  addressForm,
+  addressSaveFeedback,
+  isLookingUpPostalCode,
+  isSavingAddress,
+  onCancelAddressEditor,
+  onLookupPostalCode,
+  onSavePrimaryAddress,
+  onUpdateAddressField,
+  showAddressFeedback,
+  showCancelButton,
+}) {
+  return (
+    <View style={styles.addressPanel}>
+      <Text style={styles.panelTitle}>Editar endereço</Text>
+      <Text style={styles.panelCopy}>
+        O CEP preenche automaticamente os campos principais. Você só revisa o
+        que importa.
+      </Text>
+
+      <AddressFields
+        address={addressForm}
+        isLookingUpPostalCode={isLookingUpPostalCode}
+        onChangeField={onUpdateAddressField}
+        onLookupPostalCode={onLookupPostalCode}
+      />
+
+      <Text style={styles.addressHint}>
+        Cep, rua e bairro entram rápido. Número e complemento continuam sob seu
+        controle.
+      </Text>
+
+      {showAddressFeedback ? (
+        <View
+          style={[
+            styles.addressFeedback,
+            addressSaveFeedback.tone === "success" &&
+              styles.addressFeedbackSuccess,
+            addressSaveFeedback.tone === "error" && styles.addressFeedbackError,
+          ]}
+        >
+          {addressSaveFeedback.tone === "saving" ? (
+            <ActivityIndicator color={theme.colors.accentSoft} size="small" />
+          ) : null}
+          <Text style={styles.addressFeedbackText}>
+            {addressSaveFeedback.message}
+          </Text>
+        </View>
+      ) : null}
+
+      <Pressable
+        accessibilityRole="button"
+        disabled={isSavingAddress}
+        onPress={onSavePrimaryAddress}
+        style={[styles.primaryButton, isSavingAddress && styles.buttonDisabled]}
+      >
+        <View style={styles.primaryButtonContent}>
+          {isSavingAddress ? (
+            <ActivityIndicator color={theme.colors.background} size="small" />
+          ) : null}
+          <Text style={styles.primaryButtonText}>
+            {isSavingAddress ? "Salvando..." : "Salvar endereço principal"}
+          </Text>
+        </View>
+      </Pressable>
+
+      {showCancelButton ? (
+        <Pressable
+          accessibilityRole="button"
+          disabled={isSavingAddress}
+          onPress={onCancelAddressEditor}
+          style={[
+            styles.cancelButton,
+            isSavingAddress && styles.buttonDisabled,
+          ]}
+        >
+          <Text style={styles.cancelButtonText}>Cancelar edição</Text>
+        </Pressable>
+      ) : null}
+    </View>
   );
 }
 
@@ -602,15 +660,49 @@ AddressSection.propTypes = {
   hasAddress: PropTypes.bool.isRequired,
   isLookingUpPostalCode: PropTypes.bool.isRequired,
   isSavingAddress: PropTypes.bool.isRequired,
+  onCancelAddressEditor: PropTypes.func.isRequired,
   onLookupPostalCode: PropTypes.func.isRequired,
   onSavePrimaryAddress: PropTypes.func.isRequired,
-  onToggleAddressEditor: PropTypes.func.isRequired,
+  onStartAddressEditor: PropTypes.func.isRequired,
   onUpdateAddressField: PropTypes.func.isRequired,
   primaryAddress: PropTypes.shape({
     label: PropTypes.string,
     summary: PropTypes.string,
   }),
   shouldShowAddressEditor: PropTypes.bool.isRequired,
+};
+
+AddressSummaryCard.propTypes = {
+  onStartAddressEditor: PropTypes.func.isRequired,
+  primaryAddress: PropTypes.shape({
+    label: PropTypes.string,
+    summary: PropTypes.string,
+  }),
+  showSummaryEditButton: PropTypes.bool.isRequired,
+};
+
+AddressEditorPanel.propTypes = {
+  addressForm: PropTypes.shape({
+    city: PropTypes.string.isRequired,
+    complement: PropTypes.string.isRequired,
+    neighborhood: PropTypes.string.isRequired,
+    number: PropTypes.string.isRequired,
+    postalCode: PropTypes.string.isRequired,
+    state: PropTypes.string.isRequired,
+    street: PropTypes.string.isRequired,
+  }).isRequired,
+  addressSaveFeedback: PropTypes.shape({
+    message: PropTypes.string.isRequired,
+    tone: PropTypes.oneOf(["idle", "saving", "success", "error"]).isRequired,
+  }).isRequired,
+  isLookingUpPostalCode: PropTypes.bool.isRequired,
+  isSavingAddress: PropTypes.bool.isRequired,
+  onCancelAddressEditor: PropTypes.func.isRequired,
+  onLookupPostalCode: PropTypes.func.isRequired,
+  onSavePrimaryAddress: PropTypes.func.isRequired,
+  onUpdateAddressField: PropTypes.func.isRequired,
+  showAddressFeedback: PropTypes.bool.isRequired,
+  showCancelButton: PropTypes.bool.isRequired,
 };
 
 function CompactActivityCard({
@@ -968,17 +1060,47 @@ const styles = StyleSheet.create({
     gap: 12,
     justifyContent: "space-between",
   },
+  addressSummaryContent: {
+    flex: 1,
+    minWidth: 0,
+  },
+  addressSummaryTitleRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 6,
+    marginBottom: 6,
+  },
   addressSummaryTitle: {
     color: theme.colors.text,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 16,
-    marginBottom: 6,
+    flexShrink: 1,
   },
   addressSummaryCopy: {
     color: theme.colors.textMuted,
+    flexShrink: 1,
     fontFamily: theme.fonts.body,
     fontSize: 14,
     lineHeight: 22,
+  },
+  addressSummaryEditButton: {
+    alignItems: "center",
+    alignSelf: "flex-start",
+    backgroundColor: "rgba(255,255,255,0.03)",
+    borderColor: theme.colors.border,
+    borderRadius: 0,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 6,
+    justifyContent: "center",
+    marginTop: 12,
+    minHeight: 36,
+    paddingHorizontal: 10,
+  },
+  addressSummaryEditButtonText: {
+    color: theme.colors.text,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 12,
   },
   emptyCard: {
     alignItems: "flex-start",
@@ -1064,6 +1186,21 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 8,
   },
+  cancelButton: {
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.03)",
+    borderColor: theme.colors.border,
+    borderRadius: 0,
+    borderWidth: 1,
+    justifyContent: "center",
+    minHeight: 44,
+    paddingHorizontal: 14,
+  },
+  cancelButtonText: {
+    color: theme.colors.text,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 13,
+  },
   buttonDisabled: {
     opacity: 0.75,
   },
@@ -1071,25 +1208,6 @@ const styles = StyleSheet.create({
     color: theme.colors.background,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 14,
-  },
-  inlineSecondaryButton: {
-    alignItems: "center",
-    alignSelf: "flex-start",
-    backgroundColor: "rgba(255,255,255,0.03)",
-    borderColor: theme.colors.border,
-    borderRadius: 0,
-    borderWidth: 1,
-    flexDirection: "row",
-    gap: 8,
-    justifyContent: "center",
-    minHeight: 42,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-  },
-  inlineSecondaryButtonText: {
-    color: theme.colors.text,
-    fontFamily: theme.fonts.bodyBold,
-    fontSize: 13,
   },
   activityStack: {
     gap: 12,
