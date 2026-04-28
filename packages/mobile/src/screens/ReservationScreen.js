@@ -12,16 +12,13 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 
 import { AddressFields } from "../components/AddressFields";
-import { BranchCard } from "../components/BranchCard";
 import { KeyboardScrollScreen } from "../components/KeyboardScrollScreen";
-import { SectionHeader } from "../components/SectionHeader";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import {
   createOrder,
   createReservation,
   fetchBranches,
-  fetchReservations,
   getApiErrorMessage,
   lookupPostalCode
 } from "../services/api";
@@ -55,13 +52,10 @@ export function ReservationScreen({ navigation }) {
     itemCount,
     items,
     totalCents,
-    updateItemNote,
-    updateItemQuantity
   } = useCart();
   const { width } = useWindowDimensions();
   const [mode, setMode] = useState("reservation");
   const [branches, setBranches] = useState([]);
-  const [reservations, setReservations] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLookingUpPostalCode, setIsLookingUpPostalCode] = useState(false);
   const [reservationForm, setReservationForm] = useState({
@@ -81,13 +75,9 @@ export function ReservationScreen({ navigation }) {
   useEffect(() => {
     async function loadData() {
       try {
-        const [nextBranches, nextReservations] = await Promise.all([
-          fetchBranches(),
-          fetchReservations()
-        ]);
+        const nextBranches = await fetchBranches();
 
         setBranches(nextBranches);
-        setReservations(nextReservations);
 
         if (nextBranches.length && !reservationForm.branchId) {
           setReservationForm((current) => ({
@@ -117,15 +107,6 @@ export function ReservationScreen({ navigation }) {
   const layout = getResponsiveLayout(width);
   const selectedBranch =
     branches.find((branch) => branch.id === reservationForm.branchId) || branches[0];
-  const recentReservations = reservations.slice(0, 3);
-  const nextReservationItem = reservations[0];
-  const deliverySummary = buildAddressSummary(deliveryForm.address);
-  const selectedPaymentLabel =
-    paymentOptions.find(([value]) => value === deliveryForm.paymentMethod)?.[1] ||
-    paymentOptions[0][1];
-  const reservationSummaryText = itemCount
-    ? `${itemCount} itens prontos`
-    : "Carrinho vazio";
 
   function updateDeliveryAddressField(field, value) {
     setDeliveryForm((current) => ({
@@ -174,7 +155,7 @@ export function ReservationScreen({ navigation }) {
         `${reservationForm.date}T${reservationForm.time}:00`
       ).toISOString();
 
-      const createdReservation = await createReservation({
+        await createReservation({
         branchId: reservationForm.branchId,
         scheduledAt,
         guests: Number(reservationForm.guests),
@@ -182,7 +163,6 @@ export function ReservationScreen({ navigation }) {
         specialRequest: reservationForm.specialRequest
       });
 
-      setReservations((current) => [createdReservation, ...current]);
       Alert.alert("Reserva confirmada", "Sua reserva foi registrada com sucesso.");
     } catch (error) {
       Alert.alert("Não foi possível reservar", getApiErrorMessage(error));
@@ -247,48 +227,23 @@ export function ReservationScreen({ navigation }) {
           start={{ x: 0, y: 0 }}
           style={[styles.hero, layout.isCompact && styles.heroCompact]}
         >
-          <View style={[styles.heroTop, layout.isWide && styles.heroTopWide]}>
-            <View style={styles.heroCopy}>
-              <Text style={styles.heroEyebrow}>Reserva e delivery</Text>
-              <Text
-                style={[
-                  styles.heroTitle,
-                  {
-                    fontSize: layout.heroTitleSize,
-                    lineHeight: layout.heroTitleLineHeight
-                  }
-                ]}
-              >
-                {mode === "reservation"
-                  ? "Escolha a mesa e confirme em segundos."
-                  : "Finalize seu pedido sem distrações."}
-              </Text>
-              <Text style={styles.heroSubtitle}>
-                Tudo organizado em uma tela limpa: filial, horário, convidados e confirmação.
-              </Text>
-            </View>
-
-            <View style={[styles.heroStats, layout.isCompact && styles.heroStatsCompact]}>
-              <HeroStat
-                compact={layout.isCompact}
-                label="Reservas"
-                minWidth={layout.statCardMinWidth}
-                value={String(reservations.length)}
-              />
-              <HeroStat
-                compact={layout.isCompact}
-                label="Itens"
-                minWidth={layout.statCardMinWidth}
-                value={String(itemCount)}
-              />
-              <HeroStat
-                compact={layout.isCompact}
-                label="Entrega"
-                minWidth={layout.statCardMinWidth}
-                value={user?.savedAddresses?.[0]?.summary ? "Pronta" : "Pendente"}
-              />
-            </View>
-          </View>
+          <Text style={styles.heroEyebrow}>Reserva e delivery</Text>
+          <Text
+            style={[
+              styles.heroTitle,
+              {
+                fontSize: layout.heroTitleSize,
+                lineHeight: layout.heroTitleLineHeight
+              }
+            ]}
+          >
+            {mode === "reservation"
+              ? "Escolha a mesa e confirme sem ruído."
+              : "Finalize seu pedido com a mesma calma."}
+          </Text>
+          <Text style={styles.heroSubtitle}>
+            Uma tela única, mais leve, com o essencial no lugar certo.
+          </Text>
         </LinearGradient>
 
         <View style={[styles.modeRow, layout.isCompact && styles.modeRowStack]}>
@@ -306,339 +261,213 @@ export function ReservationScreen({ navigation }) {
           />
         </View>
 
-        <View style={[styles.mainGrid, layout.isWide && styles.mainGridWide]}>
-          <View style={styles.primaryColumn}>
-            {mode === "reservation" ? (
-              <View style={[styles.panel, layout.isCompact && styles.panelCompact]}>
-                <Text style={styles.panelEyebrow}>Reserva presencial</Text>
-                <Text
-                  style={[
-                    styles.panelTitle,
-                    {
-                      fontSize: layout.featureTitleSize,
-                      lineHeight: layout.featureTitleLineHeight
-                    }
-                  ]}
-                >
-                  Monte sua reserva com poucos toques.
-                </Text>
-                <Text style={styles.panelCopy}>
-                  Escolha a unidade, ajuste o horário e confirme sem ruído visual.
-                </Text>
+        <View style={[styles.panel, layout.isCompact && styles.panelCompact]}>
+          {mode === "reservation" ? (
+            <>
+              <Text style={styles.panelEyebrow}>Reserva presencial</Text>
+              <Text
+                style={[
+                  styles.panelTitle,
+                  {
+                    fontSize: layout.featureTitleSize,
+                    lineHeight: layout.featureTitleLineHeight
+                  }
+                ]}
+              >
+                Selecione a unidade e horário.
+              </Text>
+              <Text style={styles.panelCopy}>
+                Mantivemos só o necessário para reservar com calma e sem distração.
+              </Text>
 
-                {selectedBranch ? (
-                  <View style={styles.branchSpotlight}>
-                    <Text style={styles.branchSpotlightLabel}>Filial selecionada</Text>
-                    <BranchCard branch={selectedBranch} compact style={styles.branchSpotlightCard} />
-                  </View>
-                ) : null}
-
-                <Field label="Filial">
-                  <View style={styles.chipWrap}>
-                    {branches.map((branch) => (
-                      <SelectionChip
-                        active={reservationForm.branchId === branch.id}
-                        key={branch.id}
-                        label={branch.name}
-                        onPress={() =>
-                          setReservationForm((current) => ({
-                            ...current,
-                            branchId: branch.id,
-                            depthLevel: branch.reservationDepths[0]
-                          }))
-                        }
-                      />
-                    ))}
-                  </View>
-                </Field>
-
-                <View style={[styles.dualFieldRow, layout.isCompact && styles.dualFieldRowStack]}>
-                  <Field label="Data">
-                    <StyledInput
-                      onChangeText={(value) =>
-                        setReservationForm((current) => ({ ...current, date: value }))
+              <Field label="Filial">
+                <View style={styles.chipWrap}>
+                  {branches.map((branch) => (
+                    <SelectionChip
+                      active={reservationForm.branchId === branch.id}
+                      key={branch.id}
+                      label={branch.name}
+                      onPress={() =>
+                        setReservationForm((current) => ({
+                          ...current,
+                          branchId: branch.id,
+                          depthLevel: branch.reservationDepths[0]
+                        }))
                       }
-                      placeholder="2026-05-10"
-                      value={reservationForm.date}
                     />
-                  </Field>
-                  <Field label="Horário">
-                    <StyledInput
-                      onChangeText={(value) =>
-                        setReservationForm((current) => ({ ...current, time: value }))
-                      }
-                      placeholder="20:30"
-                      value={reservationForm.time}
-                    />
-                  </Field>
+                  ))}
                 </View>
+              </Field>
 
-                <Field label="Convidados">
+              <View style={[styles.dualFieldRow, layout.isCompact && styles.dualFieldRowStack]}>
+                <Field label="Data">
                   <StyledInput
-                    keyboardType="number-pad"
                     onChangeText={(value) =>
-                      setReservationForm((current) => ({ ...current, guests: value }))
+                      setReservationForm((current) => ({ ...current, date: value }))
                     }
-                    value={reservationForm.guests}
+                    placeholder="2026-05-10"
+                    value={reservationForm.date}
                   />
                 </Field>
-
-                <Field label="Nível">
-                  <View style={styles.chipWrap}>
-                    {(selectedBranch?.reservationDepths || []).map((depth) => (
-                      <SelectionChip
-                        active={reservationForm.depthLevel === depth}
-                        key={depth}
-                        label={depth}
-                        onPress={() =>
-                          setReservationForm((current) => ({ ...current, depthLevel: depth }))
-                        }
-                      />
-                    ))}
-                  </View>
-                </Field>
-
-                <Field label="Observações">
+                <Field label="Horário">
                   <StyledInput
-                    multiline
                     onChangeText={(value) =>
-                      setReservationForm((current) => ({
-                        ...current,
-                        specialRequest: value
-                      }))
+                      setReservationForm((current) => ({ ...current, time: value }))
                     }
-                    placeholder="Restrições ou pedidos especiais"
-                    value={reservationForm.specialRequest}
+                    placeholder="20:30"
+                    value={reservationForm.time}
                   />
                 </Field>
-
-                <PrimaryButton
-                  disabled={isSubmitting}
-                  label={isSubmitting ? "Confirmando..." : "Confirmar reserva"}
-                  onPress={submitReservation}
-                />
               </View>
-            ) : (
-              <View style={[styles.panel, layout.isCompact && styles.panelCompact]}>
-                <Text style={styles.panelEyebrow}>Delivery</Text>
-                <Text
-                  style={[
-                    styles.panelTitle,
-                    {
-                      fontSize: layout.featureTitleSize,
-                      lineHeight: layout.featureTitleLineHeight
-                    }
-                  ]}
-                >
-                  Feche seu pedido sem excesso de informação.
-                </Text>
-                <Text style={styles.panelCopy}>
-                  Carrinho, contato, endereço e pagamento aparecem na ordem certa.
-                </Text>
 
-                {items.length ? (
-                  items.map((item) => (
-                    <View key={item.id} style={styles.cartItem}>
-                      <View style={[styles.cartTopRow, layout.isCompact && styles.cartTopRowStack]}>
-                        <Text style={styles.cartName}>{item.name}</Text>
-                        <Text style={[styles.cartPrice, layout.isCompact && styles.cartPriceStack]}>
-                          {formatCurrency(item.priceCents * item.quantity)}
-                        </Text>
-                      </View>
-                      <View style={styles.quantityRow}>
-                        <Pressable
-                          accessibilityRole="button"
-                          onPress={() => updateItemQuantity(item.id, item.quantity - 1)}
-                          style={styles.quantityButton}
-                        >
-                          <Text style={styles.quantityButtonText}>-</Text>
-                        </Pressable>
-                        <Text style={styles.quantityValue}>{item.quantity}</Text>
-                        <Pressable
-                          accessibilityRole="button"
-                          onPress={() => updateItemQuantity(item.id, item.quantity + 1)}
-                          style={styles.quantityButton}
-                        >
-                          <Text style={styles.quantityButtonText}>+</Text>
-                        </Pressable>
-                      </View>
-                      <StyledInput
-                        onChangeText={(value) => updateItemNote(item.id, value)}
-                        placeholder="Observação opcional do item"
-                        value={item.note}
-                      />
+              <Field label="Convidados">
+                <StyledInput
+                  keyboardType="number-pad"
+                  onChangeText={(value) =>
+                    setReservationForm((current) => ({ ...current, guests: value }))
+                  }
+                  value={reservationForm.guests}
+                />
+              </Field>
+
+              <Field label="Nível">
+                <View style={styles.chipWrap}>
+                  {(selectedBranch?.reservationDepths || []).map((depth) => (
+                    <SelectionChip
+                      active={reservationForm.depthLevel === depth}
+                      key={depth}
+                      label={depth}
+                      onPress={() =>
+                        setReservationForm((current) => ({ ...current, depthLevel: depth }))
+                      }
+                    />
+                  ))}
+                </View>
+              </Field>
+
+              <Field label="Observações">
+                <StyledInput
+                  multiline
+                  onChangeText={(value) =>
+                    setReservationForm((current) => ({
+                      ...current,
+                      specialRequest: value
+                    }))
+                  }
+                  placeholder="Pedido especial, restrição ou preferência"
+                  value={reservationForm.specialRequest}
+                />
+              </Field>
+
+              <PrimaryButton
+                disabled={isSubmitting}
+                label={isSubmitting ? "Confirmando..." : "Confirmar reserva"}
+                onPress={submitReservation}
+              />
+            </>
+          ) : (
+            <>
+              <Text style={styles.panelEyebrow}>Delivery</Text>
+              <Text
+                style={[
+                  styles.panelTitle,
+                  {
+                    fontSize: layout.featureTitleSize,
+                    lineHeight: layout.featureTitleLineHeight
+                  }
+                ]}
+              >
+                Complete o pedido com o essencial.
+              </Text>
+              <Text style={styles.panelCopy}>
+                Nome, endereço e pagamento aparecem sem blocos desnecessários.
+              </Text>
+
+              <View style={styles.deliverySummaryRow}>
+                <Text style={styles.deliverySummaryLabel}>Itens no carrinho</Text>
+                <Text style={styles.deliverySummaryValue}>{itemCount}</Text>
+                <Text style={styles.deliverySummaryDivider}>•</Text>
+                <Text style={styles.deliverySummaryLabel}>Total</Text>
+                <Text style={styles.deliverySummaryValue}>{formatCurrency(totalCents)}</Text>
+              </View>
+
+              {items.length ? (
+                <View style={styles.cartPreview}>
+                  {items.slice(0, 3).map((item) => (
+                    <View key={item.id} style={styles.cartPreviewRow}>
+                      <Text style={styles.cartPreviewName} numberOfLines={1}>
+                        {item.quantity}x {item.name}
+                      </Text>
+                      <Text style={styles.cartPreviewValue}>
+                        {formatCurrency(item.priceCents * item.quantity)}
+                      </Text>
                     </View>
-                  ))
-                ) : (
-                  <View style={styles.emptyState}>
-                    <Text style={styles.emptyTitle}>Seu carrinho esta vazio.</Text>
-                    <Text style={styles.emptyCopy}>
-                      Adicione pratos pela aba Menu antes de enviar o pedido.
+                  ))}
+                  {items.length > 3 ? (
+                    <Text style={styles.cartPreviewMore}>
+                      +{items.length - 3} itens adicionais
                     </Text>
-                    <Pressable
-                      accessibilityRole="button"
-                      onPress={() => navigation.navigate("Menu")}
-                      style={styles.secondaryButton}
-                    >
-                      <Text style={styles.secondaryButtonText}>Ir para o menu</Text>
-                    </Pressable>
-                  </View>
-                )}
-
-                <Field label="Nome para entrega">
-                  <StyledInput
-                    onChangeText={(value) =>
-                      setDeliveryForm((current) => ({ ...current, contactName: value }))
-                    }
-                    placeholder="Nome do recebedor"
-                    value={deliveryForm.contactName}
-                  />
-                </Field>
-
-                <View style={styles.infoCard}>
-                  <Text style={styles.infoCardTitle}>Endereço principal</Text>
-                  <Text style={styles.infoCardCopy}>
-                    {user?.savedAddresses?.[0]?.summary
-                      ? "Endereço principal carregado das configurações. Ajuste se necessário."
-                      : "Use o CEP para preencher mais rápido e concluir o pedido."}
-                  </Text>
+                  ) : null}
                 </View>
-
-                <AddressFields
-                  address={deliveryForm.address}
-                  isLookingUpPostalCode={isLookingUpPostalCode}
-                  onChangeField={updateDeliveryAddressField}
-                  onLookupPostalCode={handleDeliveryPostalCodeLookup}
-                />
-
-                <Field label="Pagamento">
-                  <View style={styles.chipWrap}>
-                    {paymentOptions.map(([value, label]) => (
-                      <SelectionChip
-                        active={deliveryForm.paymentMethod === value}
-                        key={value}
-                        label={label}
-                        onPress={() =>
-                          setDeliveryForm((current) => ({
-                            ...current,
-                            paymentMethod: value
-                          }))
-                        }
-                      />
-                    ))}
-                  </View>
-                </Field>
-
-                <View style={styles.summaryCard}>
-                  <Text style={styles.summaryLabel}>Total estimado</Text>
-                  <Text
-                    style={[
-                      styles.summaryValue,
-                      layout.isCompact && styles.summaryValueCompact
-                    ]}
-                  >
-                    {formatCurrency(totalCents)}
-                  </Text>
-                  <Text style={styles.summaryAddress}>
-                    {deliverySummary ||
-                      "Complete o endereço para visualizar o resumo do pedido."}
-                  </Text>
-                </View>
-
-                <PrimaryButton
-                  disabled={isSubmitting}
-                  label={isSubmitting ? "Enviando..." : "Enviar pedido"}
-                  onPress={submitDeliveryOrder}
-                />
-              </View>
-            )}
-          </View>
-
-          <View style={[styles.secondaryColumn, layout.isWide && styles.secondaryColumnWide]}>
-            <View style={styles.railCard}>
-              <Text style={styles.railEyebrow}>Resumo atual</Text>
-              <Text style={styles.railTitle}>
-                {mode === "reservation"
-                  ? selectedBranch?.name || "Escolha uma filial"
-                  : reservationSummaryText}
-              </Text>
-
-              {mode === "reservation" ? (
-                <>
-                  <SideDetail
-                    label="Horario"
-                    value={`${reservationForm.date} • ${reservationForm.time}`}
-                  />
-                  <SideDetail label="Convidados" value={`${reservationForm.guests} pessoas`} />
-                  <SideDetail
-                    label="Nível"
-                    value={reservationForm.depthLevel || "Selecione um nível"}
-                  />
-                </>
               ) : (
-                <>
-                  <SideDetail label="Pagamento" value={selectedPaymentLabel} />
-                  <SideDetail
-                    label="Entrega"
-                    value={deliverySummary || "Endereco ainda incompleto"}
-                  />
-                  <SideDetail label="Total" value={formatCurrency(totalCents)} />
-                </>
+                <View style={styles.emptyState}>
+                  <Text style={styles.emptyTitle}>Carrinho vazio.</Text>
+                  <Text style={styles.emptyCopy}>Adicione pratos no menu para continuar.</Text>
+                  <Pressable
+                    accessibilityRole="button"
+                    onPress={() => navigation.navigate("Menu")}
+                    style={styles.secondaryButton}
+                  >
+                    <Text style={styles.secondaryButtonText}>Ir para o menu</Text>
+                  </Pressable>
+                </View>
               )}
-            </View>
 
-            <View style={styles.railCard}>
-              <Text style={styles.railEyebrow}>Acompanhar</Text>
-              <Text style={styles.railTitle}>
-                {nextReservationItem ? "Próxima reserva confirmada" : "Nenhuma reserva futura"}
-              </Text>
-              <Text style={styles.railCopy}>
-                {nextReservationItem
-                  ? `${nextReservationItem.branchName} em ${new Date(
-                      nextReservationItem.scheduledAt
-                    ).toLocaleString("pt-BR")}.`
-                  : "Quando você confirmar uma mesa, o resumo vai aparecer aqui."}
-              </Text>
-            </View>
-
-            <SectionHeader
-              description="As reservas recentes aparecem de forma resumida, sem poluir a tela."
-              eyebrow="Histórico"
-              title="Reservas registradas"
-            />
-            {recentReservations.length ? (
-              recentReservations.map((reservation) => (
-                <HistoryCard
-                  key={reservation.id}
-                  meta={new Date(reservation.scheduledAt).toLocaleString("pt-BR")}
-                  subtitle={`${reservation.depthLevel} • ${reservation.status}`}
-                  title={reservation.branchName}
+              <Field label="Nome para entrega">
+                <StyledInput
+                  onChangeText={(value) =>
+                    setDeliveryForm((current) => ({ ...current, contactName: value }))
+                  }
+                  placeholder="Nome do recebedor"
+                  value={deliveryForm.contactName}
                 />
-              ))
-            ) : (
-              <View style={styles.emptyState}>
-                <Text style={styles.emptyTitle}>Suas próximas reservas aparecerão aqui.</Text>
-              </View>
-            )}
-          </View>
+              </Field>
+
+              <AddressFields
+                address={deliveryForm.address}
+                isLookingUpPostalCode={isLookingUpPostalCode}
+                onChangeField={updateDeliveryAddressField}
+                onLookupPostalCode={handleDeliveryPostalCodeLookup}
+              />
+
+              <Field label="Pagamento">
+                <View style={styles.chipWrap}>
+                  {paymentOptions.map(([value, label]) => (
+                    <SelectionChip
+                      active={deliveryForm.paymentMethod === value}
+                      key={value}
+                      label={label}
+                      onPress={() =>
+                        setDeliveryForm((current) => ({
+                          ...current,
+                          paymentMethod: value
+                        }))
+                      }
+                    />
+                  ))}
+                </View>
+              </Field>
+
+              <PrimaryButton
+                disabled={isSubmitting}
+                label={isSubmitting ? "Enviando..." : "Enviar pedido"}
+                onPress={submitDeliveryOrder}
+              />
+            </>
+          )}
         </View>
       </View>
     </KeyboardScrollScreen>
-  );
-}
-
-function HeroStat({ compact = false, label, minWidth, value }) {
-  return (
-    <View
-      style={[
-        styles.heroStat,
-        compact && styles.heroStatCompact,
-        { minWidth: compact ? 0 : minWidth }
-      ]}
-    >
-      <Text style={[styles.heroStatValue, compact && styles.heroStatValueCompact]}>{value}</Text>
-      <Text style={styles.heroStatLabel}>{label}</Text>
-    </View>
   );
 }
 
@@ -683,15 +512,6 @@ function SelectionChip({ active, label, onPress }) {
   );
 }
 
-function SideDetail({ label, value }) {
-  return (
-    <View style={styles.sideDetail}>
-      <Text style={styles.sideDetailLabel}>{label}</Text>
-      <Text style={styles.sideDetailValue}>{value}</Text>
-    </View>
-  );
-}
-
 function StyledInput(props) {
   return (
     <TextInput
@@ -716,27 +536,10 @@ function PrimaryButton({ disabled, label, onPress }) {
   );
 }
 
-function HistoryCard({ meta, subtitle, title }) {
-  return (
-    <View style={styles.historyCard}>
-      <Text style={styles.historyTitle}>{title}</Text>
-      <Text style={styles.historyMeta}>{meta}</Text>
-      <Text style={styles.historyMeta}>{subtitle}</Text>
-    </View>
-  );
-}
-
 ReservationScreen.propTypes = {
   navigation: PropTypes.shape({
     navigate: PropTypes.func.isRequired
   }).isRequired
-};
-
-HeroStat.propTypes = {
-  compact: PropTypes.bool,
-  label: PropTypes.string.isRequired,
-  minWidth: PropTypes.number.isRequired,
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired
 };
 
 ModeButton.propTypes = {
@@ -757,11 +560,6 @@ SelectionChip.propTypes = {
   onPress: PropTypes.func.isRequired
 };
 
-SideDetail.propTypes = {
-  label: PropTypes.string.isRequired,
-  value: PropTypes.string.isRequired
-};
-
 StyledInput.propTypes = {
   multiline: PropTypes.bool
 };
@@ -770,12 +568,6 @@ PrimaryButton.propTypes = {
   disabled: PropTypes.bool,
   label: PropTypes.string.isRequired,
   onPress: PropTypes.func.isRequired
-};
-
-HistoryCard.propTypes = {
-  meta: PropTypes.string.isRequired,
-  subtitle: PropTypes.string.isRequired,
-  title: PropTypes.string.isRequired
 };
 
 const styles = StyleSheet.create({
@@ -797,18 +589,6 @@ const styles = StyleSheet.create({
   heroCompact: {
     padding: theme.spacing.lg
   },
-  heroTop: {
-    gap: 20
-  },
-  heroTopWide: {
-    alignItems: "flex-start",
-    flexDirection: "row",
-    justifyContent: "space-between"
-  },
-  heroCopy: {
-    flex: 1,
-    maxWidth: 560
-  },
   heroEyebrow: {
     color: theme.colors.accentSoft,
     fontFamily: theme.fonts.bodyBold,
@@ -819,7 +599,8 @@ const styles = StyleSheet.create({
   heroTitle: {
     color: theme.colors.text,
     fontFamily: theme.fonts.display,
-    marginTop: 8
+    marginTop: 8,
+    maxWidth: 640
   },
   heroSubtitle: {
     color: theme.colors.textMuted,
@@ -827,38 +608,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 24,
     marginTop: 10
-  },
-  heroStats: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 12
-  },
-  heroStatsCompact: {
-    width: "100%"
-  },
-  heroStat: {
-    backgroundColor: "rgba(255,255,255,0.05)",
-    minHeight: 96,
-    justifyContent: "center",
-    minWidth: 136,
-    padding: 14
-  },
-  heroStatCompact: {
-    flexBasis: "47%",
-    flexGrow: 1
-  },
-  heroStatValue: {
-    color: theme.colors.text,
-    fontFamily: theme.fonts.display,
-    fontSize: 32
-  },
-  heroStatValueCompact: {
-    fontSize: 28
-  },
-  heroStatLabel: {
-    color: theme.colors.textMuted,
-    fontFamily: theme.fonts.body,
-    fontSize: 13
   },
   modeRow: {
     flexDirection: "row",
@@ -894,22 +643,6 @@ const styles = StyleSheet.create({
   modeButtonTextActive: {
     color: theme.colors.text
   },
-  mainGrid: {
-    gap: theme.spacing.lg
-  },
-  mainGridWide: {
-    alignItems: "flex-start",
-    flexDirection: "row"
-  },
-  primaryColumn: {
-    flex: 1
-  },
-  secondaryColumn: {
-    gap: theme.spacing.md
-  },
-  secondaryColumnWide: {
-    width: 330
-  },
   panel: {
     backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,
@@ -938,24 +671,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 22,
     marginBottom: theme.spacing.lg
-  },
-  branchSpotlight: {
-    backgroundColor: "rgba(255,255,255,0.03)",
-    borderColor: theme.colors.border,
-    borderWidth: 1,
-    marginBottom: theme.spacing.lg,
-    padding: theme.spacing.md
-  },
-  branchSpotlightLabel: {
-    color: theme.colors.textMuted,
-    fontFamily: theme.fonts.bodyBold,
-    fontSize: 12,
-    letterSpacing: 1.1,
-    marginBottom: 10,
-    textTransform: "uppercase"
-  },
-  branchSpotlightCard: {
-    width: "100%"
   },
   dualFieldRow: {
     flexDirection: "row",
@@ -998,6 +713,59 @@ const styles = StyleSheet.create({
   },
   selectionChipTextActive: {
     color: theme.colors.text
+  },
+  deliverySummaryRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: theme.spacing.md
+  },
+  deliverySummaryLabel: {
+    color: theme.colors.textMuted,
+    fontFamily: theme.fonts.body,
+    fontSize: 12,
+    textTransform: "uppercase"
+  },
+  deliverySummaryValue: {
+    color: theme.colors.text,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 13
+  },
+  deliverySummaryDivider: {
+    color: theme.colors.textMuted,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 13
+  },
+  cartPreview: {
+    backgroundColor: theme.colors.backgroundAlt,
+    borderColor: theme.colors.border,
+    borderWidth: 1,
+    marginBottom: theme.spacing.lg,
+    padding: theme.spacing.md
+  },
+  cartPreviewRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12,
+    justifyContent: "space-between"
+  },
+  cartPreviewName: {
+    color: theme.colors.text,
+    flex: 1,
+    fontFamily: theme.fonts.body,
+    fontSize: 13
+  },
+  cartPreviewValue: {
+    color: theme.colors.accentSoft,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 13
+  },
+  cartPreviewMore: {
+    color: theme.colors.textMuted,
+    fontFamily: theme.fonts.body,
+    fontSize: 12,
+    marginTop: 10
   },
   input: {
     backgroundColor: theme.colors.backgroundAlt,
