@@ -46,6 +46,7 @@ public final class CatalogPayloads {
     @Min(1) @Max(1000000) Integer priceCents,
     Boolean isFeatured,
     @Size(max = 80) String imageHint,
+    @Size(max = 300) String imageUrl,
     Boolean availableForDelivery,
     Boolean availableForDineIn,
     @Size(max = 20) String accentColor
@@ -60,12 +61,13 @@ public final class CatalogPayloads {
     @Min(1) @Max(1000000) Integer priceCents,
     Boolean isFeatured,
     @Size(max = 80) String imageHint,
+    @Size(max = 300) String imageUrl,
     Boolean availableForDelivery,
     Boolean availableForDineIn,
     @Size(max = 20) String accentColor
   ) {
     public boolean hasAnyField() {
-      return name != null || slug != null || description != null || category != null || priceCents != null || isFeatured != null || imageHint != null || availableForDelivery != null || availableForDineIn != null || accentColor != null;
+      return name != null || slug != null || description != null || category != null || priceCents != null || isFeatured != null || imageHint != null || imageUrl != null || availableForDelivery != null || availableForDineIn != null || accentColor != null;
     }
   }
 
@@ -90,6 +92,7 @@ public final class CatalogPayloads {
     Integer priceCents,
     boolean isFeatured,
     String imageHint,
+    String imageUrl,
     boolean availableForDelivery,
     boolean availableForDineIn,
     String accentColor

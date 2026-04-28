@@ -152,6 +152,10 @@ public class CatalogService {
       menuItem.setImageHint(trimOrNull(request.imageHint()));
     }
 
+    if (request.imageUrl() != null) {
+      menuItem.setImageUrl(trimOrNull(request.imageUrl()));
+    }
+
     if (request.availableForDelivery() != null) {
       menuItem.setAvailableForDelivery(request.availableForDelivery());
     }
@@ -234,6 +238,7 @@ public class CatalogService {
     menuItem.setPriceCents(request.priceCents());
     menuItem.setFeatured(Boolean.TRUE.equals(request.isFeatured()));
     menuItem.setImageHint(trimOrNull(request.imageHint()));
+    menuItem.setImageUrl(trimOrNull(request.imageUrl()));
     menuItem.setAvailableForDelivery(request.availableForDelivery() == null || request.availableForDelivery());
     menuItem.setAvailableForDineIn(request.availableForDineIn() == null || request.availableForDineIn());
     menuItem.setAccentColor(request.accentColor() == null ? "#31e7ff" : request.accentColor().trim());
@@ -262,6 +267,7 @@ public class CatalogService {
       menuItem.getPriceCents(),
       menuItem.isFeatured(),
       menuItem.getImageHint(),
+      menuItem.getImageUrl(),
       menuItem.isAvailableForDelivery(),
       menuItem.isAvailableForDineIn(),
       menuItem.getAccentColor()

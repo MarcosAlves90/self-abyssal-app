@@ -42,6 +42,9 @@ public class MenuItemEntity {
   @Column(name = "image_hint", length = 80)
   private String imageHint;
 
+  @Column(name = "image_url", length = 300)
+  private String imageUrl;
+
   @Column(name = "available_for_delivery", nullable = false)
   private boolean availableForDelivery = true;
 
@@ -117,6 +120,14 @@ public class MenuItemEntity {
 
   public void setImageHint(String imageHint) {
     this.imageHint = imageHint;
+  }
+
+  public String getImageUrl() {
+    return imageUrl;
+  }
+
+  public void setImageUrl(String imageUrl) {
+    this.imageUrl = imageUrl;
   }
 
   public boolean isAvailableForDelivery() {
