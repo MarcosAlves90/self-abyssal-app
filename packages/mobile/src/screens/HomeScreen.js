@@ -10,6 +10,7 @@ import {
   View,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 
 import { BranchCard } from "../components/BranchCard";
 import { LoadingOverlay } from "../components/LoadingOverlay";
@@ -79,20 +80,20 @@ export function HomeScreen({ navigation }) {
   const quickActions = [
     {
       description: itemCount
-        ? `${itemCount} itens prontos para finalizar.`
-        : "Veja os pratos em destaque e monte o carrinho.",
+        ? `${itemCount} itens prontos para seguir.`
+        : "Veja os pratos em destaque e monte sua seleção.",
       icon: itemCount ? "cart-outline" : "silverware-fork-knife",
-      label: itemCount ? "Finalizar pedido" : "Explorar cardápio",
+      label: itemCount ? "Finalizar seleção" : "Explorar cardápio",
       onPress: () => navigation.navigate(itemCount ? "Cart" : "Menu"),
     },
     {
-      description: "Escolha data, horário e unidade em poucos passos.",
+      description: "Escolha a mesa ideal em poucos passos.",
       icon: "calendar-month-outline",
       label: "Reservar mesa",
       onPress: () => navigation.navigate("Reserva"),
     },
     {
-      description: "Confira endereço, horários e opções de atendimento.",
+      description: "Confira unidades, horários e atendimento.",
       icon: "storefront-outline",
       label: "Ver unidades",
       onPress: () => navigation.navigate("Reserva"),
@@ -111,8 +112,36 @@ export function HomeScreen({ navigation }) {
       ]}
     >
       <View style={[styles.shell, { maxWidth: layout.contentMaxWidth }]}>
+        <View style={styles.heroCard}>
+          <LinearGradient
+            colors={[
+              "rgba(255,217,138,0.08)",
+              "rgba(17,35,64,0.96)",
+              "rgba(7,18,38,1)",
+            ]}
+            end={{ x: 1, y: 1 }}
+            start={{ x: 0, y: 0 }}
+            style={StyleSheet.absoluteFillObject}
+          />
+          <View style={styles.heroGlow} />
+          <View style={styles.heroRow}>
+            <View style={styles.heroIconShell}>
+              <MaterialCommunityIcons
+                color={theme.colors.warning}
+                name="waves"
+                size={20}
+              />
+            </View>
+            <Text style={styles.heroEyebrow}>Início</Text>
+          </View>
+          <Text style={styles.heroTitle}>Seu ritual começa aqui.</Text>
+          <Text style={styles.heroCopy}>
+            Da escolha ao primeiro sabor, tudo flui com mais leveza e intenção.
+          </Text>
+        </View>
+
         <SectionHeader
-          description="Atalhos rápidos para decidir e seguir sem perder tempo."
+          description="Ações rápidas para seguir sem perder tempo."
           eyebrow="Acesso rápido"
           title="Comece por aqui"
         />
@@ -134,7 +163,7 @@ export function HomeScreen({ navigation }) {
           onPress={() => navigation.navigate("Reserva")}
           style={styles.highlightCard}
         >
-          <Text style={styles.highlightEyebrow}>Próxima ação</Text>
+          <Text style={styles.highlightEyebrow}>Próxima mesa</Text>
           {nextReservation ? (
             <>
               <Text
@@ -150,8 +179,7 @@ export function HomeScreen({ navigation }) {
               </Text>
               <Text style={styles.highlightCopy}>
                 {new Date(nextReservation.scheduledAt).toLocaleString("pt-BR")}{" "}
-                • {nextReservation.depthLevel} • {nextReservation.guests}{" "}
-                pessoas
+                • {nextReservation.depthLevel} • {nextReservation.guests} pessoas
               </Text>
             </>
           ) : (
@@ -168,7 +196,7 @@ export function HomeScreen({ navigation }) {
                 Sem reservas agendadas.
               </Text>
               <Text style={styles.highlightCopy}>
-                Toque em Reservar mesa para fechar sua próxima visita.
+                Toque em Reservar mesa para definir a próxima experiência.
               </Text>
             </>
           )}
@@ -176,7 +204,7 @@ export function HomeScreen({ navigation }) {
 
         <SectionHeader
           actionLabel="Ver menu"
-          description="Pratos em destaque para decidir rápido e sem excesso de texto."
+          description="Pratos em destaque, prontos para uma decisão rápida."
           eyebrow="Curadoria"
           onActionPress={() => navigation.navigate("Menu")}
           title="Pratos em destaque"
@@ -193,7 +221,7 @@ export function HomeScreen({ navigation }) {
         </View>
 
         <SectionHeader
-          description="Unidades organizadas de forma simples para você escolher mais rápido."
+          description="Unidades organizadas para uma escolha objetiva."
           eyebrow="Presencial"
           title="Unidades e horários"
         />
@@ -263,7 +291,7 @@ function QuickActionCard({ description, icon, label, onPress, wide }) {
     >
       <View style={styles.quickActionHeader}>
         <MaterialCommunityIcons
-          color={theme.colors.accentSoft}
+          color={theme.colors.warning}
           name={icon}
           size={18}
         />
@@ -300,6 +328,65 @@ const styles = StyleSheet.create({
   shell: {
     width: "100%",
   },
+  heroCard: {
+    backgroundColor: theme.colors.surfaceRaised,
+    borderColor: "rgba(255,217,138,0.14)",
+    borderWidth: 1,
+    marginBottom: theme.spacing.md,
+    overflow: "hidden",
+    padding: theme.spacing.lg,
+    position: "relative",
+  },
+  heroGlow: {
+    backgroundColor: "rgba(255,217,138,0.16)",
+    height: 180,
+    opacity: 0.18,
+    position: "absolute",
+    right: -40,
+    top: -40,
+    width: 180,
+  },
+  heroRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 10,
+    position: "relative",
+    zIndex: 1,
+  },
+  heroIconShell: {
+    alignItems: "center",
+    backgroundColor: "rgba(4, 11, 23, 0.24)",
+    borderColor: "rgba(255,217,138,0.18)",
+    borderWidth: 1,
+    height: 34,
+    justifyContent: "center",
+    width: 34,
+  },
+  heroEyebrow: {
+    color: theme.colors.warning,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 11,
+    letterSpacing: 1.3,
+    textTransform: "uppercase",
+  },
+  heroTitle: {
+    color: theme.colors.text,
+    fontFamily: theme.fonts.display,
+    fontSize: 28,
+    lineHeight: 32,
+    marginBottom: 8,
+    position: "relative",
+    zIndex: 1,
+  },
+  heroCopy: {
+    color: theme.colors.textMuted,
+    fontFamily: theme.fonts.body,
+    fontSize: 14,
+    lineHeight: 22,
+    position: "relative",
+    zIndex: 1,
+  },
   actionGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -308,8 +395,8 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   quickActionCard: {
-    backgroundColor: "rgba(255,255,255,0.06)",
-    borderColor: "rgba(255,255,255,0.07)",
+    backgroundColor: theme.colors.surfaceRaised,
+    borderColor: "rgba(255,217,138,0.12)",
     borderWidth: 1,
     padding: 12,
     width: "100%",
@@ -326,7 +413,7 @@ const styles = StyleSheet.create({
   quickActionLabel: {
     color: theme.colors.text,
     fontFamily: theme.fonts.bodyBold,
-    fontSize: 14,
+    fontSize: 13,
     marginBottom: 0,
   },
   quickActionDescription: {
@@ -336,14 +423,14 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   highlightCard: {
-    backgroundColor: theme.colors.surface,
-    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.surfaceRaised,
+    borderColor: "rgba(255,217,138,0.14)",
     borderWidth: 1,
     marginBottom: theme.spacing.xl,
     padding: theme.spacing.lg,
   },
   highlightEyebrow: {
-    color: theme.colors.accentWarm,
+    color: theme.colors.warning,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 12,
     letterSpacing: 1.2,
@@ -386,7 +473,7 @@ const styles = StyleSheet.create({
   },
   reservationCard: {
     backgroundColor: theme.colors.surfaceRaised,
-    borderColor: "rgba(255,255,255,0.04)",
+    borderColor: "rgba(255,217,138,0.1)",
     borderWidth: 1,
     padding: theme.spacing.lg,
     width: "100%",
