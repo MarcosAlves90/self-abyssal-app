@@ -29,6 +29,13 @@ function nextDate() {
   return date.toISOString().slice(0, 10);
 }
 
+function formatReservationDate(dateTime) {
+  return new Date(dateTime).toLocaleString("pt-BR", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+}
+
 export function ReservationScreen() {
   const { width } = useWindowDimensions();
   const [branches, setBranches] = useState([]);
@@ -148,6 +155,25 @@ export function ReservationScreen() {
       style={styles.screen}
     >
       <View style={[styles.shell, { maxWidth: layout.contentMaxWidth }]}>
+        <View style={styles.heroCard}>
+          <View style={styles.heroGlow} />
+          <View style={styles.heroRow}>
+            <View style={styles.heroIconShell}>
+              <MaterialCommunityIcons
+                color={theme.colors.warning}
+                name="calendar-star"
+                size={20}
+              />
+            </View>
+            <Text style={styles.heroEyebrow}>Reserva</Text>
+          </View>
+          <Text style={styles.heroTitle}>Escolha sua mesa</Text>
+          <Text style={styles.heroCopy}>
+            Selecione a unidade, o horário e o ambiente sem excesso de
+            informação.
+          </Text>
+        </View>
+
         <View style={[styles.panel, layout.isCompact && styles.panelCompact]}>
           <Text
             style={[
@@ -158,26 +184,26 @@ export function ReservationScreen() {
               },
             ]}
           >
-            Reservar mesa
+            Agende sua mesa
           </Text>
 
           {hasReservations ? (
             <View style={styles.existingReservationsBlock}>
               <Text style={styles.existingReservationsEyebrow}>
-                Você já tem reservas
+                Próximas reservas
               </Text>
               <Text style={styles.existingReservationsTitle}>
-                Confira seus próximos agendamentos.
+                O que já está confirmado fica resumido aqui.
               </Text>
 
               {isLoadingReservations ? (
                 <View style={styles.loadingReservations}>
                   <ActivityIndicator
-                    color={theme.colors.accentSoft}
+                    color={theme.colors.warning}
                     size="small"
                   />
                   <Text style={styles.loadingReservationsText}>
-                    Carregando reservas...
+                    Carregando...
                   </Text>
                 </View>
               ) : (
@@ -186,7 +212,7 @@ export function ReservationScreen() {
                     <View key={reservation.id} style={styles.reservationCard}>
                       <View style={styles.reservationHeader}>
                         <MaterialCommunityIcons
-                          color={theme.colors.success}
+                          color={theme.colors.warning}
                           name="calendar-check-outline"
                           size={16}
                         />
@@ -195,7 +221,7 @@ export function ReservationScreen() {
                         </Text>
                       </View>
                       <Text style={styles.reservationMeta}>
-                        {new Date(reservation.scheduledAt).toLocaleString("pt-BR")}
+                        {formatReservationDate(reservation.scheduledAt)}
                       </Text>
                       <Text style={styles.reservationMeta}>
                         {reservation.depthLevel} • {reservation.guests} pessoas
@@ -220,7 +246,7 @@ export function ReservationScreen() {
                 <Text style={styles.reserveFormEyebrow}>Nova reserva</Text>
               ) : null}
 
-              <Field icon="storefront-outline" label="Filial" required>
+              <Field icon="storefront-outline" label="Unidade" required>
                 <View style={styles.chipWrap}>
                   {branches.map((branch) => (
                     <SelectionChip
@@ -265,7 +291,7 @@ export function ReservationScreen() {
                 </Field>
               </View>
 
-              <Field icon="account-group-outline" label="Convidados" required>
+              <Field icon="account-group-outline" label="Pessoas" required>
                 <StyledInput
                   keyboardType="number-pad"
                   onChangeText={(value) =>
@@ -275,7 +301,7 @@ export function ReservationScreen() {
                 />
               </Field>
 
-              <Field icon="layers-outline" label="Nível" required>
+              <Field icon="layers-outline" label="Ambiente" required>
                 <View style={styles.chipWrap}>
                   {(selectedBranch?.reservationDepths || []).map((depth) => (
                     <SelectionChip
@@ -324,7 +350,7 @@ export function ReservationScreen() {
                         {confirmation.branchName}
                       </Text>
                       <Text style={styles.confirmationDetail}>
-                        {new Date(confirmation.scheduledAt).toLocaleString("pt-BR")}
+                        {formatReservationDate(confirmation.scheduledAt)}
                       </Text>
                       <Text style={styles.confirmationDetail}>
                         {confirmation.guests} pessoas
@@ -348,7 +374,7 @@ function Field({ children, icon, label, required }) {
     <View style={styles.field}>
       <View style={styles.fieldLabelRow}>
         <MaterialCommunityIcons
-          color={theme.colors.textMuted}
+          color={theme.colors.warning}
           name={icon}
           size={16}
         />
@@ -383,7 +409,7 @@ function StyledInput(props) {
   return (
     <TextInput
       placeholderTextColor={theme.colors.textMuted}
-      selectionColor={theme.colors.accentSoft}
+      selectionColor={theme.colors.warning}
       style={styles.input}
       {...props}
     />
@@ -460,6 +486,65 @@ const styles = StyleSheet.create({
   shell: {
     width: "100%",
   },
+  heroCard: {
+    backgroundColor: theme.colors.surfaceRaised,
+    borderColor: "rgba(255, 217, 138, 0.14)",
+    borderWidth: 1,
+    marginBottom: theme.spacing.md,
+    overflow: "hidden",
+    padding: theme.spacing.lg,
+    position: "relative",
+  },
+  heroGlow: {
+    backgroundColor: "rgba(255, 217, 138, 0.16)",
+    height: 180,
+    opacity: 0.18,
+    position: "absolute",
+    right: -40,
+    top: -40,
+    width: 180,
+  },
+  heroRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 10,
+    position: "relative",
+    zIndex: 1,
+  },
+  heroIconShell: {
+    alignItems: "center",
+    backgroundColor: "rgba(4, 11, 23, 0.24)",
+    borderColor: "rgba(255, 217, 138, 0.18)",
+    borderWidth: 1,
+    height: 34,
+    justifyContent: "center",
+    width: 34,
+  },
+  heroEyebrow: {
+    color: theme.colors.warning,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 11,
+    letterSpacing: 1.3,
+    textTransform: "uppercase",
+  },
+  heroTitle: {
+    color: theme.colors.text,
+    fontFamily: theme.fonts.display,
+    fontSize: 28,
+    lineHeight: 32,
+    marginBottom: 8,
+    position: "relative",
+    zIndex: 1,
+  },
+  heroCopy: {
+    color: theme.colors.textMuted,
+    fontFamily: theme.fonts.body,
+    fontSize: 14,
+    lineHeight: 22,
+    position: "relative",
+    zIndex: 1,
+  },
   panel: {
     backgroundColor: theme.colors.surface,
     borderColor: theme.colors.border,
@@ -475,7 +560,7 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.md,
   },
   existingReservationsEyebrow: {
-    color: theme.colors.accentWarm,
+    color: theme.colors.warning,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 12,
     letterSpacing: 1.2,
@@ -533,7 +618,7 @@ const styles = StyleSheet.create({
     paddingTop: theme.spacing.lg,
   },
   reserveFormEyebrow: {
-    color: theme.colors.accentWarm,
+    color: theme.colors.warning,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 12,
     letterSpacing: 1.2,
@@ -589,8 +674,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
   },
   selectionChipActive: {
-    backgroundColor: "rgba(49,231,255,0.12)",
-    borderColor: theme.colors.accent,
+    backgroundColor: "rgba(255,217,138,0.12)",
+    borderColor: theme.colors.warning,
   },
   selectionChipText: {
     color: theme.colors.textMuted,
@@ -613,7 +698,7 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     alignItems: "center",
-    backgroundColor: theme.colors.accent,
+    backgroundColor: theme.colors.warning,
     justifyContent: "center",
     minHeight: 52,
   },
