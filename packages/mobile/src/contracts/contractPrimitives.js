@@ -27,10 +27,6 @@ export function asArray(value) {
   return Array.isArray(value) ? value : [];
 }
 
-export function asBoolean(value) {
-  return Boolean(value);
-}
-
 export function requiredString(value, { entity, field, trim = true }) {
   if (typeof value !== "string") {
     fail({ entity, field, code: "REQUIRED_STRING", message: `${entity}.${field} precisa ser texto.` });
@@ -106,7 +102,7 @@ export function safeMaskPostalCode(value) {
     return "***";
   }
 
-  const digits = value.replace(/\D/g, "");
+  const digits = value.replaceAll(/\D/g, "");
   if (!digits.length) {
     return "***";
   }

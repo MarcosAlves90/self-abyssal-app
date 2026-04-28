@@ -1,5 +1,4 @@
 import {
-  asBoolean,
   optionalString,
   requiredId,
   requiredPositiveInteger,
@@ -18,9 +17,9 @@ export function normalizeMenuItemResponse(raw) {
     imageUrl: optionalString(raw?.imageUrl),
     imageHint: optionalString(raw?.imageHint),
     accentColor: optionalString(raw?.accentColor),
-    isFeatured: asBoolean(raw?.isFeatured),
-    availableForDineIn: asBoolean(raw?.availableForDineIn),
-    availableForDelivery: asBoolean(raw?.availableForDelivery),
+    isFeatured: Boolean(raw?.isFeatured),
+    availableForDineIn: Boolean(raw?.availableForDineIn),
+    availableForDelivery: Boolean(raw?.availableForDelivery),
   };
 }
 
