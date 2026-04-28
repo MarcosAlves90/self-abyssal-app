@@ -12,13 +12,12 @@ import { theme } from "../theme/tokens";
 const TAB_BAR_HEIGHT = 82;
 const TAB_BAR_OVERLAP = 2;
 
-export function CartFab({ navigation }) {
+export function CartFab({ currentRouteName, navigation }) {
   const { itemCount } = useCart();
   const { isAuthenticated } = useAuth();
   const insets = useSafeAreaInsets();
-  const currentRoute = navigation.getCurrentRoute?.();
 
-  if (!isAuthenticated || !itemCount || currentRoute?.name === "Cart") {
+  if (!isAuthenticated || !itemCount || currentRouteName === "Cart") {
     return null;
   }
 
@@ -55,8 +54,8 @@ export function CartFab({ navigation }) {
 }
 
 CartFab.propTypes = {
+  currentRouteName: PropTypes.string,
   navigation: PropTypes.shape({
-    getCurrentRoute: PropTypes.func,
     navigate: PropTypes.func.isRequired
   }).isRequired
 };
