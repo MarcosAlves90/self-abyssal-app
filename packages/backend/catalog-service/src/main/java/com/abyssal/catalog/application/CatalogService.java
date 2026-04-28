@@ -40,7 +40,7 @@ public class CatalogService {
 
   public void assertAdministrator(String authorizationHeader) {
     if (!StringUtils.hasText(authorizationHeader) || !authorizationHeader.startsWith("Bearer ")) {
-      throw new ApiException(HttpStatus.UNAUTHORIZED, "Authentication token is required.");
+      throw new ApiException(HttpStatus.UNAUTHORIZED, "Token de autenticação é obrigatório.");
     }
 
     String token = authorizationHeader.substring(7).trim();
@@ -49,10 +49,10 @@ public class CatalogService {
       String role = jwtService.parse(token).role();
 
       if (!"ADMIN".equalsIgnoreCase(role)) {
-        throw new ApiException(HttpStatus.FORBIDDEN, "Administrator access is required.");
+        throw new ApiException(HttpStatus.FORBIDDEN, "Acesso de administrador é obrigatório.");
       }
     } catch (JwtException | IllegalArgumentException exception) {
-      throw new ApiException(HttpStatus.UNAUTHORIZED, "Invalid authentication token.");
+      throw new ApiException(HttpStatus.UNAUTHORIZED, "Token de autenticação inválido.");
     }
   }
 
@@ -79,7 +79,7 @@ public class CatalogService {
   @Transactional
   public CatalogPayloads.BranchResponse updateBranch(UUID branchId, CatalogPayloads.BranchUpdateRequest request) {
     if (!request.hasAnyField()) {
-      throw new ApiException(HttpStatus.BAD_REQUEST, "At least one branch field must be provided.");
+      throw new ApiException(HttpStatus.BAD_REQUEST, "Pelo menos um campo da filial deve ser informado.");
     }
 
     BranchEntity branch = findBranch(branchId);
@@ -129,7 +129,7 @@ public class CatalogService {
   @Transactional
   public CatalogPayloads.MenuItemResponse updateMenuItem(UUID menuItemId, CatalogPayloads.MenuItemUpdateRequest request) {
     if (!request.hasAnyField()) {
-      throw new ApiException(HttpStatus.BAD_REQUEST, "At least one menu field must be provided.");
+      throw new ApiException(HttpStatus.BAD_REQUEST, "Pelo menos um campo do item deve ser informado.");
     }
 
     MenuItemEntity menuItem = findMenuItem(menuItemId);
@@ -192,7 +192,7 @@ public class CatalogService {
     long uniqueIds = ids.stream().distinct().count();
 
     if (menuItems.size() != uniqueIds) {
-      throw new ApiException(HttpStatus.BAD_REQUEST, "One or more menu items are invalid.");
+      throw new ApiException(HttpStatus.BAD_REQUEST, "Um ou mais itens do menu são inválidos.");
     }
 
     return ids.stream()
@@ -209,13 +209,13 @@ public class CatalogService {
 
   private BranchEntity findBranch(UUID branchId) {
     return branchRepository.findById(branchId)
-      .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Branch not found."));
+      .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Filial não encontrada."));
   }
 
   private MenuItemEntity findMenuItem(UUID menuItemId) {
     return menuItemRepository.findById(menuItemId)
-      .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Menu item not found."));
-  }
+      .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Item do menu não encontrado."));
+    }
 
   private void applyBranchRequest(BranchEntity branch, CatalogPayloads.BranchUpsertRequest request) {
     branch.setName(request.name().trim());

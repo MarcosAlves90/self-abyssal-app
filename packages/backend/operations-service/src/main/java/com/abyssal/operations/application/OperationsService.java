@@ -31,7 +31,7 @@ import org.springframework.util.StringUtils;
 @Service
 public class OperationsService {
   private static final String ACTIVE_RESERVATION_CONFLICT_MESSAGE =
-    "An active reservation already exists for this branch, time and depth level.";
+    "Já existe uma reserva ativa para esta filial, horário e nível.";
 
   private final ReservationRepository reservationRepository;
   private final OrderRepository orderRepository;
@@ -70,7 +70,7 @@ public class OperationsService {
   @Transactional(readOnly = true)
   public OperationsPayloads.ReservationResponse getReservation(UUID reservationId, AuthenticatedUser user) {
     ReservationEntity reservation = findReservation(reservationId);
-    assertOwnershipOrAdmin(user, reservation.getUserId(), "Reservation access denied.");
+    assertOwnershipOrAdmin(user, reservation.getUserId(), "Acesso à reserva negado.");
     return toReservationResponse(reservation);
   }
 
@@ -83,7 +83,7 @@ public class OperationsService {
     String depthLevel = request.depthLevel().trim();
 
     if (!branch.reservationDepths().contains(depthLevel)) {
-      throw new ApiException(HttpStatus.BAD_REQUEST, "Selected branch does not support this depth level.");
+      throw new ApiException(HttpStatus.BAD_REQUEST, "A filial selecionada não suporta este nível.");
     }
 
     ensureReservationSlotIsAvailable(request.branchId(), request.scheduledAt(), depthLevel, null);
@@ -107,14 +107,14 @@ public class OperationsService {
     AuthenticatedUser user
   ) {
     if (!request.hasAnyField()) {
-      throw new ApiException(HttpStatus.BAD_REQUEST, "At least one reservation field must be provided.");
+      throw new ApiException(HttpStatus.BAD_REQUEST, "Pelo menos um campo da reserva deve ser informado.");
     }
 
     ReservationEntity reservation = findReservation(reservationId);
-    assertOwnershipOrAdmin(user, reservation.getUserId(), "Reservation access denied.");
+    assertOwnershipOrAdmin(user, reservation.getUserId(), "Acesso à reserva negado.");
 
     if (!isAdmin(user) && request.status() != null && parseReservationStatus(request.status()) != ReservationStatus.CANCELLED) {
-      throw new ApiException(HttpStatus.FORBIDDEN, "Only administrators can apply this reservation status.");
+      throw new ApiException(HttpStatus.FORBIDDEN, "Apenas administradores podem aplicar este status de reserva.");
     }
 
     UUID nextBranchId = request.branchId() == null ? reservation.getBranchId() : request.branchId();
@@ -126,7 +126,7 @@ public class OperationsService {
       CatalogClient.BranchSnapshot branch = catalogClient.getBranch(nextBranchId);
 
       if (!branch.reservationDepths().contains(nextDepthLevel)) {
-        throw new ApiException(HttpStatus.BAD_REQUEST, "Selected branch does not support this depth level.");
+        throw new ApiException(HttpStatus.BAD_REQUEST, "A filial selecionada não suporta este nível.");
       }
 
       reservation.setBranchId(nextBranchId);
@@ -160,7 +160,7 @@ public class OperationsService {
   @Transactional
   public void deleteReservation(UUID reservationId, AuthenticatedUser user) {
     ReservationEntity reservation = findReservation(reservationId);
-    assertOwnershipOrAdmin(user, reservation.getUserId(), "Reservation access denied.");
+    assertOwnershipOrAdmin(user, reservation.getUserId(), "Acesso à reserva negado.");
     reservationRepository.delete(reservation);
   }
 
@@ -181,7 +181,7 @@ public class OperationsService {
   @Transactional(readOnly = true)
   public OperationsPayloads.OrderResponse getOrder(UUID orderId, AuthenticatedUser user) {
     OrderEntity order = findOrder(orderId);
-    assertOwnershipOrAdmin(user, order.getUserId(), "Order access denied.");
+    assertOwnershipOrAdmin(user, order.getUserId(), "Acesso ao pedido negado.");
     return toOrderResponse(order);
   }
 
@@ -194,7 +194,7 @@ public class OperationsService {
     PaymentMethod paymentMethod = parsePaymentMethod(request.paymentMethod());
 
     if (fulfillmentType == FulfillmentType.DELIVERY && !StringUtils.hasText(request.deliveryAddress())) {
-      throw new ApiException(HttpStatus.BAD_REQUEST, "deliveryAddress is required for delivery orders.");
+      throw new ApiException(HttpStatus.BAD_REQUEST, "O endereço de entrega é obrigatório para pedidos de entrega.");
     }
 
     UUID branchId = request.branchId();
@@ -204,18 +204,18 @@ public class OperationsService {
 
     if (request.reservationId() != null) {
       reservation = findReservation(request.reservationId());
-      assertOwnershipOrAdmin(user, reservation.getUserId(), "Reservation access denied for this order.");
+      assertOwnershipOrAdmin(user, reservation.getUserId(), "Acesso à reserva negado para este pedido.");
 
       if (branchId == null) {
         branchId = reservation.getBranchId();
         branchName = reservation.getBranchNameSnapshot();
       } else if (!branchId.equals(reservation.getBranchId())) {
-        throw new ApiException(HttpStatus.BAD_REQUEST, "Reservation branch must match the selected branch.");
+        throw new ApiException(HttpStatus.BAD_REQUEST, "A filial da reserva deve corresponder à filial selecionada.");
       }
     }
 
     if (fulfillmentType == FulfillmentType.DINE_IN && branchId == null) {
-      throw new ApiException(HttpStatus.BAD_REQUEST, "branchId is required for dine-in orders.");
+      throw new ApiException(HttpStatus.BAD_REQUEST, "branchId é obrigatório para pedidos no local.");
     }
 
     if (branchId != null && branchName == null) {
@@ -257,18 +257,18 @@ public class OperationsService {
     AuthenticatedUser user
   ) {
     if (!request.hasAnyField()) {
-      throw new ApiException(HttpStatus.BAD_REQUEST, "At least one order field must be provided.");
+      throw new ApiException(HttpStatus.BAD_REQUEST, "Pelo menos um campo do pedido deve ser informado.");
     }
 
     OrderEntity order = findOrder(orderId);
-    assertOwnershipOrAdmin(user, order.getUserId(), "Order access denied.");
+    assertOwnershipOrAdmin(user, order.getUserId(), "Acesso ao pedido negado.");
 
     if (!isAdmin(user) && request.paymentStatus() != null) {
-      throw new ApiException(HttpStatus.FORBIDDEN, "Only administrators can update payment status.");
+      throw new ApiException(HttpStatus.FORBIDDEN, "Apenas administradores podem atualizar o status de pagamento.");
     }
 
     if (!isAdmin(user) && request.status() != null && parseOrderStatus(request.status()) != OrderStatus.CANCELLED) {
-      throw new ApiException(HttpStatus.FORBIDDEN, "Only administrators can apply this order status.");
+      throw new ApiException(HttpStatus.FORBIDDEN, "Apenas administradores podem aplicar este status do pedido.");
     }
 
     if (request.status() != null) {
@@ -285,13 +285,13 @@ public class OperationsService {
   @Transactional
   public void deleteOrder(UUID orderId, AuthenticatedUser user) {
     OrderEntity order = findOrder(orderId);
-    assertOwnershipOrAdmin(user, order.getUserId(), "Order access denied.");
+    assertOwnershipOrAdmin(user, order.getUserId(), "Acesso ao pedido negado.");
     orderRepository.delete(order);
   }
 
   private ReservationEntity findReservation(UUID reservationId) {
     return reservationRepository.findById(reservationId)
-      .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Reservation not found."));
+      .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Reserva não encontrada."));
   }
 
   private void ensureReservationSlotIsAvailable(
@@ -323,7 +323,7 @@ public class OperationsService {
 
   private OrderEntity findOrder(UUID orderId) {
     return orderRepository.findById(orderId)
-      .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Order not found."));
+      .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Pedido não encontrado."));
   }
 
   private OrderItemEntity toOrderItem(
@@ -334,15 +334,15 @@ public class OperationsService {
     CatalogClient.MenuItemSnapshot menuItem = menuItems.get(item.menuItemId());
 
     if (menuItem == null) {
-      throw new ApiException(HttpStatus.BAD_REQUEST, "One or more menu items are invalid.");
+      throw new ApiException(HttpStatus.BAD_REQUEST, "Um ou mais itens do menu são inválidos.");
     }
 
     if (fulfillmentType == FulfillmentType.DELIVERY && !menuItem.availableForDelivery()) {
-      throw new ApiException(HttpStatus.BAD_REQUEST, "One or more menu items are not available for delivery.");
+      throw new ApiException(HttpStatus.BAD_REQUEST, "Um ou mais itens do menu não estão disponíveis para entrega.");
     }
 
     if (fulfillmentType == FulfillmentType.DINE_IN && !menuItem.availableForDineIn()) {
-      throw new ApiException(HttpStatus.BAD_REQUEST, "One or more menu items are not available for dine-in.");
+      throw new ApiException(HttpStatus.BAD_REQUEST, "Um ou mais itens do menu não estão disponíveis para consumo no local.");
     }
 
     OrderItemEntity orderItem = new OrderItemEntity();

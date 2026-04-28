@@ -31,7 +31,7 @@ public class RestExceptionHandler {
     }
 
     return ResponseEntity.badRequest()
-      .body(new ApiError("Invalid request payload.", details));
+      .body(new ApiError("Payload da requisição inválido.", details));
   }
 
   @ExceptionHandler(ConstraintViolationException.class)
@@ -45,36 +45,36 @@ public class RestExceptionHandler {
       ));
 
     return ResponseEntity.badRequest()
-      .body(new ApiError("Invalid request payload.", details));
+      .body(new ApiError("Payload da requisição inválido.", details));
   }
 
   @ExceptionHandler(HttpMessageNotReadableException.class)
   public ResponseEntity<ApiError> handleMalformedPayload(HttpMessageNotReadableException exception) {
     return ResponseEntity.badRequest()
-      .body(new ApiError("Invalid request payload.", null));
+      .body(new ApiError("Payload da requisição inválido.", null));
   }
 
   @ExceptionHandler(MethodArgumentTypeMismatchException.class)
   public ResponseEntity<ApiError> handleTypeMismatch(MethodArgumentTypeMismatchException exception) {
     return ResponseEntity.badRequest()
-      .body(new ApiError("Invalid request payload.", null));
+      .body(new ApiError("Payload da requisição inválido.", null));
   }
 
   @ExceptionHandler(IllegalArgumentException.class)
   public ResponseEntity<ApiError> handleIllegalArgument(IllegalArgumentException exception) {
     return ResponseEntity.badRequest()
-      .body(new ApiError("Invalid request payload.", exception.getMessage()));
+      .body(new ApiError("Payload da requisição inválido.", exception.getMessage()));
   }
 
   @ExceptionHandler(DataIntegrityViolationException.class)
   public ResponseEntity<ApiError> handleConflict(DataIntegrityViolationException exception) {
     return ResponseEntity.status(HttpStatus.CONFLICT)
-      .body(new ApiError("Resource violates a persistence constraint.", null));
+      .body(new ApiError("Recurso viola uma restrição de persistência.", null));
   }
 
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ApiError> handleUnexpectedException(Exception exception) {
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-      .body(new ApiError("Unexpected internal error.", null));
+      .body(new ApiError("Erro interno inesperado.", null));
   }
 }

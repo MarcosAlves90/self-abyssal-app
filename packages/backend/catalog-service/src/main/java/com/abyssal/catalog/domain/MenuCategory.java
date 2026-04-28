@@ -23,6 +23,6 @@ public enum MenuCategory {
       }
     }
 
-    throw new IllegalArgumentException("Unknown menu category: " + value);
+    throw new IllegalArgumentException("Categoria de menu desconhecida: " + value);
   }
 }

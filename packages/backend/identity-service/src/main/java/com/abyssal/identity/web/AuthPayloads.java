@@ -14,7 +14,7 @@ public final class AuthPayloads {
     @NotBlank @Size(min = 3, max = 80) String name,
     @NotBlank @Email @Size(max = 120) String email,
     @NotBlank @Size(min = 8, max = 128) String password,
-    @NotBlank @Pattern(regexp = "^\\d{10,11}$", message = "phone must contain 10 or 11 digits.") String phone
+    @NotBlank @Pattern(regexp = "^\\d{10,11}$", message = "telefone deve conter 10 ou 11 dígitos.") String phone
   ) {
   }
 
@@ -26,13 +26,13 @@ public final class AuthPayloads {
 
   public record AddressUpsertRequest(
     @Size(min = 2, max = 40) String label,
-    @NotBlank @Pattern(regexp = "^\\d{5}-?\\d{3}$", message = "postalCode must contain 8 digits.") String postalCode,
+    @NotBlank @Pattern(regexp = "^\\d{5}-?\\d{3}$", message = "CEP deve conter 8 dígitos.") String postalCode,
     @NotBlank @Size(min = 3, max = 120) String street,
     @NotBlank @Size(min = 1, max = 20) String number,
     @Size(min = 1, max = 80) String complement,
     @NotBlank @Size(min = 2, max = 80) String neighborhood,
     @NotBlank @Size(min = 2, max = 80) String city,
-    @NotBlank @Pattern(regexp = "^[a-zA-Z]{2}$", message = "state must contain 2 characters.") String state
+    @NotBlank @Pattern(regexp = "^[a-zA-Z]{2}$", message = "UF deve conter 2 caracteres.") String state
   ) {
   }
 

@@ -22,6 +22,6 @@ public enum PaymentMethod {
       }
     }
 
-    throw new IllegalArgumentException("Unknown payment method: " + value);
+    throw new IllegalArgumentException("Método de pagamento desconhecido: " + value);
   }
 }

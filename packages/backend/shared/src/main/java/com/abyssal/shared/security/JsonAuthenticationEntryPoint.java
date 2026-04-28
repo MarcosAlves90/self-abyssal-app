@@ -22,6 +22,6 @@ public class JsonAuthenticationEntryPoint implements AuthenticationEntryPoint {
     HttpServletResponse response,
     AuthenticationException authException
   ) throws IOException, ServletException {
-    SecurityJsonWriter.write(response, objectMapper, HttpStatus.UNAUTHORIZED, "Authentication token is required.");
+    SecurityJsonWriter.write(response, objectMapper, HttpStatus.UNAUTHORIZED, "Token de autenticação é obrigatório.");
   }
 }

@@ -21,7 +21,7 @@ public class TextCrypto {
 
   public TextCrypto(SecurityProperties properties) {
     if (!properties.getEncryptionKey().matches("^[0-9a-fA-F]{64}$")) {
-      throw new IllegalStateException("APP_SECURITY_ENCRYPTION_KEY must contain exactly 64 hex characters.");
+      throw new IllegalStateException("APP_SECURITY_ENCRYPTION_KEY deve conter exatamente 64 caracteres hexadecimais.");
     }
 
     this.keySpec = new SecretKeySpec(HexFormat.of().parseHex(properties.getEncryptionKey()), AES);
@@ -42,7 +42,7 @@ public class TextCrypto {
       byte[] encrypted = cipher.doFinal(value.getBytes(StandardCharsets.UTF_8));
       return HexFormat.of().formatHex(iv) + ":" + HexFormat.of().formatHex(encrypted);
     } catch (GeneralSecurityException exception) {
-      throw new IllegalStateException("Failed to encrypt sensitive data.", exception);
+      throw new IllegalStateException("Falha ao criptografar dados sensíveis.", exception);
     }
   }
 
@@ -54,7 +54,7 @@ public class TextCrypto {
     String[] parts = value.split(":");
 
     if (parts.length != 2) {
-      throw new IllegalStateException("Encrypted payload is malformed.");
+      throw new IllegalStateException("O payload criptografado está malformado.");
     }
 
     try {
@@ -66,7 +66,7 @@ public class TextCrypto {
 
       return new String(cipher.doFinal(encrypted), StandardCharsets.UTF_8);
     } catch (GeneralSecurityException exception) {
-      throw new IllegalStateException("Failed to decrypt sensitive data.", exception);
+      throw new IllegalStateException("Falha ao descriptografar dados sensíveis.", exception);
     }
   }
 }

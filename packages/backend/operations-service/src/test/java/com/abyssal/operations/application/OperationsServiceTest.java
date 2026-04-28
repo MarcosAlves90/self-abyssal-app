@@ -32,7 +32,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 @ExtendWith(MockitoExtension.class)
 class OperationsServiceTest {
   private static final String CONFLICT_MESSAGE =
-    "An active reservation already exists for this branch, time and depth level.";
+    "Já existe uma reserva ativa para esta filial, horário e nível.";
 
   @Mock
   private ReservationRepository reservationRepository;

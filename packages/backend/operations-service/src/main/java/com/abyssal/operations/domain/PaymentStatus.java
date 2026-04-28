@@ -22,6 +22,6 @@ public enum PaymentStatus {
       }
     }
 
-    throw new IllegalArgumentException("Unknown payment status: " + value);
+    throw new IllegalArgumentException("Status de pagamento desconhecido: " + value);
   }
 }

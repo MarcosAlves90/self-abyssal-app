@@ -31,7 +31,7 @@ public final class OperationsPayloads {
     @Future Instant scheduledAt,
     @Min(1) @Max(12) Integer guests,
     @Size(min = 3, max = 40) String depthLevel,
-    @Pattern(regexp = "^(confirmed|checked_in|completed|cancelled)$", message = "status must be one of confirmed, checked_in, completed or cancelled.") String status,
+    @Pattern(regexp = "^(confirmed|checked_in|completed|cancelled)$", message = "o status deve ser um de confirmed, checked_in, completed ou cancelled.") String status,
     @Size(max = 200) String specialRequest
   ) {
     public boolean hasAnyField() {
@@ -62,17 +62,17 @@ public final class OperationsPayloads {
   public record OrderCreateRequest(
     UUID branchId,
     UUID reservationId,
-    @NotBlank @Pattern(regexp = "^(delivery|dine_in)$", message = "fulfillmentType must be delivery or dine_in.") String fulfillmentType,
+    @NotBlank @Pattern(regexp = "^(delivery|dine_in)$", message = "o tipo de atendimento deve ser delivery ou dine_in.") String fulfillmentType,
     @NotEmpty List<@Valid OrderItemRequest> items,
-    @NotBlank @Pattern(regexp = "^(in_app_card_tokenized|card_on_delivery|on_site)$", message = "paymentMethod must be one of in_app_card_tokenized, card_on_delivery or on_site.") String paymentMethod,
+    @NotBlank @Pattern(regexp = "^(in_app_card_tokenized|card_on_delivery|on_site)$", message = "o método de pagamento deve ser um de in_app_card_tokenized, card_on_delivery ou on_site.") String paymentMethod,
     @Size(min = 10, max = 200) String deliveryAddress,
     @Size(min = 3, max = 80) String contactName
   ) {
   }
 
   public record OrderUpdateRequest(
-    @Pattern(regexp = "^(pending|preparing|on_the_way|served|completed|cancelled)$", message = "status must be one of pending, preparing, on_the_way, served, completed or cancelled.") String status,
-    @Pattern(regexp = "^(pending|authorized|paid)$", message = "paymentStatus must be one of pending, authorized or paid.") String paymentStatus
+    @Pattern(regexp = "^(pending|preparing|on_the_way|served|completed|cancelled)$", message = "o status deve ser um de pending, preparing, on_the_way, served, completed ou cancelled.") String status,
+    @Pattern(regexp = "^(pending|authorized|paid)$", message = "o status de pagamento deve ser um de pending, authorized ou paid.") String paymentStatus
   ) {
     public boolean hasAnyField() {
       return status != null || paymentStatus != null;

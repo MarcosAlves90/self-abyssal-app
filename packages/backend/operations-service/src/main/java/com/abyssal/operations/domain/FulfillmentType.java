@@ -21,6 +21,6 @@ public enum FulfillmentType {
       }
     }
 
-    throw new IllegalArgumentException("Unknown fulfillment type: " + value);
+    throw new IllegalArgumentException("Tipo de atendimento desconhecido: " + value);
   }
 }

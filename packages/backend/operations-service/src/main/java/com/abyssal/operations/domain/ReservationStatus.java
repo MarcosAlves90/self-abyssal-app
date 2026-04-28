@@ -23,6 +23,6 @@ public enum ReservationStatus {
       }
     }
 
-    throw new IllegalArgumentException("Unknown reservation status: " + value);
+    throw new IllegalArgumentException("Status da reserva desconhecido: " + value);
   }
 }

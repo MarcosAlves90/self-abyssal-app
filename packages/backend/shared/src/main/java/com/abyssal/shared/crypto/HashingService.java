@@ -10,7 +10,7 @@ public class HashingService {
       MessageDigest digest = MessageDigest.getInstance("SHA-256");
       return toHex(digest.digest(value.getBytes(StandardCharsets.UTF_8)));
     } catch (NoSuchAlgorithmException exception) {
-      throw new IllegalStateException("SHA-256 is not available.", exception);
+      throw new IllegalStateException("SHA-256 não está disponível.", exception);
     }
   }
 

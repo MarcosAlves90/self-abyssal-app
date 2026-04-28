@@ -37,6 +37,6 @@ public class HttpsEnforcementFilter extends OncePerRequestFilter {
       return;
     }
 
-    SecurityJsonWriter.write(response, objectMapper, HttpStatus.UPGRADE_REQUIRED, "HTTPS is required.");
+    SecurityJsonWriter.write(response, objectMapper, HttpStatus.UPGRADE_REQUIRED, "HTTPS é obrigatório.");
   }
 }

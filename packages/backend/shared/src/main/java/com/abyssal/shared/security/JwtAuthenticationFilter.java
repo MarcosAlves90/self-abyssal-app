@@ -39,14 +39,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     if (!authorization.startsWith("Bearer ")) {
-      SecurityJsonWriter.write(response, objectMapper, HttpStatus.UNAUTHORIZED, "Authentication token is required.");
+      SecurityJsonWriter.write(response, objectMapper, HttpStatus.UNAUTHORIZED, "Token de autenticação é obrigatório.");
       return;
     }
 
     String token = authorization.substring(7).trim();
 
     if (!StringUtils.hasText(token)) {
-      SecurityJsonWriter.write(response, objectMapper, HttpStatus.UNAUTHORIZED, "Authentication token is required.");
+      SecurityJsonWriter.write(response, objectMapper, HttpStatus.UNAUTHORIZED, "Token de autenticação é obrigatório.");
       return;
     }
 
@@ -62,7 +62,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       filterChain.doFilter(request, response);
     } catch (JwtException | IllegalArgumentException exception) {
       SecurityContextHolder.clearContext();
-      SecurityJsonWriter.write(response, objectMapper, HttpStatus.UNAUTHORIZED, "Invalid authentication token.");
+      SecurityJsonWriter.write(response, objectMapper, HttpStatus.UNAUTHORIZED, "Token de autenticação inválido.");
     }
   }
 }

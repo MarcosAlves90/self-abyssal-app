@@ -25,6 +25,6 @@ public enum OrderStatus {
       }
     }
 
-    throw new IllegalArgumentException("Unknown order status: " + value);
+    throw new IllegalArgumentException("Status do pedido desconhecido: " + value);
   }
 }

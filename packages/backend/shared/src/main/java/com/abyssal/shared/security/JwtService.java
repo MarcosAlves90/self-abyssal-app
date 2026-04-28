@@ -15,7 +15,7 @@ public class JwtService {
 
   public JwtService(SecurityProperties properties) {
     if (properties.getJwtSecret() == null || properties.getJwtSecret().length() < 32) {
-      throw new IllegalStateException("APP_SECURITY_JWT_SECRET must contain at least 32 characters.");
+      throw new IllegalStateException("APP_SECURITY_JWT_SECRET deve conter pelo menos 32 caracteres.");
     }
 
     this.secretKey = Keys.hmacShaKeyFor(properties.getJwtSecret().getBytes(StandardCharsets.UTF_8));

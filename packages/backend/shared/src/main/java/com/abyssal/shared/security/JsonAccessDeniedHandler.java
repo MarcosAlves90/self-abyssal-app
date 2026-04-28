@@ -22,6 +22,6 @@ public class JsonAccessDeniedHandler implements AccessDeniedHandler {
     HttpServletResponse response,
     AccessDeniedException accessDeniedException
   ) throws IOException, ServletException {
-    SecurityJsonWriter.write(response, objectMapper, HttpStatus.FORBIDDEN, "Administrator access is required.");
+    SecurityJsonWriter.write(response, objectMapper, HttpStatus.FORBIDDEN, "Acesso de administrador é obrigatório.");
   }
 }

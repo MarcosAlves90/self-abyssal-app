@@ -46,7 +46,7 @@ public class AuthService {
     String emailHash = hashingService.sha256(normalizedEmail);
 
     if (userRepository.existsByEmailHash(emailHash)) {
-      throw new ApiException(HttpStatus.CONFLICT, "An account with this email already exists.");
+      throw new ApiException(HttpStatus.CONFLICT, "Já existe uma conta com este e-mail.");
     }
 
     UserEntity user = new UserEntity();
@@ -67,10 +67,10 @@ public class AuthService {
     String emailHash = hashingService.sha256(normalizedEmail);
 
     UserEntity user = userRepository.findByEmailHash(emailHash)
-      .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "Invalid email or password."));
+      .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "E-mail ou senha inválidos."));
 
     if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
-      throw new ApiException(HttpStatus.UNAUTHORIZED, "Invalid email or password.");
+      throw new ApiException(HttpStatus.UNAUTHORIZED, "E-mail ou senha inválidos.");
     }
 
     return new AuthPayloads.AuthResponse(jwtService.generate(user.getId(), user.getRole().name()), toUserResponse(user));
@@ -79,7 +79,7 @@ public class AuthService {
   @Transactional(readOnly = true)
   public AuthPayloads.UserResponse getCurrentUser(UUID userId) {
     UserEntity user = userRepository.findById(userId)
-      .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Authenticated user not found."));
+      .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuário autenticado não encontrado."));
 
     return toUserResponse(user);
   }
@@ -87,7 +87,7 @@ public class AuthService {
   @Transactional
   public AuthPayloads.UserResponse savePrimaryAddress(UUID userId, AuthPayloads.AddressUpsertRequest request) {
     UserEntity user = userRepository.findById(userId)
-      .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Authenticated user not found."));
+      .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Usuário autenticado não encontrado."));
 
     UserAddressEntity address = new UserAddressEntity();
     address.setLabel(StringUtils.hasText(request.label()) ? request.label().trim() : "Principal");

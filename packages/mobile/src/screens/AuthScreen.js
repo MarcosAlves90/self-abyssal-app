@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
+import { FeedbackBanner } from "../components/FeedbackBanner";
 import { KeyboardScrollScreen } from "../components/KeyboardScrollScreen";
 import { SeaShellIcon } from "../components/icons/SeaShellIcon";
 import { useAuth } from "../context/AuthContext";
@@ -62,9 +63,20 @@ export function AuthScreen() {
     phone: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState({ tone: "idle", message: "" });
 
   function updateField(field, value) {
+    if (feedback.tone !== "idle") {
+      setFeedback({ tone: "idle", message: "" });
+    }
+
     setForm((current) => ({ ...current, [field]: value }));
+  }
+
+  function clearFeedback() {
+    if (feedback.tone !== "idle") {
+      setFeedback({ tone: "idle", message: "" });
+    }
   }
 
   async function handleSubmit() {
@@ -78,6 +90,10 @@ export function AuthScreen() {
       normalizedPhone = normalizePhoneNumber(form.phone);
 
       if (normalizedPhone.length !== 10 && normalizedPhone.length !== 11) {
+        setFeedback({
+          tone: "error",
+          message: "Informe um telefone válido para concluir o cadastro."
+        });
         Alert.alert(
           "Telefone obrigatório",
           "Informe um telefone válido para concluir o cadastro."
@@ -103,6 +119,10 @@ export function AuthScreen() {
         });
       }
     } catch (error) {
+      setFeedback({
+        tone: "error",
+        message: error.message
+      });
       Alert.alert("Não foi possível autenticar", error.message);
     } finally {
       setIsSubmitting(false);
@@ -134,7 +154,10 @@ export function AuthScreen() {
               {["login", "register"].map((value) => (
                 <Pressable
                   key={value}
-                  onPress={() => setMode(value)}
+                  onPress={() => {
+                    setMode(value);
+                    clearFeedback();
+                  }}
                   style={[
                     styles.modeButton,
                     mode === value && styles.modeButtonActive
@@ -233,8 +256,13 @@ export function AuthScreen() {
               </Text>
             </Pressable>
 
+            <FeedbackBanner message={feedback.message} tone={feedback.tone} />
+
             <Pressable
-              onPress={() => setMode(isRegister ? "login" : "register")}
+              onPress={() => {
+                setMode(isRegister ? "login" : "register");
+                clearFeedback();
+              }}
               style={styles.switchAction}
             >
               <Text style={styles.switchActionLabel}>{currentMode.switchLabel}</Text>

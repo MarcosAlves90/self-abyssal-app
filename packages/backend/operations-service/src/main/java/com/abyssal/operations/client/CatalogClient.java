@@ -29,12 +29,12 @@ public class CatalogClient {
         .body(BranchSnapshot.class);
     } catch (RestClientResponseException exception) {
       if (exception.getStatusCode() == HttpStatus.NOT_FOUND) {
-        throw new ApiException(HttpStatus.NOT_FOUND, "Selected branch not found.");
+        throw new ApiException(HttpStatus.NOT_FOUND, "A filial selecionada não foi encontrada.");
       }
 
-      throw new ApiException(HttpStatus.BAD_GATEWAY, "Catalog service is unavailable.");
+      throw new ApiException(HttpStatus.BAD_GATEWAY, "O serviço de catálogo está indisponível.");
     } catch (RestClientException exception) {
-      throw new ApiException(HttpStatus.BAD_GATEWAY, "Catalog service is unavailable.");
+      throw new ApiException(HttpStatus.BAD_GATEWAY, "O serviço de catálogo está indisponível.");
     }
   }
 
@@ -49,12 +49,12 @@ public class CatalogClient {
       return response == null || response.items() == null ? List.of() : response.items();
     } catch (RestClientResponseException exception) {
       if (exception.getStatusCode() == HttpStatus.BAD_REQUEST) {
-        throw new ApiException(HttpStatus.BAD_REQUEST, "One or more menu items are invalid.");
+        throw new ApiException(HttpStatus.BAD_REQUEST, "Um ou mais itens do menu são inválidos.");
       }
 
-      throw new ApiException(HttpStatus.BAD_GATEWAY, "Catalog service is unavailable.");
+      throw new ApiException(HttpStatus.BAD_GATEWAY, "O serviço de catálogo está indisponível.");
     } catch (RestClientException exception) {
-      throw new ApiException(HttpStatus.BAD_GATEWAY, "Catalog service is unavailable.");
+      throw new ApiException(HttpStatus.BAD_GATEWAY, "O serviço de catálogo está indisponível.");
     }
   }
 
