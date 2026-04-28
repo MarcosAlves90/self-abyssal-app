@@ -103,7 +103,7 @@ export function getApiErrorMessage(error) {
 
   return (
     error?.response?.data?.message ||
-    "Nao foi possivel concluir a operacao no momento."
+    "Não foi possível concluir a operação no momento."
   );
 }
 
