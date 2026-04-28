@@ -11,6 +11,7 @@
     "dev:backend": "docker compose -f packages/backend/docker-compose.yml up --build",
     "dev:backend:detached": "docker compose -f packages/backend/docker-compose.yml up --build -d",
     "dev:backend:down": "docker compose -f packages/backend/docker-compose.yml down -v",
+    "clean:backend:db": "docker compose -f packages/backend/docker-compose.yml down -v",
     "build:backend": "mvn -f packages/backend/pom.xml package",
     "test:backend": "mvn -f packages/backend/pom.xml test",
     "dev:mobile": "npm --workspace @abyssal/mobile run start",
