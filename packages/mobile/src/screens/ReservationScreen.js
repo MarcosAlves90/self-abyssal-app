@@ -169,8 +169,8 @@ export function ReservationScreen() {
           </View>
           <Text style={styles.heroTitle}>Escolha sua mesa</Text>
           <Text style={styles.heroCopy}>
-            Selecione a unidade, o horário e o ambiente sem excesso de
-            informação.
+            Reserve sua mesa e escolha o ambiente ideal para aproveitar a
+            experiência da casa.
           </Text>
         </View>
 
