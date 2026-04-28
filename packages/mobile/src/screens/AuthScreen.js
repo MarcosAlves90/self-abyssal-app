@@ -349,7 +349,6 @@ const styles = StyleSheet.create({
   modeRow: {
     backgroundColor: "rgba(255,255,255,0.03)",
     borderColor: theme.colors.border,
-    borderRadius: theme.radius.pill,
     borderWidth: 1,
     flexDirection: "row",
     marginBottom: 20,
@@ -358,7 +357,6 @@ const styles = StyleSheet.create({
   modeButton: {
     alignItems: "center",
     flex: 1,
-    borderRadius: theme.radius.pill,
     minHeight: 46,
     justifyContent: "center"
   },
@@ -404,7 +402,6 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surfaceRaised,
     borderColor: theme.colors.border,
     borderWidth: 1,
-    borderRadius: theme.radius.md,
     color: theme.colors.text,
     fontFamily: theme.fonts.body,
     fontSize: 15,
@@ -415,7 +412,6 @@ const styles = StyleSheet.create({
   submitButton: {
     alignItems: "center",
     backgroundColor: theme.colors.accent,
-    borderRadius: theme.radius.lg,
     justifyContent: "center",
     marginTop: 18,
     minHeight: 54
