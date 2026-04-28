@@ -79,21 +79,21 @@ public class CatalogSeeder implements ApplicationRunner {
 
   private List<MenuItemEntity> sampleMenuItems() {
     return List.of(
-      menuItem(new MenuItemSeed("Ostra Neon", "ostra-neon", MenuCategory.ENTRADAS, 4200, true, "ostra", true, true, ACCENT_BLUE, imageUrl("v1777411035/ostra-neon_ve7zy8.png"))),
-      menuItem(new MenuItemSeed("Ceviche de Lulas Prismatica", "ceviche-lulas-prismatica", MenuCategory.ENTRADAS, 4800, true, "lulas", false, true, ACCENT_LIGHT_BLUE, imageUrl("v1777411032/ceviche-de-lula-prismatica_so2mz7.png"))),
-      menuItem(new MenuItemSeed("Bao de Camarao Fantasma", "bao-camarao-fantasma", MenuCategory.ENTRADAS, 3600, false, "bao", true, true, ACCENT_TEAL, imageUrl("v1777411031/bao-de-camarao-fantasma_qyyica.png"))),
-      menuItem(new MenuItemSeed("Tartare de Atum Obscuro", "tartare-atum-obscuro", MenuCategory.ENTRADAS, 5100, false, "atum", false, true, ACCENT_SKY, imageUrl("v1777411040/tartare-de-atum-obscuro_sywz7l.png"))),
-      menuItem(new MenuItemSeed("Lagosta Bioluminescente", "lagosta-bioluminescente", MenuCategory.PRINCIPAIS, 12900, true, "lagosta", true, true, ACCENT_BLUE, imageUrl("v1777411034/lagosta-bioluminescente_jm3yho.png"))),
-      menuItem(new MenuItemSeed("Risoto de Polvo Ink", "risoto-polvo-ink", MenuCategory.PRINCIPAIS, 7600, true, "polvo", true, true, ACCENT_LIGHT_BLUE, imageUrl("v1777411038/risoto-de-polvo-ink_ssaybc.png"))),
-      menuItem(new MenuItemSeed("Bacalhau das Correntes Frias", "bacalhau-correntes-frias", MenuCategory.PRINCIPAIS, 8400, false, "bacalhau", true, true, ACCENT_TEAL, imageUrl("v1777411030/bacalhau-das-correntes-frias_zgrpjx.png"))),
-      menuItem(new MenuItemSeed("Arroz Negro com Vieiras", "arroz-negro-vieiras", MenuCategory.PRINCIPAIS, 9300, false, "vieiras", true, true, ACCENT_SKY, imageUrl("v1777411030/arroz-negro-com-vieiras_wrintx.png"))),
-      menuItem(new MenuItemSeed("Ramen de Mariscos Abissal", "ramen-mariscos-abissal", MenuCategory.PRINCIPAIS, 6700, false, "ramen", true, true, ACCENT_BLUE, imageUrl("v1777411037/ramen-de-mariscos-abissal_uogw0u.png"))),
-      menuItem(new MenuItemSeed("Brioche de Caranguejo Azul", "brioche-caranguejo-azul", MenuCategory.PRINCIPAIS, 5900, false, "caranguejo", true, true, ACCENT_LIGHT_BLUE, imageUrl("v1777411032/brioche-de-carangueijo-azul_nxzyqy.png"))),
-      menuItem(new MenuItemSeed("Mousse de Algas Doces", "mousse-algas-doces", MenuCategory.SOBREMESAS, 2900, false, "mousse", true, true, ACCENT_TEAL, imageUrl("v1777411035/mousse-de-algas-doces_nxscnq.png"))),
-      menuItem(new MenuItemSeed("Torta Lua de Perola", "torta-lua-de-perola", MenuCategory.SOBREMESAS, 3400, true, "torta", true, true, ACCENT_SKY, imageUrl("v1777411042/torta-de-lula-de-perola_voaw6i.png"))),
-      menuItem(new MenuItemSeed("Pudim de Sal Marinho", "pudim-sal-marinho", MenuCategory.SOBREMESAS, 2700, false, "pudim", true, true, ACCENT_BLUE, imageUrl("v1777411038/pudim-de-sal-marinho_c5zt9v.png"))),
-      menuItem(new MenuItemSeed("Elixir de Plancton", "elixir-de-plancton", MenuCategory.BEBIDAS, 2200, true, "drink", true, true, ACCENT_LIGHT_BLUE, imageUrl("v1777411033/elixir-de-plancton_wou2tn.png"))),
-      menuItem(new MenuItemSeed("Soda de Agua-Viva", "soda-de-agua-viva", MenuCategory.BEBIDAS, 1800, false, "soda", true, true, ACCENT_TEAL, imageUrl("v1777411039/soda-de-agua-viva_humpsf.png")))
+      menuItem(new MenuItemSeed("Ostra Neon", "ostra-neon", MenuCategory.ENTRADAS, 21000, true, "ostra", true, true, ACCENT_BLUE, imageUrl("v1777411035/ostra-neon_ve7zy8.png"))),
+      menuItem(new MenuItemSeed("Ceviche de Lulas Prismatica", "ceviche-lulas-prismatica", MenuCategory.ENTRADAS, 24000, true, "lulas", false, true, ACCENT_LIGHT_BLUE, imageUrl("v1777411032/ceviche-de-lula-prismatica_so2mz7.png"))),
+      menuItem(new MenuItemSeed("Bao de Camarao Fantasma", "bao-camarao-fantasma", MenuCategory.ENTRADAS, 18000, false, "bao", true, true, ACCENT_TEAL, imageUrl("v1777411031/bao-de-camarao-fantasma_qyyica.png"))),
+      menuItem(new MenuItemSeed("Tartare de Atum Obscuro", "tartare-atum-obscuro", MenuCategory.ENTRADAS, 25500, false, "atum", false, true, ACCENT_SKY, imageUrl("v1777411040/tartare-de-atum-obscuro_sywz7l.png"))),
+      menuItem(new MenuItemSeed("Lagosta Bioluminescente", "lagosta-bioluminescente", MenuCategory.PRINCIPAIS, 64500, true, "lagosta", true, true, ACCENT_BLUE, imageUrl("v1777411034/lagosta-bioluminescente_jm3yho.png"))),
+      menuItem(new MenuItemSeed("Risoto de Polvo Ink", "risoto-polvo-ink", MenuCategory.PRINCIPAIS, 38000, true, "polvo", true, true, ACCENT_LIGHT_BLUE, imageUrl("v1777411038/risoto-de-polvo-ink_ssaybc.png"))),
+      menuItem(new MenuItemSeed("Bacalhau das Correntes Frias", "bacalhau-correntes-frias", MenuCategory.PRINCIPAIS, 42000, false, "bacalhau", true, true, ACCENT_TEAL, imageUrl("v1777411030/bacalhau-das-correntes-frias_zgrpjx.png"))),
+      menuItem(new MenuItemSeed("Arroz Negro com Vieiras", "arroz-negro-vieiras", MenuCategory.PRINCIPAIS, 46500, false, "vieiras", true, true, ACCENT_SKY, imageUrl("v1777411030/arroz-negro-com-vieiras_wrintx.png"))),
+      menuItem(new MenuItemSeed("Ramen de Mariscos Abissal", "ramen-mariscos-abissal", MenuCategory.PRINCIPAIS, 33500, false, "ramen", true, true, ACCENT_BLUE, imageUrl("v1777411037/ramen-de-mariscos-abissal_uogw0u.png"))),
+      menuItem(new MenuItemSeed("Brioche de Caranguejo Azul", "brioche-caranguejo-azul", MenuCategory.PRINCIPAIS, 29500, false, "caranguejo", true, true, ACCENT_LIGHT_BLUE, imageUrl("v1777411032/brioche-de-carangueijo-azul_nxzyqy.png"))),
+      menuItem(new MenuItemSeed("Mousse de Algas Doces", "mousse-algas-doces", MenuCategory.SOBREMESAS, 14500, false, "mousse", true, true, ACCENT_TEAL, imageUrl("v1777411035/mousse-de-algas-doces_nxscnq.png"))),
+      menuItem(new MenuItemSeed("Torta Lua de Perola", "torta-lua-de-perola", MenuCategory.SOBREMESAS, 17000, true, "torta", true, true, ACCENT_SKY, imageUrl("v1777411042/torta-de-lula-de-perola_voaw6i.png"))),
+      menuItem(new MenuItemSeed("Pudim de Sal Marinho", "pudim-sal-marinho", MenuCategory.SOBREMESAS, 13500, false, "pudim", true, true, ACCENT_BLUE, imageUrl("v1777411038/pudim-de-sal-marinho_c5zt9v.png"))),
+      menuItem(new MenuItemSeed("Elixir de Plancton", "elixir-de-plancton", MenuCategory.BEBIDAS, 11000, true, "drink", true, true, ACCENT_LIGHT_BLUE, imageUrl("v1777411033/elixir-de-plancton_wou2tn.png"))),
+      menuItem(new MenuItemSeed("Soda de Agua-Viva", "soda-de-agua-viva", MenuCategory.BEBIDAS, 9000, false, "soda", true, true, ACCENT_TEAL, imageUrl("v1777411039/soda-de-agua-viva_humpsf.png")))
     );
   }
 
