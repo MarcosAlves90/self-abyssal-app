@@ -14,6 +14,7 @@
     "build:backend": "mvn -f packages/backend/pom.xml package",
     "test:backend": "mvn -f packages/backend/pom.xml test",
     "dev:mobile": "npm --workspace @abyssal/mobile run start",
-    "dev:mobile:web": "npm --workspace @abyssal/mobile run web"
+    "dev:mobile:web": "npm --workspace @abyssal/mobile run web",
+    "test:mobile": "npm --workspace @abyssal/mobile run test"
   }
 }

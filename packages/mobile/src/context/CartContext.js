@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from "react";
 
-import { buildCartItemContract } from "../contracts/publicContracts";
+import { buildCartItemRequest } from "../contracts";
 
 const CartContext = createContext(undefined);
 
@@ -21,7 +21,7 @@ export function CartProvider({ children }) {
 
       return [
         ...currentItems,
-        buildCartItemContract(menuItem)
+        buildCartItemRequest(menuItem)
       ];
     });
   }

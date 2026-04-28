@@ -2,17 +2,18 @@ import axios from "axios";
 import { Platform } from "react-native";
 
 import {
-  buildAddressPayloadContract,
-  buildAuthPayloadContract,
-  buildOrderPayloadContract,
-  buildReservationPayloadContract,
-  normalizeAuthSessionContract,
-  normalizeBranchContract,
-  normalizeMenuItemContract,
-  normalizeOrderContract,
-  normalizeReservationContract,
-  normalizeUserContract,
-} from "../contracts/publicContracts";
+  buildAddressRequest,
+  buildAuthRequest,
+  buildOrderRequest,
+  buildReservationRequest,
+  normalizeAuthSessionResponse,
+  normalizeBranchResponse,
+  normalizeMenuItemResponse,
+  normalizeOrderResponse,
+  normalizePostalLookupResponse,
+  normalizeReservationResponse,
+  normalizeUserResponse,
+} from "../contracts";
 import { formatPostalCode, normalizePostalCode } from "../utils/address";
 
 const isDevelopment = __DEV__;
@@ -95,6 +96,10 @@ export function setAuthToken(token) {
 }
 
 export function getApiErrorMessage(error) {
+  if (error?.safeMessage) {
+    return error.safeMessage;
+  }
+
   return (
     error?.response?.data?.message ||
     "Nao foi possivel concluir a operacao no momento."
@@ -102,59 +107,59 @@ export function getApiErrorMessage(error) {
 }
 
 export async function registerAccount(payload) {
-  const { data } = await api.post("/auth/register", buildAuthPayloadContract(payload));
-  return normalizeAuthSessionContract(data);
+  const { data } = await api.post("/auth/register", buildAuthRequest(payload));
+  return normalizeAuthSessionResponse(data);
 }
 
 export async function loginAccount(payload) {
-  const { data } = await api.post("/auth/login", buildAuthPayloadContract(payload));
-  return normalizeAuthSessionContract(data);
+  const { data } = await api.post("/auth/login", buildAuthRequest(payload));
+  return normalizeAuthSessionResponse(data);
 }
 
 export async function fetchMe() {
   const { data } = await api.get("/auth/me");
-  return normalizeUserContract(data.user);
+  return normalizeUserResponse(data.user);
 }
 
 export async function savePrimaryAddress(payload) {
   const { data } = await api.put(
     "/auth/me/address",
-    buildAddressPayloadContract(payload)
+    buildAddressRequest(payload)
   );
-  return normalizeUserContract(data.user);
+  return normalizeUserResponse(data.user);
 }
 
 export async function fetchBranches() {
   const { data } = await api.get("/branches");
-  return (data.branches || []).map(normalizeBranchContract);
+  return (data.branches || []).map(normalizeBranchResponse);
 }
 
 export async function fetchMenu(params = {}) {
   const { data } = await api.get("/menu", { params });
-  return (data.items || []).map(normalizeMenuItemContract);
+  return (data.items || []).map(normalizeMenuItemResponse);
 }
 
 export async function fetchReservations() {
   const { data } = await api.get("/reservations");
-  return (data.reservations || []).map(normalizeReservationContract);
+  return (data.reservations || []).map(normalizeReservationResponse);
 }
 
 export async function createReservation(payload) {
   const { data } = await api.post(
     "/reservations",
-    buildReservationPayloadContract(payload)
+    buildReservationRequest(payload)
   );
-  return normalizeReservationContract(data.reservation);
+  return normalizeReservationResponse(data.reservation);
 }
 
 export async function fetchOrders() {
   const { data } = await api.get("/orders");
-  return (data.orders || []).map(normalizeOrderContract);
+  return (data.orders || []).map(normalizeOrderResponse);
 }
 
 export async function createOrder(payload) {
-  const { data } = await api.post("/orders", buildOrderPayloadContract(payload));
-  return normalizeOrderContract(data.order);
+  const { data } = await api.post("/orders", buildOrderRequest(payload));
+  return normalizeOrderResponse(data.order);
 }
 
 export async function lookupPostalCode(postalCode) {
@@ -172,12 +177,12 @@ export async function lookupPostalCode(postalCode) {
     throw new Error("CEP nao encontrado.");
   }
 
-  return {
+  return normalizePostalLookupResponse({
     postalCode: formatPostalCode(normalizedPostalCode),
     street: data.logradouro || "",
     neighborhood: data.bairro || "",
     city: data.localidade || "",
     state: data.uf || "",
     complement: data.complemento || ""
-  };
+  });
 }

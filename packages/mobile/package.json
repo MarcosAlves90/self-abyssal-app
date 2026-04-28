@@ -7,7 +7,8 @@
     "start": "expo start --clear",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "test": "jest --runInBand"
   },
   "dependencies": {
     "@expo-google-fonts/cormorant-garamond": "^0.4.1",
@@ -29,5 +30,9 @@
     "react-native-screens": "~4.16.0",
     "react-native-svg": "15.12.1",
     "react-native-web": "^0.21.0"
+  },
+  "devDependencies": {
+    "babel-jest": "^30.3.0",
+    "jest": "^30.3.0"
   }
 }
