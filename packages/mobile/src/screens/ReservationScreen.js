@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
+  ActivityIndicator,
   Alert,
   Pressable,
   StyleSheet,
@@ -29,13 +31,13 @@ export function ReservationScreen() {
   const { width } = useWindowDimensions();
   const [branches, setBranches] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [confirmation, setConfirmation] = useState(null);
   const [reservationForm, setReservationForm] = useState({
     branchId: "",
     date: nextDate(),
     time: "20:00",
     guests: "2",
     depthLevel: "",
-    specialRequest: "",
   });
 
   useEffect(() => {
@@ -72,6 +74,7 @@ export function ReservationScreen() {
     branches[0];
 
   async function submitReservation() {
+    setConfirmation(null);
     setIsSubmitting(true);
 
     try {
@@ -84,7 +87,12 @@ export function ReservationScreen() {
         scheduledAt,
         guests: Number(reservationForm.guests),
         depthLevel: reservationForm.depthLevel,
-        specialRequest: reservationForm.specialRequest,
+      });
+
+      setConfirmation({
+        branchName: selectedBranch?.name || "Unidade selecionada",
+        guests: Number(reservationForm.guests),
+        scheduledAt,
       });
 
       Alert.alert(
@@ -112,7 +120,6 @@ export function ReservationScreen() {
     >
       <View style={[styles.shell, { maxWidth: layout.contentMaxWidth }]}>
         <View style={[styles.panel, layout.isCompact && styles.panelCompact]}>
-          <Text style={styles.panelEyebrow}>Reserva presencial</Text>
           <Text
             style={[
               styles.panelTitle,
@@ -122,13 +129,10 @@ export function ReservationScreen() {
               },
             ]}
           >
-            Selecione a unidade e horário.
-          </Text>
-          <Text style={styles.panelCopy}>
-            Mantivemos só o necessário para reservar com calma e sem distração.
+            Reservar mesa
           </Text>
 
-          <Field label="Filial">
+          <Field icon="storefront-outline" label="Filial">
             <View style={styles.chipWrap}>
               {branches.map((branch) => (
                 <SelectionChip
@@ -153,7 +157,7 @@ export function ReservationScreen() {
               layout.isCompact && styles.dualFieldRowStack,
             ]}
           >
-            <Field label="Data">
+            <Field icon="calendar-month-outline" label="Data">
               <StyledInput
                 onChangeText={(value) =>
                   setReservationForm((current) => ({ ...current, date: value }))
@@ -162,7 +166,7 @@ export function ReservationScreen() {
                 value={reservationForm.date}
               />
             </Field>
-            <Field label="Horário">
+            <Field icon="clock-outline" label="Horário">
               <StyledInput
                 onChangeText={(value) =>
                   setReservationForm((current) => ({ ...current, time: value }))
@@ -173,7 +177,7 @@ export function ReservationScreen() {
             </Field>
           </View>
 
-          <Field label="Convidados">
+          <Field icon="account-group-outline" label="Convidados">
             <StyledInput
               keyboardType="number-pad"
               onChangeText={(value) =>
@@ -183,7 +187,7 @@ export function ReservationScreen() {
             />
           </Field>
 
-          <Field label="Nível">
+          <Field icon="layers-outline" label="Nível">
             <View style={styles.chipWrap}>
               {(selectedBranch?.reservationDepths || []).map((depth) => (
                 <SelectionChip
@@ -201,35 +205,46 @@ export function ReservationScreen() {
             </View>
           </Field>
 
-          <Field label="Observações">
-            <StyledInput
-              multiline
-              onChangeText={(value) =>
-                setReservationForm((current) => ({
-                  ...current,
-                  specialRequest: value,
-                }))
-              }
-              placeholder="Pedido especial, restrição ou preferência"
-              value={reservationForm.specialRequest}
-            />
-          </Field>
-
           <PrimaryButton
             disabled={isSubmitting}
             label={isSubmitting ? "Confirmando..." : "Confirmar reserva"}
             onPress={submitReservation}
           />
+
+          {confirmation ? (
+            <View style={styles.successCard}>
+              <View style={styles.successHeader}>
+                <MaterialCommunityIcons
+                  color={theme.colors.accent}
+                  name="check-decagram-outline"
+                  size={18}
+                />
+                <Text style={styles.successTitle}>Reserva confirmada</Text>
+              </View>
+              <Text style={styles.successText}>{confirmation.branchName}</Text>
+              <Text style={styles.successText}>
+                {new Date(confirmation.scheduledAt).toLocaleString("pt-BR")} •{" "}
+                {confirmation.guests} pessoas
+              </Text>
+            </View>
+          ) : null}
         </View>
       </View>
     </KeyboardScrollScreen>
   );
 }
 
-function Field({ children, label }) {
+function Field({ children, icon, label }) {
   return (
     <View style={styles.field}>
-      <Text style={styles.fieldLabel}>{label}</Text>
+      <View style={styles.fieldLabelRow}>
+        <MaterialCommunityIcons
+          color={theme.colors.textMuted}
+          name={icon}
+          size={16}
+        />
+        <Text style={styles.fieldLabel}>{label}</Text>
+      </View>
       {children}
     </View>
   );
@@ -260,7 +275,7 @@ function StyledInput(props) {
     <TextInput
       placeholderTextColor={theme.colors.textMuted}
       selectionColor={theme.colors.accentSoft}
-      style={[styles.input, props.multiline && styles.textarea]}
+      style={styles.input}
       {...props}
     />
   );
@@ -272,15 +287,35 @@ function PrimaryButton({ disabled, label, onPress }) {
       accessibilityRole="button"
       disabled={disabled}
       onPress={onPress}
-      style={[styles.primaryButton, disabled && styles.buttonDisabled]}
+      style={({ pressed }) => [
+        styles.primaryButton,
+        pressed && !disabled && styles.primaryButtonPressed,
+        disabled && styles.buttonDisabled,
+      ]}
     >
-      <Text style={styles.primaryButtonText}>{label}</Text>
+      <View style={styles.primaryButtonContent}>
+        {disabled ? (
+          <ActivityIndicator
+            color={theme.colors.background}
+            size="small"
+            style={styles.primaryButtonLoader}
+          />
+        ) : (
+          <MaterialCommunityIcons
+            color={theme.colors.background}
+            name="check-circle-outline"
+            size={18}
+          />
+        )}
+        <Text style={styles.primaryButtonText}>{label}</Text>
+      </View>
     </Pressable>
   );
 }
 
 Field.propTypes = {
   children: PropTypes.node.isRequired,
+  icon: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
 };
 
@@ -292,7 +327,6 @@ SelectionChip.propTypes = {
 
 StyledInput.propTypes = {
   keyboardType: PropTypes.string,
-  multiline: PropTypes.bool,
   onChangeText: PropTypes.func,
   placeholder: PropTypes.string,
   value: PropTypes.string,
@@ -325,25 +359,10 @@ const styles = StyleSheet.create({
   panelCompact: {
     padding: theme.spacing.md,
   },
-  panelEyebrow: {
-    color: theme.colors.accentWarm,
-    fontFamily: theme.fonts.bodyBold,
-    fontSize: 12,
-    letterSpacing: 1.2,
-    marginBottom: 8,
-    textTransform: "uppercase",
-  },
   panelTitle: {
     color: theme.colors.text,
     fontFamily: theme.fonts.display,
-    marginBottom: 10,
-  },
-  panelCopy: {
-    color: theme.colors.textMuted,
-    fontFamily: theme.fonts.body,
-    fontSize: 14,
-    lineHeight: 22,
-    marginBottom: theme.spacing.lg,
+    marginBottom: theme.spacing.md,
   },
   dualFieldRow: {
     flexDirection: "row",
@@ -354,13 +373,18 @@ const styles = StyleSheet.create({
   },
   field: {
     flex: 1,
-    marginBottom: 16,
+    marginBottom: 14,
+  },
+  fieldLabelRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 6,
+    marginBottom: 8,
   },
   fieldLabel: {
     color: theme.colors.text,
     fontFamily: theme.fonts.body,
     fontSize: 13,
-    marginBottom: 8,
   },
   chipWrap: {
     flexDirection: "row",
@@ -394,13 +418,9 @@ const styles = StyleSheet.create({
     color: theme.colors.text,
     fontFamily: theme.fonts.body,
     fontSize: 14,
-    minHeight: 52,
+    minHeight: 48,
     paddingHorizontal: 16,
-    paddingVertical: 14,
-  },
-  textarea: {
-    minHeight: 92,
-    textAlignVertical: "top",
+    paddingVertical: 12,
   },
   primaryButton: {
     alignItems: "center",
@@ -408,12 +428,48 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     minHeight: 52,
   },
+  primaryButtonPressed: {
+    opacity: 0.86,
+  },
   buttonDisabled: {
     opacity: 0.7,
+  },
+  primaryButtonContent: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 8,
+    justifyContent: "center",
   },
   primaryButtonText: {
     color: theme.colors.background,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 15,
+  },
+  primaryButtonLoader: {
+    width: 18,
+  },
+  successCard: {
+    backgroundColor: "rgba(49,231,255,0.08)",
+    borderColor: theme.colors.accent,
+    borderWidth: 1,
+    marginTop: theme.spacing.md,
+    padding: theme.spacing.md,
+  },
+  successHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 8,
+  },
+  successTitle: {
+    color: theme.colors.text,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 14,
+  },
+  successText: {
+    color: theme.colors.textMuted,
+    fontFamily: theme.fonts.body,
+    fontSize: 13,
+    lineHeight: 20,
   },
 });
