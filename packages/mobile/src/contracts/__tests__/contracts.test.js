@@ -5,6 +5,7 @@ import {
   buildOrderRequest,
   normalizeAuthSessionResponse,
   normalizeMenuItemResponse,
+  normalizeOrderResponse,
   normalizeReservationResponse,
 } from "..";
 
@@ -80,5 +81,32 @@ describe("contracts", () => {
         items: [{ menuItemId: "m1", quantity: -1 }],
       }),
     ).toThrow(ContractError);
+  });
+
+  it("normaliza resposta de pedido com createdAt em formato numérico", () => {
+    const result = normalizeOrderResponse({
+      id: "o1",
+      createdAt: 1714435200,
+      status: "pending",
+      fulfillmentType: "delivery",
+      totalCents: 6500,
+    });
+
+    expect(result.createdAt).toBe("2024-04-30T00:00:00.000Z");
+  });
+
+  it("normaliza resposta de pedido com createdAt como objeto de data", () => {
+    const result = normalizeOrderResponse({
+      id: "o2",
+      createdAt: {
+        epochSecond: 1714435200,
+        nano: 0,
+      },
+      status: "pending",
+      fulfillmentType: "delivery",
+      totalCents: 6500,
+    });
+
+    expect(result.createdAt).toBe("2024-04-30T00:00:00.000Z");
   });
 });

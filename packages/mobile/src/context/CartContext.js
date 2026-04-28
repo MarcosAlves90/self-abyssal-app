@@ -6,6 +6,7 @@ const CartContext = createContext(undefined);
 
 export function CartProvider({ children }) {
   const [items, setItems] = useState([]);
+  const [checkoutFeedback, setCheckoutFeedback] = useState(null);
 
   function addItem(menuItem) {
     setItems((currentItems) => {
@@ -55,6 +56,10 @@ export function CartProvider({ children }) {
     setItems([]);
   }
 
+  function clearCheckoutFeedback() {
+    setCheckoutFeedback(null);
+  }
+
   const totalCents = items.reduce(
     (sum, item) => sum + item.quantity * item.priceCents,
     0
@@ -68,7 +73,10 @@ export function CartProvider({ children }) {
     totalCents,
     addItem,
     clearCart,
+    checkoutFeedback,
     removeItem,
+    clearCheckoutFeedback,
+    setCheckoutFeedback,
     updateItemNote,
     updateItemQuantity
   };

@@ -165,7 +165,7 @@ export async function fetchOrders() {
 
 export async function createOrder(payload) {
   const { data } = await api.post("/orders", buildOrderRequest(payload));
-  return normalizeOrderResponse(data.order);
+  return data.order || data;
 }
 
 export async function lookupPostalCode(postalCode) {

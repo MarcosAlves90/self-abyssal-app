@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
+import { CommonActions } from "@react-navigation/native";
 import {
   Alert,
   Pressable,
@@ -38,7 +39,13 @@ const paymentOptions = [
 
 export function DeliveryCheckoutScreen({ navigation }) {
   const { user } = useAuth();
-  const { clearCart, itemCount, items, totalCents } = useCart();
+  const {
+    clearCart,
+    itemCount,
+    items,
+    setCheckoutFeedback,
+    totalCents,
+  } = useCart();
   const { width } = useWindowDimensions();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLookingUpPostalCode, setIsLookingUpPostalCode] = useState(false);
@@ -137,14 +144,48 @@ export function DeliveryCheckoutScreen({ navigation }) {
       });
 
       clearCart();
-      Alert.alert("Pedido enviado", "Seu pedido foi enviado para a cozinha.", [
-        {
-          text: "OK",
-          onPress: () => navigation.navigate("MainTabs", { screen: "Inicio" }),
-        },
-      ]);
+      const successFeedback = {
+        tone: "success",
+        title: "Pedido efetuado com sucesso",
+        message: "Pedido enviado para a cozinha.",
+      };
+
+      setCheckoutFeedback(successFeedback);
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [
+            {
+              name: "MainTabs",
+              params: {
+                screen: "Inicio",
+              },
+            },
+          ],
+        }),
+      );
     } catch (error) {
-      Alert.alert("Falha ao enviar pedido", getApiErrorMessage(error));
+      const probableReason = getDeliveryFailureReason(error);
+
+      setCheckoutFeedback({
+        tone: "error",
+        title: "Não foi possível enviar o pedido",
+        message: probableReason,
+      });
+
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [
+            {
+              name: "MainTabs",
+              params: {
+                screen: "Inicio",
+              },
+            },
+          ],
+        }),
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -275,9 +316,33 @@ export function DeliveryCheckoutScreen({ navigation }) {
 
 DeliveryCheckoutScreen.propTypes = {
   navigation: PropTypes.shape({
+    dispatch: PropTypes.func.isRequired,
     navigate: PropTypes.func.isRequired,
   }).isRequired,
 };
+
+function getDeliveryFailureReason(error) {
+  const message = getApiErrorMessage(error);
+  const normalized = message.toLowerCase();
+
+  if (normalized.includes("timeout") || normalized.includes("tempo esgotado")) {
+    return "O servidor demorou para responder. Verifique sua conexão e tente novamente.";
+  }
+
+  if (
+    normalized.includes("network") ||
+    normalized.includes("conex") ||
+    normalized.includes("offline")
+  ) {
+    return "Não conseguimos falar com o servidor agora. Verifique sua internet e tente novamente.";
+  }
+
+  if (normalized.includes("inval") || normalized.includes("obrigat")) {
+    return "Algum dado do pedido parece inválido. Revise nome, endereço e pagamento.";
+  }
+
+  return message || "Não foi possível concluir o pedido neste momento.";
+}
 
 function Field({ children, label, required }) {
   return (
