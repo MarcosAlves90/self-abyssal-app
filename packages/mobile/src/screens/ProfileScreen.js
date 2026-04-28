@@ -443,8 +443,7 @@ function AddressSection({
   const showSummaryEditButton = hasAddress && shouldShowAddressEditor === false;
   const showEditor = shouldShowAddressEditor;
   const showCancelButton = hasAddress;
-  const showAddressFeedback =
-    addressSaveFeedback.tone === "idle" ? false : true;
+  const showAddressFeedback = addressSaveFeedback.tone !== "idle";
 
   return (
     <>

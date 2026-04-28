@@ -36,6 +36,21 @@ function iconForRoute(routeName, color, size) {
   );
 }
 
+function TabBarBackground() {
+  return (
+    <LinearGradient
+      colors={[
+        "rgba(7, 18, 38, 0.98)",
+        "rgba(9, 24, 46, 0.98)",
+        "rgba(4, 11, 23, 0.99)",
+      ]}
+      end={{ x: 1, y: 1 }}
+      start={{ x: 0, y: 0 }}
+      style={StyleSheet.absoluteFillObject}
+    />
+  );
+}
+
 function MainTabs() {
   return (
     <Tabs.Navigator
@@ -43,18 +58,7 @@ function MainTabs() {
         headerShown: false,
         tabBarActiveTintColor: theme.colors.warning,
         tabBarInactiveTintColor: theme.colors.textMuted,
-        tabBarBackground: () => (
-          <LinearGradient
-            colors={[
-              "rgba(7, 18, 38, 0.98)",
-              "rgba(9, 24, 46, 0.98)",
-              "rgba(4, 11, 23, 0.99)",
-            ]}
-            end={{ x: 1, y: 1 }}
-            start={{ x: 0, y: 0 }}
-            style={StyleSheet.absoluteFillObject}
-          />
-        ),
+        tabBarBackground: TabBarBackground,
         tabBarHideOnKeyboard: true,
         tabBarItemStyle: {
           paddingBottom: 4,

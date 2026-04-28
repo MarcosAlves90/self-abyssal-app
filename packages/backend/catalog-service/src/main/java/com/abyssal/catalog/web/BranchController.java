@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/branches")
 public class BranchController {
+  private static final String BRANCH_KEY = "branch";
+
   private final CatalogService catalogService;
 
   public BranchController(CatalogService catalogService) {
@@ -35,7 +37,7 @@ public class BranchController {
 
   @GetMapping("/{branchId}")
   public Map<String, Object> getBranch(@PathVariable UUID branchId) {
-    return Map.of("branch", catalogService.getBranch(branchId));
+    return Map.of(BRANCH_KEY, catalogService.getBranch(branchId));
   }
 
   @PostMapping
@@ -45,7 +47,7 @@ public class BranchController {
   ) {
     catalogService.assertAdministrator(authorizationHeader);
     return ResponseEntity.status(HttpStatus.CREATED)
-      .body(Map.of("branch", catalogService.createBranch(request)));
+      .body(Map.of(BRANCH_KEY, catalogService.createBranch(request)));
   }
 
   @PatchMapping("/{branchId}")
@@ -55,7 +57,7 @@ public class BranchController {
     @Valid @RequestBody CatalogPayloads.BranchUpdateRequest request
   ) {
     catalogService.assertAdministrator(authorizationHeader);
-    return Map.of("branch", catalogService.updateBranch(branchId, request));
+    return Map.of(BRANCH_KEY, catalogService.updateBranch(branchId, request));
   }
 
   @DeleteMapping("/{branchId}")

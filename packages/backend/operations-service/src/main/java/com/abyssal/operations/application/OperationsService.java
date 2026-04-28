@@ -20,7 +20,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -32,6 +31,12 @@ import org.springframework.util.StringUtils;
 public class OperationsService {
   private static final String ACTIVE_RESERVATION_CONFLICT_MESSAGE =
     "Já existe uma reserva ativa para esta filial, horário e nível.";
+  private static final String RESERVATION_ACCESS_DENIED_MESSAGE =
+    "Acesso à reserva negado.";
+  private static final String RESERVATION_ACCESS_DENIED_FOR_ORDER_MESSAGE =
+    "Acesso à reserva negado para este pedido.";
+  private static final String ORDER_ACCESS_DENIED_MESSAGE =
+    "Acesso ao pedido negado.";
 
   private final ReservationRepository reservationRepository;
   private final OrderRepository orderRepository;
@@ -57,12 +62,8 @@ public class OperationsService {
   ) {
     ReservationStatus filter = status == null ? null : parseReservationStatus(status);
     List<ReservationEntity> reservations = isAdmin(user)
-      ? filter == null
-        ? reservationRepository.findAll().stream().sorted(Comparator.comparing(ReservationEntity::getScheduledAt)).toList()
-        : reservationRepository.findByStatusOrderByScheduledAtAsc(filter)
-      : filter == null
-        ? reservationRepository.findByUserIdOrderByScheduledAtAsc(user.id())
-        : reservationRepository.findByUserIdAndStatusOrderByScheduledAtAsc(user.id(), filter);
+      ? listReservationsForAdmin(filter)
+      : listReservationsForUser(user.id(), filter);
 
     return reservations.stream().map(this::toReservationResponse).toList();
   }
@@ -70,7 +71,7 @@ public class OperationsService {
   @Transactional(readOnly = true)
   public OperationsPayloads.ReservationResponse getReservation(UUID reservationId, AuthenticatedUser user) {
     ReservationEntity reservation = findReservation(reservationId);
-    assertOwnershipOrAdmin(user, reservation.getUserId(), "Acesso à reserva negado.");
+    assertOwnershipOrAdmin(user, reservation.getUserId(), RESERVATION_ACCESS_DENIED_MESSAGE);
     return toReservationResponse(reservation);
   }
 
@@ -106,49 +107,17 @@ public class OperationsService {
     OperationsPayloads.ReservationUpdateRequest request,
     AuthenticatedUser user
   ) {
-    if (!request.hasAnyField()) {
-      throw new ApiException(HttpStatus.BAD_REQUEST, "Pelo menos um campo da reserva deve ser informado.");
-    }
-
     ReservationEntity reservation = findReservation(reservationId);
-    assertOwnershipOrAdmin(user, reservation.getUserId(), "Acesso à reserva negado.");
+    validateReservationUpdateRequest(request);
+    assertOwnershipOrAdmin(user, reservation.getUserId(), RESERVATION_ACCESS_DENIED_MESSAGE);
 
-    if (!isAdmin(user) && request.status() != null && parseReservationStatus(request.status()) != ReservationStatus.CANCELLED) {
-      throw new ApiException(HttpStatus.FORBIDDEN, "Apenas administradores podem aplicar este status de reserva.");
-    }
+    ReservationStatus nextStatus = resolveReservationStatus(request, reservation, user);
+    UUID nextBranchId = resolveReservationBranchId(request, reservation);
+    String nextDepthLevel = resolveReservationDepthLevel(request, reservation);
+    Instant nextScheduledAt = resolveReservationScheduledAt(request, reservation);
 
-    UUID nextBranchId = request.branchId() == null ? reservation.getBranchId() : request.branchId();
-    String nextDepthLevel = request.depthLevel() == null ? reservation.getDepthLevel() : request.depthLevel().trim();
-    Instant nextScheduledAt = request.scheduledAt() == null ? reservation.getScheduledAt() : request.scheduledAt();
-    ReservationStatus nextStatus = request.status() == null ? reservation.getStatus() : parseReservationStatus(request.status());
-
-    if (request.branchId() != null || request.depthLevel() != null) {
-      CatalogClient.BranchSnapshot branch = catalogClient.getBranch(nextBranchId);
-
-      if (!branch.reservationDepths().contains(nextDepthLevel)) {
-        throw new ApiException(HttpStatus.BAD_REQUEST, "A filial selecionada não suporta este nível.");
-      }
-
-      reservation.setBranchId(nextBranchId);
-      reservation.setBranchNameSnapshot(branch.name());
-      reservation.setDepthLevel(nextDepthLevel);
-    }
-
-    if (request.scheduledAt() != null) {
-      reservation.setScheduledAt(request.scheduledAt());
-    }
-
-    if (request.guests() != null) {
-      reservation.setGuests(request.guests());
-    }
-
-    if (request.status() != null) {
-      reservation.setStatus(nextStatus);
-    }
-
-    if (request.specialRequest() != null) {
-      reservation.setSpecialRequestEncrypted(textCrypto.encrypt(trimOrNull(request.specialRequest())));
-    }
+    applyReservationBranchUpdate(request, reservation, nextBranchId, nextDepthLevel);
+    applyReservationFieldUpdates(request, reservation, nextStatus);
 
     if (nextStatus != ReservationStatus.CANCELLED) {
       ensureReservationSlotIsAvailable(nextBranchId, nextScheduledAt, nextDepthLevel, reservation.getId());
@@ -160,7 +129,7 @@ public class OperationsService {
   @Transactional
   public void deleteReservation(UUID reservationId, AuthenticatedUser user) {
     ReservationEntity reservation = findReservation(reservationId);
-    assertOwnershipOrAdmin(user, reservation.getUserId(), "Acesso à reserva negado.");
+    assertOwnershipOrAdmin(user, reservation.getUserId(), RESERVATION_ACCESS_DENIED_MESSAGE);
     reservationRepository.delete(reservation);
   }
 
@@ -168,12 +137,8 @@ public class OperationsService {
   public List<OperationsPayloads.OrderResponse> listOrders(AuthenticatedUser user, String status) {
     OrderStatus filter = status == null ? null : parseOrderStatus(status);
     List<OrderEntity> orders = isAdmin(user)
-      ? filter == null
-        ? orderRepository.findAll().stream().sorted(Comparator.comparing(OrderEntity::getCreatedAt).reversed()).toList()
-        : orderRepository.findByStatusOrderByCreatedAtDesc(filter)
-      : filter == null
-        ? orderRepository.findByUserIdOrderByCreatedAtDesc(user.id())
-        : orderRepository.findByUserIdAndStatusOrderByCreatedAtDesc(user.id(), filter);
+      ? listOrdersForAdmin(filter)
+      : listOrdersForUser(user.id(), filter);
 
     return orders.stream().map(this::toOrderResponse).toList();
   }
@@ -181,7 +146,7 @@ public class OperationsService {
   @Transactional(readOnly = true)
   public OperationsPayloads.OrderResponse getOrder(UUID orderId, AuthenticatedUser user) {
     OrderEntity order = findOrder(orderId);
-    assertOwnershipOrAdmin(user, order.getUserId(), "Acesso ao pedido negado.");
+    assertOwnershipOrAdmin(user, order.getUserId(), ORDER_ACCESS_DENIED_MESSAGE);
     return toOrderResponse(order);
   }
 
@@ -204,7 +169,7 @@ public class OperationsService {
 
     if (request.reservationId() != null) {
       reservation = findReservation(request.reservationId());
-      assertOwnershipOrAdmin(user, reservation.getUserId(), "Acesso à reserva negado para este pedido.");
+      assertOwnershipOrAdmin(user, reservation.getUserId(), RESERVATION_ACCESS_DENIED_FOR_ORDER_MESSAGE);
 
       if (branchId == null) {
         branchId = reservation.getBranchId();
@@ -261,7 +226,7 @@ public class OperationsService {
     }
 
     OrderEntity order = findOrder(orderId);
-    assertOwnershipOrAdmin(user, order.getUserId(), "Acesso ao pedido negado.");
+    assertOwnershipOrAdmin(user, order.getUserId(), ORDER_ACCESS_DENIED_MESSAGE);
 
     if (!isAdmin(user) && request.paymentStatus() != null) {
       throw new ApiException(HttpStatus.FORBIDDEN, "Apenas administradores podem atualizar o status de pagamento.");
@@ -285,7 +250,7 @@ public class OperationsService {
   @Transactional
   public void deleteOrder(UUID orderId, AuthenticatedUser user) {
     OrderEntity order = findOrder(orderId);
-    assertOwnershipOrAdmin(user, order.getUserId(), "Acesso ao pedido negado.");
+    assertOwnershipOrAdmin(user, order.getUserId(), ORDER_ACCESS_DENIED_MESSAGE);
     orderRepository.delete(order);
   }
 
@@ -324,6 +289,130 @@ public class OperationsService {
   private OrderEntity findOrder(UUID orderId) {
     return orderRepository.findById(orderId)
       .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Pedido não encontrado."));
+  }
+
+  private void validateReservationUpdateRequest(OperationsPayloads.ReservationUpdateRequest request) {
+    if (!request.hasAnyField()) {
+      throw new ApiException(HttpStatus.BAD_REQUEST, "Pelo menos um campo da reserva deve ser informado.");
+    }
+  }
+
+  private ReservationStatus resolveReservationStatus(
+    OperationsPayloads.ReservationUpdateRequest request,
+    ReservationEntity reservation,
+    AuthenticatedUser user
+  ) {
+    if (request.status() == null) {
+      return reservation.getStatus();
+    }
+
+    ReservationStatus nextStatus = parseReservationStatus(request.status());
+
+    if (!isAdmin(user) && nextStatus != ReservationStatus.CANCELLED) {
+      throw new ApiException(HttpStatus.FORBIDDEN, "Apenas administradores podem aplicar este status de reserva.");
+    }
+
+    return nextStatus;
+  }
+
+  private UUID resolveReservationBranchId(
+    OperationsPayloads.ReservationUpdateRequest request,
+    ReservationEntity reservation
+  ) {
+    return request.branchId() == null ? reservation.getBranchId() : request.branchId();
+  }
+
+  private String resolveReservationDepthLevel(
+    OperationsPayloads.ReservationUpdateRequest request,
+    ReservationEntity reservation
+  ) {
+    return request.depthLevel() == null ? reservation.getDepthLevel() : request.depthLevel().trim();
+  }
+
+  private Instant resolveReservationScheduledAt(
+    OperationsPayloads.ReservationUpdateRequest request,
+    ReservationEntity reservation
+  ) {
+    return request.scheduledAt() == null ? reservation.getScheduledAt() : request.scheduledAt();
+  }
+
+  private void applyReservationBranchUpdate(
+    OperationsPayloads.ReservationUpdateRequest request,
+    ReservationEntity reservation,
+    UUID nextBranchId,
+    String nextDepthLevel
+  ) {
+    if (request.branchId() == null && request.depthLevel() == null) {
+      return;
+    }
+
+    CatalogClient.BranchSnapshot branch = catalogClient.getBranch(nextBranchId);
+
+    if (!branch.reservationDepths().contains(nextDepthLevel)) {
+      throw new ApiException(HttpStatus.BAD_REQUEST, "A filial selecionada não suporta este nível.");
+    }
+
+    reservation.setBranchId(nextBranchId);
+    reservation.setBranchNameSnapshot(branch.name());
+    reservation.setDepthLevel(nextDepthLevel);
+  }
+
+  private void applyReservationFieldUpdates(
+    OperationsPayloads.ReservationUpdateRequest request,
+    ReservationEntity reservation,
+    ReservationStatus nextStatus
+  ) {
+    if (request.scheduledAt() != null) {
+      reservation.setScheduledAt(request.scheduledAt());
+    }
+
+    if (request.guests() != null) {
+      reservation.setGuests(request.guests());
+    }
+
+    if (request.status() != null) {
+      reservation.setStatus(nextStatus);
+    }
+
+    if (request.specialRequest() != null) {
+      reservation.setSpecialRequestEncrypted(textCrypto.encrypt(trimOrNull(request.specialRequest())));
+    }
+  }
+
+  private List<ReservationEntity> listReservationsForAdmin(ReservationStatus filter) {
+    if (filter == null) {
+      return reservationRepository.findAll().stream()
+        .sorted(Comparator.comparing(ReservationEntity::getScheduledAt))
+        .toList();
+    }
+
+    return reservationRepository.findByStatusOrderByScheduledAtAsc(filter);
+  }
+
+  private List<ReservationEntity> listReservationsForUser(UUID userId, ReservationStatus filter) {
+    if (filter == null) {
+      return reservationRepository.findByUserIdOrderByScheduledAtAsc(userId);
+    }
+
+    return reservationRepository.findByUserIdAndStatusOrderByScheduledAtAsc(userId, filter);
+  }
+
+  private List<OrderEntity> listOrdersForAdmin(OrderStatus filter) {
+    if (filter == null) {
+      return orderRepository.findAll().stream()
+        .sorted(Comparator.comparing(OrderEntity::getCreatedAt).reversed())
+        .toList();
+    }
+
+    return orderRepository.findByStatusOrderByCreatedAtDesc(filter);
+  }
+
+  private List<OrderEntity> listOrdersForUser(UUID userId, OrderStatus filter) {
+    if (filter == null) {
+      return orderRepository.findByUserIdOrderByCreatedAtDesc(userId);
+    }
+
+    return orderRepository.findByUserIdAndStatusOrderByCreatedAtDesc(userId, filter);
   }
 
   private OrderItemEntity toOrderItem(
@@ -372,9 +461,9 @@ public class OperationsService {
     return new OperationsPayloads.OrderResponse(
       order.getId().toString(),
       order.getUserId().toString(),
-      order.getBranchId() == null ? null : order.getBranchId().toString(),
+      toStringOrNull(order.getBranchId()),
       order.getBranchNameSnapshot(),
-      order.getReservationId() == null ? null : order.getReservationId().toString(),
+      toStringOrNull(order.getReservationId()),
       order.getFulfillmentType().getApiValue(),
       order.getStatus().getApiValue(),
       order.getPaymentMethod().getApiValue(),
@@ -382,15 +471,25 @@ public class OperationsService {
       order.getTotalCents(),
       textCrypto.decrypt(order.getDeliveryAddressEncrypted()),
       textCrypto.decrypt(order.getContactNameEncrypted()),
-      order.getItems().stream().map(item -> new OperationsPayloads.OrderItemResponse(
+      toOrderItemResponses(order),
+      order.getCreatedAt()
+    );
+  }
+
+  private List<OperationsPayloads.OrderItemResponse> toOrderItemResponses(OrderEntity order) {
+    return order.getItems().stream()
+      .map(item -> new OperationsPayloads.OrderItemResponse(
         item.getMenuItemId().toString(),
         item.getNameSnapshot(),
         item.getQuantity(),
         item.getUnitPriceCents(),
         textCrypto.decrypt(item.getNoteEncrypted())
-      )).toList(),
-      order.getCreatedAt()
-    );
+      ))
+      .toList();
+  }
+
+  private String toStringOrNull(UUID value) {
+    return value == null ? null : value.toString();
   }
 
   private void assertOwnershipOrAdmin(AuthenticatedUser user, UUID resourceUserId, String message) {

@@ -93,6 +93,9 @@ export function ReservationScreen() {
 
   const layout = getResponsiveLayout(width);
   const hasReservations = reservations.length > 0;
+  const shouldShowReservationForm = hasReservations
+    ? showReservationForm
+    : true;
   const selectedBranch =
     branches.find((branch) => branch.id === reservationForm.branchId) ||
     branches[0];
@@ -144,6 +147,68 @@ export function ReservationScreen() {
   }
 
   return (
+    <ReservationContent
+      branches={branches}
+      confirmation={confirmation}
+      feedback={feedback}
+      hasReservations={hasReservations}
+      isCompact={layout.isCompact}
+      isLoadingReservations={isLoadingReservations}
+      isSubmitting={isSubmitting}
+      onBranchPress={(branchId, depthLevel) =>
+        setReservationForm((current) => ({
+          ...current,
+          branchId,
+          depthLevel,
+        }))
+      }
+      onCancelReservationCreation={cancelReservationCreation}
+      onDateChange={(value) =>
+        setReservationForm((current) => ({ ...current, date: value }))
+      }
+      onDepthChange={(depth) =>
+        setReservationForm((current) => ({ ...current, depthLevel: depth }))
+      }
+      onGuestsChange={(value) =>
+        setReservationForm((current) => ({ ...current, guests: value }))
+      }
+      onReservationFormToggle={setShowReservationForm}
+      onSubmitReservation={submitReservation}
+      onTimeChange={(value) =>
+        setReservationForm((current) => ({ ...current, time: value }))
+      }
+      reservationForm={reservationForm}
+      reservations={reservations}
+      selectedBranch={selectedBranch}
+      shouldShowReservationForm={shouldShowReservationForm}
+    />
+  );
+}
+
+function ReservationContent({
+  branches,
+  feedback,
+  hasReservations,
+  isCompact,
+  isLoadingReservations,
+  isSubmitting,
+  onBranchPress,
+  onCancelReservationCreation,
+  onDateChange,
+  onDepthChange,
+  onGuestsChange,
+  onReservationFormToggle,
+  onSubmitReservation,
+  onTimeChange,
+  reservationForm,
+  reservations,
+  selectedBranch,
+  shouldShowReservationForm,
+}) {
+  const { width } = useWindowDimensions();
+  const layout = getResponsiveLayout(width);
+
+  return (
     <KeyboardScrollScreen
       contentContainerStyle={[
         styles.content,
@@ -163,7 +228,7 @@ export function ReservationScreen() {
           title="Escolha sua mesa."
         />
 
-        <View style={[styles.panel, layout.isCompact && styles.panelCompact]}>
+        <View style={[styles.panel, isCompact && styles.panelCompact]}>
           <Text
             style={[
               styles.panelTitle,
@@ -176,185 +241,201 @@ export function ReservationScreen() {
             Agende sua mesa
           </Text>
 
-          {hasReservations ? (
-            <View style={styles.existingReservationsBlock}>
-              <Text style={styles.existingReservationsEyebrow}>
-                Próximas reservas
-              </Text>
-              <Text style={styles.existingReservationsTitle}>
-                O que já está confirmado fica resumido aqui.
-              </Text>
+          <ReservationsSummary
+            confirmation={confirmation}
+            hasReservations={hasReservations}
+            isLoadingReservations={isLoadingReservations}
+            onReservationFormToggle={onReservationFormToggle}
+            reservations={reservations}
+            shouldShowReservationForm={shouldShowReservationForm}
+          />
 
-              {isLoadingReservations ? (
-                <View style={styles.loadingReservations}>
-                  <ActivityIndicator
-                    color={theme.colors.warning}
-                    size="small"
-                  />
-                  <Text style={styles.loadingReservationsText}>
-                    Carregando...
+          <ReservationForm
+            branches={branches}
+            isCompact={isCompact}
+            isSubmitting={isSubmitting}
+            onBranchPress={onBranchPress}
+            onCancelReservationCreation={onCancelReservationCreation}
+            onDateChange={onDateChange}
+            onDepthChange={onDepthChange}
+            onGuestsChange={onGuestsChange}
+            onSubmitReservation={onSubmitReservation}
+            onTimeChange={onTimeChange}
+            reservationForm={reservationForm}
+            selectedBranch={selectedBranch}
+            shouldShowReservationForm={shouldShowReservationForm}
+            hasReservations={hasReservations}
+          />
+
+          <FeedbackBanner
+            message={feedback.message}
+            details={
+              feedback.tone === "success" ? (
+                <View style={styles.confirmationDetails}>
+                  <Text style={styles.confirmationDetail}>
+                    Reserva confirmada com sucesso.
                   </Text>
                 </View>
-              ) : (
-                <View style={styles.reservationsList}>
-                  {reservations.map((reservation) => (
-                    <View key={reservation.id} style={styles.reservationCard}>
-                      <View style={styles.reservationHeader}>
-                        <MaterialCommunityIcons
-                          color={theme.colors.warning}
-                          name="calendar-check-outline"
-                          size={16}
-                        />
-                        <Text style={styles.reservationBranch}>
-                          {reservation.branchName}
-                        </Text>
-                      </View>
-                      <Text style={styles.reservationMeta}>
-                        {formatReservationDate(reservation.scheduledAt)}
-                      </Text>
-                      <Text style={styles.reservationMeta}>
-                        {reservation.depthLevel} • {reservation.guests} pessoas
-                      </Text>
-                    </View>
-                  ))}
-                </View>
-              )}
-
-              {!showReservationForm ? (
-                <PrimaryButton
-                  label="Fazer nova reserva"
-                  onPress={() => setShowReservationForm(true)}
-                />
-              ) : null}
-            </View>
-          ) : null}
-
-          {!hasReservations || showReservationForm ? (
-            <View style={hasReservations ? styles.reserveFormBlock : null}>
-              {hasReservations ? (
-                <Text style={styles.reserveFormEyebrow}>Nova reserva</Text>
-              ) : null}
-
-              <Field icon="storefront-outline" label="Unidade" required>
-                <View style={styles.chipWrap}>
-                  {branches.map((branch) => (
-                    <SelectionChip
-                      active={reservationForm.branchId === branch.id}
-                      key={branch.id}
-                      label={branch.name}
-                      onPress={() =>
-                        setReservationForm((current) => ({
-                          ...current,
-                          branchId: branch.id,
-                          depthLevel: branch.reservationDepths[0],
-                        }))
-                      }
-                    />
-                  ))}
-                </View>
-              </Field>
-
-              <View
-                style={[
-                  styles.dualFieldRow,
-                  layout.isCompact && styles.dualFieldRowStack,
-                ]}
-              >
-                <Field icon="calendar-month-outline" label="Data" required>
-                  <StyledInput
-                    onChangeText={(value) =>
-                      setReservationForm((current) => ({ ...current, date: value }))
-                    }
-                    placeholder="2026-05-10"
-                    value={reservationForm.date}
-                  />
-                </Field>
-                <Field icon="clock-outline" label="Horário" required>
-                  <StyledInput
-                    onChangeText={(value) =>
-                      setReservationForm((current) => ({ ...current, time: value }))
-                    }
-                    placeholder="20:30"
-                    value={reservationForm.time}
-                  />
-                </Field>
-              </View>
-
-              <Field icon="account-group-outline" label="Pessoas" required>
-                <StyledInput
-                  keyboardType="number-pad"
-                  onChangeText={(value) =>
-                    setReservationForm((current) => ({ ...current, guests: value }))
-                  }
-                  value={reservationForm.guests}
-                />
-              </Field>
-
-              <Field icon="layers-outline" label="Ambiente" required>
-                <View style={styles.chipWrap}>
-                  {(selectedBranch?.reservationDepths || []).map((depth) => (
-                    <SelectionChip
-                      active={reservationForm.depthLevel === depth}
-                      key={depth}
-                      label={depth}
-                      onPress={() =>
-                        setReservationForm((current) => ({
-                          ...current,
-                          depthLevel: depth,
-                        }))
-                      }
-                    />
-                  ))}
-                </View>
-              </Field>
-
-              <PrimaryButton
-                disabled={isSubmitting}
-                label={isSubmitting ? "Confirmando..." : "Confirmar reserva"}
-                onPress={submitReservation}
-              />
-
-              {hasReservations ? (
-                <Pressable
-                  accessibilityRole="button"
-                  disabled={isSubmitting}
-                  onPress={cancelReservationCreation}
-                  style={[
-                    styles.cancelReservationButton,
-                    isSubmitting && styles.buttonDisabled,
-                  ]}
-                >
-                  <Text style={styles.cancelReservationButtonText}>
-                    Cancelar
-                  </Text>
-                </Pressable>
-              ) : null}
-
-              <FeedbackBanner
-                message={feedback.message}
-                details={
-                  feedback.tone === "success" && confirmation ? (
-                    <View style={styles.confirmationDetails}>
-                      <Text style={styles.confirmationDetail}>
-                        {confirmation.branchName}
-                      </Text>
-                      <Text style={styles.confirmationDetail}>
-                        {formatReservationDate(confirmation.scheduledAt)}
-                      </Text>
-                      <Text style={styles.confirmationDetail}>
-                        {confirmation.guests} pessoas
-                        {confirmation.depthLevel ? ` • ${confirmation.depthLevel}` : ""}
-                      </Text>
-                    </View>
-                  ) : null
-                }
-                tone={feedback.tone}
-              />
-            </View>
-          ) : null}
+              ) : null
+            }
+            tone={feedback.tone}
+          />
         </View>
       </View>
     </KeyboardScrollScreen>
+  );
+}
+
+function ReservationsSummary({
+  hasReservations,
+  isLoadingReservations,
+  onReservationFormToggle,
+  reservations,
+  shouldShowReservationForm,
+}) {
+  if (hasReservations) {
+    return (
+      <View style={styles.existingReservationsBlock}>
+        <Text style={styles.existingReservationsEyebrow}>Próximas reservas</Text>
+        <Text style={styles.existingReservationsTitle}>
+          O que já está confirmado fica resumido aqui.
+        </Text>
+
+        {isLoadingReservations ? (
+          <View style={styles.loadingReservations}>
+            <ActivityIndicator color={theme.colors.warning} size="small" />
+            <Text style={styles.loadingReservationsText}>Carregando...</Text>
+          </View>
+        ) : (
+          <View style={styles.reservationsList}>
+            {reservations.map((reservation) => (
+              <View key={reservation.id} style={styles.reservationCard}>
+                <View style={styles.reservationHeader}>
+                  <MaterialCommunityIcons
+                    color={theme.colors.warning}
+                    name="calendar-check-outline"
+                    size={16}
+                  />
+                  <Text style={styles.reservationBranch}>
+                    {reservation.branchName}
+                  </Text>
+                </View>
+                <Text style={styles.reservationMeta}>
+                  {formatReservationDate(reservation.scheduledAt)}
+                </Text>
+                <Text style={styles.reservationMeta}>
+                  {reservation.depthLevel} • {reservation.guests} pessoas
+                </Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {shouldShowReservationForm ? null : (
+          <PrimaryButton
+            label="Fazer nova reserva"
+            onPress={() => onReservationFormToggle(true)}
+          />
+        )}
+      </View>
+    );
+  }
+
+  return null;
+}
+
+function ReservationForm({
+  branches,
+  hasReservations,
+  isCompact,
+  isSubmitting,
+  onBranchPress,
+  onCancelReservationCreation,
+  onDateChange,
+  onDepthChange,
+  onGuestsChange,
+  onSubmitReservation,
+  onTimeChange,
+  reservationForm,
+  selectedBranch,
+  shouldShowReservationForm,
+}) {
+  if (!shouldShowReservationForm) {
+    return null;
+  }
+
+  return (
+    <View style={hasReservations ? styles.reserveFormBlock : null}>
+      {hasReservations ? <Text style={styles.reserveFormEyebrow}>Nova reserva</Text> : null}
+
+      <Field icon="storefront-outline" label="Unidade" required>
+        <View style={styles.chipWrap}>
+          {branches.map((branch) => (
+            <SelectionChip
+              active={reservationForm.branchId === branch.id}
+              key={branch.id}
+              label={branch.name}
+              onPress={() => onBranchPress(branch.id, branch.reservationDepths[0])}
+            />
+          ))}
+        </View>
+      </Field>
+
+      <View style={[styles.dualFieldRow, isCompact && styles.dualFieldRowStack]}>
+        <Field icon="calendar-month-outline" label="Data" required>
+          <StyledInput
+            onChangeText={onDateChange}
+            placeholder="2026-05-10"
+            value={reservationForm.date}
+          />
+        </Field>
+        <Field icon="clock-outline" label="Horário" required>
+          <StyledInput
+            onChangeText={onTimeChange}
+            placeholder="20:30"
+            value={reservationForm.time}
+          />
+        </Field>
+      </View>
+
+      <Field icon="account-group-outline" label="Pessoas" required>
+        <StyledInput
+          keyboardType="number-pad"
+          onChangeText={onGuestsChange}
+          value={reservationForm.guests}
+        />
+      </Field>
+
+      <Field icon="layers-outline" label="Ambiente" required>
+        <View style={styles.chipWrap}>
+          {(selectedBranch?.reservationDepths || []).map((depth) => (
+            <SelectionChip
+              active={reservationForm.depthLevel === depth}
+              key={depth}
+              label={depth}
+              onPress={() => onDepthChange(depth)}
+            />
+          ))}
+        </View>
+      </Field>
+
+      <PrimaryButton
+        disabled={isSubmitting}
+        label={isSubmitting ? "Confirmando..." : "Confirmar reserva"}
+        onPress={onSubmitReservation}
+      />
+
+      {hasReservations ? (
+        <Pressable
+          accessibilityRole="button"
+          disabled={isSubmitting}
+          onPress={onCancelReservationCreation}
+          style={[styles.cancelReservationButton, isSubmitting && styles.buttonDisabled]}
+        >
+          <Text style={styles.cancelReservationButtonText}>Cancelar</Text>
+        </Pressable>
+      ) : null}
+    </View>
   );
 }
 

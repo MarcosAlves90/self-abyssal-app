@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import { CommonActions } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
-  ActivityIndicator,
   Alert,
   Pressable,
   StyleSheet,

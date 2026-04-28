@@ -10,7 +10,6 @@ import com.abyssal.shared.error.ApiException;
 import com.abyssal.shared.security.JwtService;
 import io.jsonwebtoken.JwtException;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
