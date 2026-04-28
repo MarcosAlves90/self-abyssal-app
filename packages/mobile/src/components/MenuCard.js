@@ -31,7 +31,7 @@ function getMediaMetrics(layout) {
 
   if (layout.isCompact) {
     return {
-      mediaHeight: 176,
+      mediaHeight: 168,
       shellSize: 74
     };
   }
@@ -189,28 +189,24 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
-      height: 16
+      height: 18
     },
-    shadowOpacity: 0.2,
-    shadowRadius: 24,
-    elevation: 6,
+    shadowOpacity: 0.22,
+    shadowRadius: 26,
+    elevation: 7,
     width: "100%"
   },
   panel: {
-    borderColor: "rgba(255, 217, 138, 0.12)",
-    borderWidth: 1,
+    borderColor: "rgba(255, 217, 138, 0.18)",
+    borderWidth: 0.75,
     overflow: "hidden",
-    padding: theme.spacing.md,
     backgroundColor: theme.colors.surface
   },
   media: {
     justifyContent: "space-between",
-    marginBottom: theme.spacing.md,
     overflow: "hidden",
     position: "relative",
-    borderColor: "rgba(255, 217, 138, 0.1)",
-    borderWidth: 1,
-    minHeight: 180
+    minHeight: 182
   },
   mediaImage: {
     ...StyleSheet.absoluteFillObject
@@ -238,9 +234,9 @@ const styles = StyleSheet.create({
   categoryBadge: {
     alignItems: "center",
     alignSelf: "flex-start",
-    backgroundColor: "rgba(4, 11, 23, 0.28)",
-    borderColor: "rgba(255, 217, 138, 0.16)",
-    borderWidth: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.12)",
+    borderColor: "rgba(255, 255, 255, 0.28)",
+    borderWidth: 0.75,
     minHeight: 30,
     justifyContent: "center",
     paddingHorizontal: 12,
@@ -269,7 +265,10 @@ const styles = StyleSheet.create({
     transform: [{ translateY: -3 }]
   },
   body: {
-    gap: 14
+    gap: 12,
+    paddingHorizontal: theme.spacing.md,
+    paddingTop: theme.spacing.md,
+    paddingBottom: theme.spacing.lg
   },
   name: {
     color: theme.colors.text,
@@ -287,7 +286,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 12,
     justifyContent: "space-between",
-    paddingTop: 6
+    paddingTop: 2
   },
   footerStack: {
     alignItems: "stretch",
@@ -299,7 +298,7 @@ const styles = StyleSheet.create({
   priceLabel: {
     color: theme.colors.warning,
     fontFamily: theme.fonts.bodyBold,
-    fontSize: 10,
+    fontSize: 11,
     letterSpacing: 1.1,
     marginBottom: 2,
     textTransform: "uppercase"
@@ -307,7 +306,7 @@ const styles = StyleSheet.create({
   price: {
     color: theme.colors.text,
     fontFamily: theme.fonts.bodyBold,
-    fontSize: 14
+    fontSize: 15
   },
   footerHint: {
     color: theme.colors.textMuted,
