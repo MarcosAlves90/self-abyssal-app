@@ -25,6 +25,15 @@ public class HttpsEnforcementFilter extends OncePerRequestFilter {
     HttpServletResponse response,
     FilterChain filterChain
   ) throws ServletException, IOException {
+    String requestUri = request.getRequestURI();
+
+    if (requestUri.contains("/swagger-ui")
+      || requestUri.contains("/v3/api-docs")
+      || requestUri.contains("/webjars/")) {
+      filterChain.doFilter(request, response);
+      return;
+    }
+
     if (!properties.isRequireHttpsInProduction()) {
       filterChain.doFilter(request, response);
       return;

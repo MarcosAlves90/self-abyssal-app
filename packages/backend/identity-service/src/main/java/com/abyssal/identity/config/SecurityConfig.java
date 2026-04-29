@@ -77,6 +77,13 @@ public class SecurityConfig {
       )
       .authorizeHttpRequests(authorize -> authorize
         .requestMatchers(antMatcher("/actuator/health")).permitAll()
+        .requestMatchers(
+          antMatcher("/swagger-ui.html"),
+          antMatcher("/swagger-ui/**"),
+          antMatcher("/webjars/**"),
+          antMatcher("/v3/api-docs"),
+          antMatcher("/v3/api-docs/**")
+        ).permitAll()
         .requestMatchers(antMatcher("/api/auth/register"), antMatcher("/api/auth/login")).permitAll()
         .anyRequest().authenticated()
       )

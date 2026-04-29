@@ -6,6 +6,9 @@ import java.util.Map;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/menu")
+@Tag(name = "Menu")
 public class MenuController {
   private final CatalogService catalogService;
 
@@ -40,7 +44,9 @@ public class MenuController {
   }
 
   @PostMapping
+  @SecurityRequirement(name = "bearerAuth")
   public ResponseEntity<Map<String, Object>> createMenuItem(
+    @Parameter(hidden = true)
     @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
     @Valid @RequestBody CatalogPayloads.MenuItemUpsertRequest request
   ) {
@@ -50,7 +56,9 @@ public class MenuController {
   }
 
   @PatchMapping("/{menuItemId}")
+  @SecurityRequirement(name = "bearerAuth")
   public Map<String, Object> updateMenuItem(
+    @Parameter(hidden = true)
     @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
     @PathVariable UUID menuItemId,
     @Valid @RequestBody CatalogPayloads.MenuItemUpdateRequest request
@@ -60,7 +68,9 @@ public class MenuController {
   }
 
   @DeleteMapping("/{menuItemId}")
+  @SecurityRequirement(name = "bearerAuth")
   public ResponseEntity<Void> deleteMenuItem(
+    @Parameter(hidden = true)
     @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
     @PathVariable UUID menuItemId
   ) {

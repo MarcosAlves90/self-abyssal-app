@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/orders")
+@Tag(name = "Orders")
+@SecurityRequirement(name = "bearerAuth")
 public class OrdersController {
   private final OperationsService operationsService;
 
@@ -29,6 +34,7 @@ public class OrdersController {
 
   @GetMapping
   public Map<String, Object> listOrders(
+    @Parameter(hidden = true)
     @AuthenticationPrincipal AuthenticatedUser authenticatedUser,
     @RequestParam(required = false) String status
   ) {
@@ -37,6 +43,7 @@ public class OrdersController {
 
   @GetMapping("/{orderId}")
   public Map<String, Object> getOrder(
+    @Parameter(hidden = true)
     @AuthenticationPrincipal AuthenticatedUser authenticatedUser,
     @PathVariable UUID orderId
   ) {
@@ -45,6 +52,7 @@ public class OrdersController {
 
   @PostMapping
   public ResponseEntity<Map<String, Object>> createOrder(
+    @Parameter(hidden = true)
     @AuthenticationPrincipal AuthenticatedUser authenticatedUser,
     @Valid @RequestBody OperationsPayloads.OrderCreateRequest request
   ) {
@@ -54,6 +62,7 @@ public class OrdersController {
 
   @PatchMapping("/{orderId}")
   public Map<String, Object> updateOrder(
+    @Parameter(hidden = true)
     @AuthenticationPrincipal AuthenticatedUser authenticatedUser,
     @PathVariable UUID orderId,
     @Valid @RequestBody OperationsPayloads.OrderUpdateRequest request
@@ -63,6 +72,7 @@ public class OrdersController {
 
   @DeleteMapping("/{orderId}")
   public ResponseEntity<Void> deleteOrder(
+    @Parameter(hidden = true)
     @AuthenticationPrincipal AuthenticatedUser authenticatedUser,
     @PathVariable UUID orderId
   ) {

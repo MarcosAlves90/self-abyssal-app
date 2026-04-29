@@ -15,10 +15,12 @@ server {
   }
 
   proxy_http_version 1.1;
-  proxy_set_header Host $host;
+  proxy_set_header Host $http_host;
   proxy_set_header X-Real-IP $remote_addr;
   proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-  proxy_set_header X-Forwarded-Proto https;
+  proxy_set_header X-Forwarded-Host $http_host;
+  proxy_set_header X-Forwarded-Port $server_port;
+  proxy_set_header X-Forwarded-Proto $scheme;
 
   location = /health {
     default_type application/json;
@@ -27,6 +29,33 @@ server {
 
   location /internal/ {
     return 404;
+  }
+
+  location = /docs/identity {
+    return 301 /docs/identity/;
+  }
+
+  location /docs/identity/ {
+    proxy_set_header X-Forwarded-Prefix /docs/identity;
+    proxy_pass http://identity-service:8080/;
+  }
+
+  location = /docs/catalog {
+    return 301 /docs/catalog/;
+  }
+
+  location /docs/catalog/ {
+    proxy_set_header X-Forwarded-Prefix /docs/catalog;
+    proxy_pass http://catalog-service:8080/;
+  }
+
+  location = /docs/operations {
+    return 301 /docs/operations/;
+  }
+
+  location /docs/operations/ {
+    proxy_set_header X-Forwarded-Prefix /docs/operations;
+    proxy_pass http://operations-service:8080/;
   }
 
   location = /api/auth {
@@ -98,10 +127,12 @@ server {
   }
 
   proxy_http_version 1.1;
-  proxy_set_header Host $host;
+  proxy_set_header Host $http_host;
   proxy_set_header X-Real-IP $remote_addr;
   proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-  proxy_set_header X-Forwarded-Proto https;
+  proxy_set_header X-Forwarded-Host $http_host;
+  proxy_set_header X-Forwarded-Port $server_port;
+  proxy_set_header X-Forwarded-Proto $scheme;
 
   location = /health {
     default_type application/json;
@@ -110,6 +141,33 @@ server {
 
   location /internal/ {
     return 404;
+  }
+
+  location = /docs/identity {
+    return 301 /docs/identity/;
+  }
+
+  location /docs/identity/ {
+    proxy_set_header X-Forwarded-Prefix /docs/identity;
+    proxy_pass http://identity-service:8080/;
+  }
+
+  location = /docs/catalog {
+    return 301 /docs/catalog/;
+  }
+
+  location /docs/catalog/ {
+    proxy_set_header X-Forwarded-Prefix /docs/catalog;
+    proxy_pass http://catalog-service:8080/;
+  }
+
+  location = /docs/operations {
+    return 301 /docs/operations/;
+  }
+
+  location /docs/operations/ {
+    proxy_set_header X-Forwarded-Prefix /docs/operations;
+    proxy_pass http://operations-service:8080/;
   }
 
   location = /api/auth {

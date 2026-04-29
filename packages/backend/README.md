@@ -34,6 +34,20 @@ Se quiser validar o TLS local diretamente, use:
 curl -k https://localhost:3333/health
 ```
 
+## Swagger/OpenAPI
+
+A documentação fica disponível pelo gateway, separada por serviço:
+
+- `https://localhost:3333/docs/identity/swagger-ui.html`
+- `https://localhost:3333/docs/catalog/swagger-ui.html`
+- `https://localhost:3333/docs/operations/swagger-ui.html`
+
+Os JSONs do OpenAPI seguem a mesma convenção:
+
+- `https://localhost:3333/docs/identity/v3/api-docs`
+- `https://localhost:3333/docs/catalog/v3/api-docs`
+- `https://localhost:3333/docs/operations/v3/api-docs`
+
 ## Observações de segurança
 
 - PII sensível fica criptografada em repouso com AES-256-GCM.

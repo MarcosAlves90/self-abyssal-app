@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/reservations")
+@Tag(name = "Reservations")
+@SecurityRequirement(name = "bearerAuth")
 public class ReservationsController {
   private final OperationsService operationsService;
 
@@ -29,6 +34,7 @@ public class ReservationsController {
 
   @GetMapping
   public Map<String, Object> listReservations(
+    @Parameter(hidden = true)
     @AuthenticationPrincipal AuthenticatedUser authenticatedUser,
     @RequestParam(required = false) String status
   ) {
@@ -37,6 +43,7 @@ public class ReservationsController {
 
   @GetMapping("/{reservationId}")
   public Map<String, Object> getReservation(
+    @Parameter(hidden = true)
     @AuthenticationPrincipal AuthenticatedUser authenticatedUser,
     @PathVariable UUID reservationId
   ) {
@@ -45,6 +52,7 @@ public class ReservationsController {
 
   @PostMapping
   public ResponseEntity<Map<String, Object>> createReservation(
+    @Parameter(hidden = true)
     @AuthenticationPrincipal AuthenticatedUser authenticatedUser,
     @Valid @RequestBody OperationsPayloads.ReservationCreateRequest request
   ) {
@@ -54,6 +62,7 @@ public class ReservationsController {
 
   @PatchMapping("/{reservationId}")
   public Map<String, Object> updateReservation(
+    @Parameter(hidden = true)
     @AuthenticationPrincipal AuthenticatedUser authenticatedUser,
     @PathVariable UUID reservationId,
     @Valid @RequestBody OperationsPayloads.ReservationUpdateRequest request
@@ -63,6 +72,7 @@ public class ReservationsController {
 
   @DeleteMapping("/{reservationId}")
   public ResponseEntity<Void> deleteReservation(
+    @Parameter(hidden = true)
     @AuthenticationPrincipal AuthenticatedUser authenticatedUser,
     @PathVariable UUID reservationId
   ) {

@@ -6,6 +6,9 @@ import java.util.Map;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/branches")
+@Tag(name = "Branches")
 public class BranchController {
   private static final String BRANCH_KEY = "branch";
 
@@ -41,7 +45,9 @@ public class BranchController {
   }
 
   @PostMapping
+  @SecurityRequirement(name = "bearerAuth")
   public ResponseEntity<Map<String, Object>> createBranch(
+    @Parameter(hidden = true)
     @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
     @Valid @RequestBody CatalogPayloads.BranchUpsertRequest request
   ) {
@@ -51,7 +57,9 @@ public class BranchController {
   }
 
   @PatchMapping("/{branchId}")
+  @SecurityRequirement(name = "bearerAuth")
   public Map<String, Object> updateBranch(
+    @Parameter(hidden = true)
     @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
     @PathVariable UUID branchId,
     @Valid @RequestBody CatalogPayloads.BranchUpdateRequest request
@@ -61,7 +69,9 @@ public class BranchController {
   }
 
   @DeleteMapping("/{branchId}")
+  @SecurityRequirement(name = "bearerAuth")
   public ResponseEntity<Void> deleteBranch(
+    @Parameter(hidden = true)
     @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
     @PathVariable UUID branchId
   ) {

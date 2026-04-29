@@ -13,9 +13,13 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Parameter;
 
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "Auth")
 public class AuthController {
   private final AuthService authService;
 
@@ -36,14 +40,18 @@ public class AuthController {
   }
 
   @GetMapping("/me")
+  @SecurityRequirement(name = "bearerAuth")
   public Map<String, AuthPayloads.UserResponse> getCurrentUser(
+    @Parameter(hidden = true)
     @AuthenticationPrincipal AuthenticatedUser authenticatedUser
   ) {
     return Map.of("user", authService.getCurrentUser(authenticatedUser.id()));
   }
 
   @PutMapping("/me/address")
+  @SecurityRequirement(name = "bearerAuth")
   public Map<String, AuthPayloads.UserResponse> savePrimaryAddress(
+    @Parameter(hidden = true)
     @AuthenticationPrincipal AuthenticatedUser authenticatedUser,
     @Valid @RequestBody AuthPayloads.AddressUpsertRequest request
   ) {
