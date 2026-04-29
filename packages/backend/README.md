@@ -1,14 +1,11 @@
 # Backend
 
-Backend refeito em microsserviços Spring Boot com:
+Backend refeito em FastAPI + SQLAlchemy com:
 
-- `identity-service`: autenticação, perfil e endereço primário.
-- `catalog-service`: filiais e cardápio.
-- `operations-service`: reservas e pedidos.
-- `nginx`: gateway reverso com HTTP em `http://localhost:3334` para desenvolvimento e TLS em `https://localhost:3333`.
-- `postgres`: um cluster PostgreSQL com bancos isolados por serviço.
+- `api`: aplicação principal com autenticação, catálogo, reservas e pedidos.
+- `postgres`: um cluster PostgreSQL com um banco dedicado para o backend.
 
-Por padrão, a publicação de portas usa `127.0.0.1` e o CORS do gateway aceita as origens locais `http://localhost:19006` e `http://127.0.0.1:19006`, além de qualquer porta local em `localhost` ou `127.0.0.1` enquanto `CORS_ALLOW_LOCALHOST=true`. Se precisar expor a stack para outra máquina ou para produção, defina `BIND_ADDRESS`, `CORS_ALLOWED_ORIGINS` e `CORS_ALLOW_LOCALHOST=false` com valores explicitamente seguros.
+Por padrão, a publicação de portas usa `127.0.0.1` e a API sobe diretamente em `http://localhost:3334`. O CORS da própria aplicação aceita as origens locais `http://localhost:19006` e `http://127.0.0.1:19006`, além de `localhost`/`127.0.0.1` em desenvolvimento enquanto `CORS_ALLOW_LOCALHOST=true`. Se precisar expor a stack para outra máquina ou para produção, defina `BIND_ADDRESS`, `API_PORT`, `CORS_ALLOWED_ORIGINS` e `CORS_ALLOW_LOCALHOST=false` com valores explicitamente seguros.
 
 ## Subir a stack
 
@@ -16,47 +13,36 @@ Por padrão, a publicação de portas usa `127.0.0.1` e o CORS do gateway aceita
 docker compose -f packages/backend/docker-compose.yml up --build
 ```
 
-## Validar build Maven
+## Validar build Docker
 
 ```bash
-mvn -f packages/backend/pom.xml test
+docker compose -f packages/backend/docker-compose.yml build
 ```
 
-## Smoke test do gateway HTTP
+## Executar testes
+
+```bash
+docker compose -f packages/backend/docker-compose.yml run --rm api pytest
+```
+
+## Smoke test da API
 
 ```bash
 curl http://localhost:3334/health
 ```
 
-Se quiser validar o TLS local diretamente, use:
-
-```bash
-curl -k https://localhost:3333/health
-```
-
 ## Swagger/OpenAPI
 
-A documentação fica disponível pelo gateway, separada por serviço:
+A documentação fica disponível diretamente na API:
 
-- `http://localhost:3334/docs/identity/swagger-ui.html`
-- `http://localhost:3334/docs/catalog/swagger-ui.html`
-- `http://localhost:3334/docs/operations/swagger-ui.html`
-- `https://localhost:3333/docs/identity/swagger-ui.html`
-- `https://localhost:3333/docs/catalog/swagger-ui.html`
-- `https://localhost:3333/docs/operations/swagger-ui.html`
+- `http://localhost:3334/docs`
 
-Os JSONs do OpenAPI seguem a mesma convenção:
+O JSON do OpenAPI fica em:
 
-- `http://localhost:3334/docs/identity/v3/api-docs`
-- `http://localhost:3334/docs/catalog/v3/api-docs`
-- `http://localhost:3334/docs/operations/v3/api-docs`
-- `https://localhost:3333/docs/identity/v3/api-docs`
-- `https://localhost:3333/docs/catalog/v3/api-docs`
-- `https://localhost:3333/docs/operations/v3/api-docs`
+- `http://localhost:3334/openapi.json`
 
 ## Observações de segurança
 
 - PII sensível fica criptografada em repouso com AES-256-GCM.
 - Email é indexado por hash SHA-256 para evitar armazenamento em claro como chave de busca.
-- O gateway local em 3334 evita problemas de certificado no navegador; o endpoint TLS em 3333 continua disponível para validações diretas.
-- Antes de usar fora de ambiente local, troque `JWT_SECRET`, `ENCRYPTION_KEY`, `POSTGRES_PASSWORD`, `BIND_ADDRESS`, `CORS_ALLOWED_ORIGINS`, `CORS_ALLOW_LOCALHOST=false` e a senha do administrador inicial.
+- Antes de usar fora de ambiente local, troque `DATABASE_URL`, `JWT_SECRET`, `ENCRYPTION_KEY`, `BIND_ADDRESS`, `API_PORT`, `CORS_ALLOWED_ORIGINS`, `CORS_ALLOW_LOCALHOST=false` e a senha do administrador inicial.

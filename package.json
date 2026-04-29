@@ -12,8 +12,8 @@
     "dev:backend:detached": "docker compose -f packages/backend/docker-compose.yml up --build -d",
     "dev:backend:down": "docker compose -f packages/backend/docker-compose.yml down -v",
     "clean:backend:db": "docker compose -f packages/backend/docker-compose.yml down -v",
-    "build:backend": "mvn -f packages/backend/pom.xml package",
-    "test:backend": "mvn -f packages/backend/pom.xml test",
+    "build:backend": "docker compose -f packages/backend/docker-compose.yml build",
+    "test:backend": "docker compose -f packages/backend/docker-compose.yml run --rm api pytest",
     "dev:mobile": "npm --workspace @abyssal/mobile run start",
     "dev:mobile:web": "npm --workspace @abyssal/mobile run web",
     "test:mobile": "npm --workspace @abyssal/mobile run test"

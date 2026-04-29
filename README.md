@@ -1,10 +1,10 @@
 # Abyssal App Monorepo
 
-Monorepo com backend Spring Boot em microsserviços, gateway Nginx com TLS e app mobile React Native + Expo.
+Monorepo com backend FastAPI + SQLAlchemy direto na API e app mobile React Native + Expo.
 
 ## Visão Geral
 
-- `packages/backend`: `identity-service`, `catalog-service`, `operations-service`, `nginx` e `postgres`.
+- `packages/backend`: `api` e `postgres`.
 - `packages/mobile`: app Expo com autenticação, menu, detalhes de prato, reservas, pedidos, endereço principal e perfil.
 
 ## Fluxos Principais
@@ -21,8 +21,7 @@ Monorepo com backend Spring Boot em microsserviços, gateway Nginx com TLS e app
 ## Requisitos
 
 - Node.js 20+
-- Java 21
-- Maven 3.9+
+- Python 3.12
 - Docker e Docker Compose
 
 ## Configuração
@@ -34,9 +33,9 @@ cp packages/backend/.env.example packages/backend/.env
 cp packages/mobile/.env.example packages/mobile/.env
 ```
 
-O gateway local do backend expõe HTTP em `http://localhost:3334` para o fluxo de desenvolvimento e mantém HTTPS em `https://localhost:3333` para smoke test direto. No modo web, o app normaliza URLs locais de desenvolvimento para o gateway HTTP automaticamente.
+O backend expõe HTTP em `http://localhost:3334` para o fluxo de desenvolvimento. No modo web, o app normaliza URLs locais de desenvolvimento para essa API automaticamente.
 
-Por padrão, a stack local fica presa em `127.0.0.1` e o CORS aceita as origens locais do Expo web em `localhost` e `127.0.0.1`, além de qualquer porta local enquanto `CORS_ALLOW_LOCALHOST=true`. Para expor a API em outra máquina ou em produção, ajuste `BIND_ADDRESS`, `CORS_ALLOWED_ORIGINS` e `CORS_ALLOW_LOCALHOST=false` explicitamente.
+Por padrão, a stack local fica presa em `127.0.0.1` e o CORS aceita as origens locais do Expo web em `localhost` e `127.0.0.1`, além de qualquer porta local enquanto `CORS_ALLOW_LOCALHOST=true`. Para expor a API em outra máquina ou em produção, ajuste `BIND_ADDRESS`, `API_PORT`, `CORS_ALLOWED_ORIGINS` e `CORS_ALLOW_LOCALHOST=false` explicitamente.
 
 Se estiver testando em Android, iOS ou em um dispositivo físico, ajuste `EXPO_PUBLIC_API_BASE_URL` para um host alcançável no seu ambiente.
 
@@ -99,11 +98,11 @@ npm run test:backend
 
 ## Backend
 
-Os detalhes do backend, da configuração de segurança e do gateway estão em [packages/backend/README.md](packages/backend/README.md).
+Os detalhes do backend e da configuração de segurança estão em [packages/backend/README.md](packages/backend/README.md).
 
 ## Segurança
 
 - PII sensível fica criptografada em repouso.
-- O gateway encerra TLS no Nginx.
+- A API aplica CORS diretamente.
 - CORS e o bypass de URL local ficam ativos apenas em modo de desenvolvimento.
 - Em produção, mantenha `REQUIRE_HTTPS_IN_PRODUCTION=true`, use `EXPO_PUBLIC_API_BASE_URL` com HTTPS, defina `CORS_ALLOW_LOCALHOST=false` e restrinja `CORS_ALLOWED_ORIGINS` para a origem exata do frontend.

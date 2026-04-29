@@ -1,17 +1,45 @@
-node_modules
-npm-debug.log*
+# OS / editor
 .DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment files
 .env
 .env.local
-.expo
-dist
-coverage
-**/target/
 packages/backend/.env
 packages/mobile/.env
-packages/backend/node_modules
-packages/mobile/node_modules
-packages/backend/.npm
-packages/mobile/.npm
-packages/backend/.cache
-packages/mobile/.cache
+
+# Node / JS
+node_modules/
+**/node_modules/
+dist/
+coverage/
+npm-debug.log*
+**/.npm/
+**/.cache/
+**/.expo/
+**/.expo-shared/
+**/.turbo/
+
+# Python
+**/__pycache__/
+**/*.py[cod]
+**/*.pyo
+**/*.pyd
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+**/.tox/
+**/.nox/
+**/.venv/
+**/venv/
+**/env/
+**/.ipynb_checkpoints/
+**/*.egg-info/
+
+# Build outputs
+**/build/
+**/site/
+**/target/

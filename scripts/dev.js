@@ -4,11 +4,7 @@ const path = require("node:path");
 const rootDir = path.resolve(__dirname, "..");
 const composeFile = path.join(rootDir, "packages/backend/docker-compose.yml");
 const composeBaseArgs = ["compose", "-f", composeFile];
-const backendServices = [
-  { name: "identity", service: "identity-service", style: "\u001b[38;2;220;138;120m" },
-  { name: "catalog", service: "catalog-service", style: "\u001b[38;2;108;170;116m" },
-  { name: "operations", service: "operations-service", style: "\u001b[38;2;214;157;82m" }
-];
+const backendServices = [{ name: "api", service: "api", style: "\u001b[38;2;108;170;116m" }];
 const frontLogger = { name: "front", style: "\u001b[38;2;156;134;206m" };
 const useWebTarget = process.argv.includes("--web");
 const mobileScript = useWebTarget ? "dev:mobile:web" : "dev:mobile";
