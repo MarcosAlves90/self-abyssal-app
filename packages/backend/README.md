@@ -38,12 +38,18 @@ curl -k https://localhost:3333/health
 
 A documentação fica disponível pelo gateway, separada por serviço:
 
+- `http://localhost:3334/docs/identity/swagger-ui.html`
+- `http://localhost:3334/docs/catalog/swagger-ui.html`
+- `http://localhost:3334/docs/operations/swagger-ui.html`
 - `https://localhost:3333/docs/identity/swagger-ui.html`
 - `https://localhost:3333/docs/catalog/swagger-ui.html`
 - `https://localhost:3333/docs/operations/swagger-ui.html`
 
 Os JSONs do OpenAPI seguem a mesma convenção:
 
+- `http://localhost:3334/docs/identity/v3/api-docs`
+- `http://localhost:3334/docs/catalog/v3/api-docs`
+- `http://localhost:3334/docs/operations/v3/api-docs`
 - `https://localhost:3333/docs/identity/v3/api-docs`
 - `https://localhost:3333/docs/catalog/v3/api-docs`
 - `https://localhost:3333/docs/operations/v3/api-docs`
