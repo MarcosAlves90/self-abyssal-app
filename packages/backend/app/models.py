@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from datetime import datetime
 from enum import StrEnum
 from uuid import uuid4
@@ -36,7 +34,7 @@ class Branch(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
     )
 
-    reservation_depths: Mapped[list[BranchReservationDepth]] = relationship(
+    reservation_depths: Mapped[list["BranchReservationDepth"]] = relationship(
         back_populates="branch", cascade="all, delete-orphan", lazy="selectin"
     )
 
@@ -62,8 +60,8 @@ class MenuItem(Base):
     category: Mapped[str] = mapped_column(String(20), nullable=False, index=True)
     price_cents: Mapped[int] = mapped_column(Integer, nullable=False)
     is_featured: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
-    image_hint: Mapped[str | None] = mapped_column(String(80))
-    image_url: Mapped[str | None] = mapped_column(String(300))
+    image_hint: Mapped[str] = mapped_column(String(80), nullable=True)
+    image_url: Mapped[str] = mapped_column(String(300), nullable=True)
     available_for_delivery: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     available_for_dine_in: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     accent_color: Mapped[str] = mapped_column(String(20), nullable=False, default="#31e7ff")
@@ -82,13 +80,13 @@ class User(Base):
     email_encrypted: Mapped[str] = mapped_column(Text, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     role: Mapped[str] = mapped_column(String(20), nullable=False)
-    phone_encrypted: Mapped[str | None] = mapped_column(Text)
+    phone_encrypted: Mapped[str] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
     )
 
-    addresses: Mapped[list[UserAddress]] = relationship(
+    addresses: Mapped[list["UserAddress"]] = relationship(
         back_populates="user", cascade="all, delete-orphan", lazy="selectin"
     )
 
@@ -102,7 +100,7 @@ class UserAddress(Base):
     postal_code_encrypted: Mapped[str] = mapped_column(Text, nullable=False)
     street_encrypted: Mapped[str] = mapped_column(Text, nullable=False)
     number_encrypted: Mapped[str] = mapped_column(Text, nullable=False)
-    complement_encrypted: Mapped[str | None] = mapped_column(Text)
+    complement_encrypted: Mapped[str] = mapped_column(Text, nullable=True)
     neighborhood_encrypted: Mapped[str] = mapped_column(Text, nullable=False)
     city_encrypted: Mapped[str] = mapped_column(Text, nullable=False)
     state_encrypted: Mapped[str] = mapped_column(Text, nullable=False)
@@ -134,7 +132,7 @@ class Reservation(Base):
     guests: Mapped[int] = mapped_column(Integer, nullable=False)
     depth_level: Mapped[str] = mapped_column(String(40), nullable=False)
     status: Mapped[str] = mapped_column(String(20), nullable=False, index=True)
-    special_request_encrypted: Mapped[str | None] = mapped_column(Text)
+    special_request_encrypted: Mapped[str] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
@@ -172,22 +170,22 @@ class Order(Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=uuid_str)
     user_id: Mapped[str] = mapped_column(String(36), nullable=False, index=True)
-    branch_id: Mapped[str | None] = mapped_column(String(36))
-    branch_name_snapshot: Mapped[str | None] = mapped_column(String(80))
-    reservation_id: Mapped[str | None] = mapped_column(String(36))
+    branch_id: Mapped[str] = mapped_column(String(36), nullable=True)
+    branch_name_snapshot: Mapped[str] = mapped_column(String(80), nullable=True)
+    reservation_id: Mapped[str] = mapped_column(String(36), nullable=True)
     fulfillment_type: Mapped[str] = mapped_column(String(20), nullable=False)
     status: Mapped[str] = mapped_column(String(20), nullable=False, index=True)
     payment_method: Mapped[str] = mapped_column(String(30), nullable=False)
     payment_status: Mapped[str] = mapped_column(String(20), nullable=False)
-    delivery_address_encrypted: Mapped[str | None] = mapped_column(Text)
-    contact_name_encrypted: Mapped[str | None] = mapped_column(Text)
+    delivery_address_encrypted: Mapped[str] = mapped_column(Text, nullable=True)
+    contact_name_encrypted: Mapped[str] = mapped_column(Text, nullable=True)
     total_cents: Mapped[int] = mapped_column(Integer, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
     )
 
-    items: Mapped[list[OrderItem]] = relationship(
+    items: Mapped[list["OrderItem"]] = relationship(
         back_populates="order", cascade="all, delete-orphan", lazy="selectin"
     )
 
@@ -201,6 +199,6 @@ class OrderItem(Base):
     name_snapshot: Mapped[str] = mapped_column(String(80), nullable=False)
     quantity: Mapped[int] = mapped_column(Integer, nullable=False)
     unit_price_cents: Mapped[int] = mapped_column(Integer, nullable=False)
-    note_encrypted: Mapped[str | None] = mapped_column(Text)
+    note_encrypted: Mapped[str] = mapped_column(Text, nullable=True)
 
     order: Mapped[Order] = relationship(back_populates="items")
