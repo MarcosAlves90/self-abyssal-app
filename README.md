@@ -22,7 +22,7 @@ Monorepo com backend FastAPI + SQLAlchemy direto na API e app mobile React Nativ
 
 - Node.js 20+
 - Python 3.12
-- Docker e Docker Compose
+- PostgreSQL (para execução local quando necessário)
 
 ## Configuração
 
@@ -59,19 +59,19 @@ Rode o app no navegador:
 npm run dev:web
 ```
 
-Rode apenas o backend em Docker:
+Rode apenas o backend (local):
 
 ```bash
 npm run dev:backend
 ```
 
-Rode o backend em background:
+Rode o backend em background (local):
 
 ```bash
 npm run dev:backend:detached
 ```
 
-Pare a stack e remova os volumes do backend:
+Pare processos locais do backend (se estiverem em execução):
 
 ```bash
 npm run dev:backend:down

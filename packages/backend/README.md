@@ -8,22 +8,43 @@ Backend refeito em FastAPI + SQLAlchemy com:
 Por padrão, a publicação de portas usa `127.0.0.1` e a API sobe diretamente em `http://localhost:3334`. O CORS da própria aplicação aceita as origens locais `http://localhost:19006` e `http://127.0.0.1:19006`, além de `localhost`/`127.0.0.1` em desenvolvimento enquanto `CORS_ALLOW_LOCALHOST=true`. Se precisar expor a stack para outra máquina ou para produção, defina `BIND_ADDRESS`, `API_PORT`, `CORS_ALLOWED_ORIGINS` e `CORS_ALLOW_LOCALHOST=false` com valores explicitamente seguros.
 
 ## Subir a stack
+## Executar localmente
 
-```bash
-docker compose -f packages/backend/docker-compose.yml up --build
-```
+Siga estes passos para executar o backend localmente sem contêineres:
 
-## Validar build Docker
+- Crie e ative um ambiente virtual (opções):
 
-```bash
-docker compose -f packages/backend/docker-compose.yml build
-```
+	- POSIX (Linux / macOS):
 
-## Executar testes
+		```bash
+		python -m venv .venv
+		source .venv/bin/activate
+		```
 
-```bash
-docker compose -f packages/backend/docker-compose.yml run --rm api pytest
-```
+	- PowerShell (Windows):
+
+		```powershell
+		python -m venv .venv
+		.\.venv\Scripts\Activate.ps1
+		```
+
+- Instale dependências:
+
+	```bash
+	python -m pip install -r requirements.txt
+	```
+
+- Execute a aplicação (desenvolvimento):
+
+	```bash
+	python -m uvicorn app.main:app --host 127.0.0.1 --port 3334 --reload
+	```
+
+- Executar testes:
+
+	```bash
+	pytest
+	```
 
 ## Smoke test da API
 

@@ -1,15 +1,13 @@
-const { spawn, spawnSync } = require("node:child_process");
+const { spawn } = require("node:child_process");
 const path = require("node:path");
 
 const rootDir = path.resolve(__dirname, "..");
-const composeFile = path.join(rootDir, "packages/backend/docker-compose.yml");
-const composeBaseArgs = ["compose", "-f", composeFile];
-const backendServices = [{ name: "api", service: "api", style: "\u001b[38;2;108;170;116m" }];
+const backendLogger = { name: "api", style: "\u001b[38;2;108;170;116m" };
 const frontLogger = { name: "front", style: "\u001b[38;2;156;134;206m" };
 const useWebTarget = process.argv.includes("--web");
 const mobileScript = useWebTarget ? "dev:mobile:web" : "dev:mobile";
 
-let backendLogStreams = [];
+let backendProcess;
 let mobileProcess;
 let isShuttingDown = false;
 
@@ -22,17 +20,8 @@ function spawnProcess(command, args, options = {}) {
   });
 }
 
-function waitForExit(child) {
-  return new Promise((resolve) => {
-    child.on("exit", (code, signal) => {
-      resolve({ code, signal });
-    });
-  });
-}
-
 function formatLine({ name, style }, message) {
   const line = `[${name}] ${message}`;
-
   return `${style}${line}\u001b[0m`;
 }
 
@@ -66,26 +55,6 @@ function writeLines(chunk, target, writeLine) {
   }
 }
 
-function startServiceLogStream(service) {
-  const childProcess = spawnProcess(
-    "docker",
-    [...composeBaseArgs, "logs", "-f", "--tail=20", service.service],
-    { stdio: ["ignore", "pipe", "pipe"] }
-  );
-
-  attachPrefixedLogs(childProcess, service);
-
-  childProcess.on("exit", (code) => {
-    if (!isShuttingDown && code && code !== 0) {
-      const message = `log stream exited with code ${code}`;
-
-      process.stderr.write(`${formatLine(service, message)}\n`);
-    }
-  });
-
-  return childProcess;
-}
-
 async function shutdown(exitCode = 0) {
   if (isShuttingDown) {
     return;
@@ -93,20 +62,13 @@ async function shutdown(exitCode = 0) {
 
   isShuttingDown = true;
 
-  for (const backendLogStream of backendLogStreams) {
-    if (backendLogStream?.exitCode === null) {
-      backendLogStream.kill("SIGINT");
-    }
+  if (backendProcess && backendProcess.exitCode === null) {
+    backendProcess.kill("SIGINT");
   }
 
-  if (mobileProcess?.exitCode === null) {
+  if (mobileProcess && mobileProcess.exitCode === null) {
     mobileProcess.kill("SIGINT");
   }
-
-  spawnSync("docker", [...composeBaseArgs, "down"], {
-    cwd: rootDir,
-    stdio: "inherit"
-  });
 
   process.exit(exitCode);
 }
@@ -116,18 +78,22 @@ async function main() {
 
   process.stdout.write(formatLine(frontLogger, "starting mobile target: " + targetLabel) + "\n");
 
-  const backendUp = spawnProcess("docker", [...composeBaseArgs, "up", "--build", "-d"], {
-    stdio: "inherit"
+  // Start backend via npm workspace script (expects `start` script in backend package)
+  backendProcess = spawnProcess("npm", ["--workspace", "@abyssal/backend", "run", "start"], {
+    stdio: ["ignore", "pipe", "pipe"]
   });
 
-  const backendUpResult = await waitForExit(backendUp);
+  attachPrefixedLogs(backendProcess, backendLogger);
 
-  if (backendUpResult.code !== 0) {
-    process.exit(backendUpResult.code || 1);
-  }
+  backendProcess.on("exit", (code) => {
+    if (!isShuttingDown && code && code !== 0) {
+      const message = `backend exited with code ${code}`;
+      process.stderr.write(`${formatLine(backendLogger, message)}\n`);
+      shutdown(code);
+    }
+  });
 
-  backendLogStreams = backendServices.map((service) => startServiceLogStream(service));
-
+  // Start mobile process
   mobileProcess = spawnProcess("npm", ["run", mobileScript], {
     stdio: ["ignore", "pipe", "pipe"]
   });

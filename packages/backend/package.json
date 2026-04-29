@@ -3,9 +3,8 @@
   "version": "2.0.0",
   "private": true,
   "scripts": {
-    "build": "docker compose build",
-    "test": "docker compose run --rm api pytest",
-    "compose:up": "docker compose up --build",
-    "compose:down": "docker compose down -v"
+    "build": "python -m pip install -r requirements.txt",
+    "start": "uvicorn app.main:app --host 127.0.0.1 --port 3334 --reload",
+    "test": "pytest -q"
   }
 }
