@@ -37,7 +37,7 @@ function formatReservationDate(dateTime) {
   });
 }
 
-export function ReservationScreen() {
+export function ReservationScreen({ navigation }) {
   const { width } = useWindowDimensions();
   const [branches, setBranches] = useState([]);
   const [reservations, setReservations] = useState([]);
@@ -90,6 +90,14 @@ export function ReservationScreen() {
 
     loadData();
   }, []);
+
+  useEffect(() => {
+    return navigation.addListener("focus", () => {
+      fetchReservations()
+        .then((next) => setReservations(next))
+        .catch(() => {});
+    });
+  }, [navigation]);
 
   const layout = getResponsiveLayout(width);
   const hasReservations = reservations.length > 0;
@@ -155,6 +163,7 @@ export function ReservationScreen() {
       isCompact={layout.isCompact}
       isLoadingReservations={isLoadingReservations}
       isSubmitting={isSubmitting}
+      navigation={navigation}
       onBranchPress={(branchId, depthLevel) =>
         setReservationForm((current) => ({
           ...current,
@@ -173,6 +182,9 @@ export function ReservationScreen() {
         setReservationForm((current) => ({ ...current, guests: value }))
       }
       onReservationFormToggle={setShowReservationForm}
+      onReservationRemoved={(id) =>
+        setReservations((current) => current.filter((r) => r.id !== id))
+      }
       onSubmitReservation={submitReservation}
       onTimeChange={(value) =>
         setReservationForm((current) => ({ ...current, time: value }))
@@ -193,12 +205,14 @@ function ReservationContent({
   isCompact,
   isLoadingReservations,
   isSubmitting,
+  navigation,
   onBranchPress,
   onCancelReservationCreation,
   onDateChange,
   onDepthChange,
   onGuestsChange,
   onReservationFormToggle,
+  onReservationRemoved,
   onSubmitReservation,
   onTimeChange,
   reservationForm,
@@ -246,7 +260,9 @@ function ReservationContent({
             confirmation={confirmation}
             hasReservations={hasReservations}
             isLoadingReservations={isLoadingReservations}
+            navigation={navigation}
             onReservationFormToggle={onReservationFormToggle}
+            onReservationRemoved={onReservationRemoved}
             reservations={reservations}
             shouldShowReservationForm={shouldShowReservationForm}
           />
@@ -300,7 +316,9 @@ function ReservationContent({
 function ReservationsSummary({
   hasReservations,
   isLoadingReservations,
+  navigation,
   onReservationFormToggle,
+  onReservationRemoved,
   reservations,
   shouldShowReservationForm,
 }) {
@@ -330,6 +348,27 @@ function ReservationsSummary({
                   <Text style={styles.reservationBranch}>
                     {reservation.branchName}
                   </Text>
+                  <Pressable
+                    accessibilityLabel={`Ver detalhes da reserva em ${reservation.branchName}`}
+                    accessibilityRole="button"
+                    hitSlop={8}
+                    onPress={() =>
+                      navigation.navigate("ReservationDetails", {
+                        reservation,
+                        onCancelled: onReservationRemoved,
+                      })
+                    }
+                    style={({ pressed }) => [
+                      styles.detailsIconButton,
+                      pressed && styles.detailsIconButtonPressed,
+                    ]}
+                  >
+                    <MaterialCommunityIcons
+                      color={theme.colors.warning}
+                      name="chevron-right"
+                      size={20}
+                    />
+                  </Pressable>
                 </View>
                 <Text style={styles.reservationMeta}>
                   {formatReservationDate(reservation.scheduledAt)}
@@ -577,12 +616,17 @@ ReservationContent.propTypes = {
   isCompact: PropTypes.bool.isRequired,
   isLoadingReservations: PropTypes.bool.isRequired,
   isSubmitting: PropTypes.bool.isRequired,
+  navigation: PropTypes.shape({
+    navigate: PropTypes.func.isRequired,
+    addListener: PropTypes.func.isRequired,
+  }).isRequired,
   onBranchPress: PropTypes.func.isRequired,
   onCancelReservationCreation: PropTypes.func.isRequired,
   onDateChange: PropTypes.func.isRequired,
   onDepthChange: PropTypes.func.isRequired,
   onGuestsChange: PropTypes.func.isRequired,
   onReservationFormToggle: PropTypes.func.isRequired,
+  onReservationRemoved: PropTypes.func.isRequired,
   onSubmitReservation: PropTypes.func.isRequired,
   onTimeChange: PropTypes.func.isRequired,
   reservationForm: PropTypes.shape({
@@ -612,7 +656,11 @@ ReservationContent.propTypes = {
 ReservationsSummary.propTypes = {
   hasReservations: PropTypes.bool.isRequired,
   isLoadingReservations: PropTypes.bool.isRequired,
+  navigation: PropTypes.shape({
+    navigate: PropTypes.func.isRequired,
+  }).isRequired,
   onReservationFormToggle: PropTypes.func.isRequired,
+  onReservationRemoved: PropTypes.func,
   reservations: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,
@@ -856,5 +904,14 @@ const styles = StyleSheet.create({
     fontFamily: theme.fonts.body,
     fontSize: 13,
     lineHeight: 20,
+  },
+  detailsIconButton: {
+    alignItems: "center",
+    borderRadius: 6,
+    justifyContent: "center",
+    padding: 2,
+  },
+  detailsIconButtonPressed: {
+    backgroundColor: "rgba(255,217,138,0.1)",
   },
 });

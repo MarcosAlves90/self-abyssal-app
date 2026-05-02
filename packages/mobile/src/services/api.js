@@ -158,6 +158,11 @@ export async function createReservation(payload) {
   return normalizeReservationResponse(data.reservation);
 }
 
+export async function cancelReservation(reservationId) {
+  await api.delete(`/reservations/${reservationId}`);
+}
+
+
 export async function fetchOrders() {
   const { data } = await api.get("/orders");
   return (data.orders || []).map(normalizeOrderResponse);

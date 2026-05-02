@@ -15,6 +15,7 @@ import { MenuScreen } from "../screens/MenuScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
 import { DeliveryCheckoutScreen } from "../screens/DeliveryCheckoutScreen";
 import { ReservationScreen } from "../screens/ReservationScreen";
+import { ReservationDetailsScreen } from "../screens/ReservationDetailsScreen";
 
 const Stack = createNativeStackNavigator();
 const Tabs = createBottomTabNavigator();
@@ -132,6 +133,11 @@ export function RootNavigator() {
             component={DeliveryCheckoutScreen}
             name="DeliveryCheckout"
             options={{ title: "Finalizar delivery" }}
+          />
+          <Stack.Screen
+            component={ReservationDetailsScreen}
+            name="ReservationDetails"
+            options={{ title: "Detalhes da reserva" }}
           />
         </>
       ) : (
