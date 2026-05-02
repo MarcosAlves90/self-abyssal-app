@@ -53,10 +53,23 @@ describe("contracts", () => {
   it("normaliza request de login", () => {
     const request = buildLoginRequest({
       email: " USER@MAIL.COM ",
-      password: "12345678",
+      password: " 123 ",
     });
 
     expect(request.email).toBe("user@mail.com");
+    expect(request.password).toBe(" 123 ");
+  });
+
+  it("aceita login com email fora de formato sem validar localmente", () => {
+    const request = buildLoginRequest({
+      email: "nao-e-mail",
+      password: "qualquer-coisa",
+    });
+
+    expect(request).toEqual({
+      email: "nao-e-mail",
+      password: "qualquer-coisa",
+    });
   });
 
   it("normaliza request de cadastro", () => {

@@ -18,8 +18,8 @@ class RegisterRequest(BaseModel):
 
 
 class LoginRequest(BaseModel):
-    email: Annotated[str, Field(pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")]
-    password: Annotated[str, Field(min_length=8, max_length=128)]
+    email: Annotated[str, Field()]
+    password: Annotated[str, Field()]
 
     @field_validator("email", "password", mode="before")
     @classmethod
