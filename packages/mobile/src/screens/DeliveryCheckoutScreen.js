@@ -224,7 +224,6 @@ export function DeliveryCheckoutScreen({ navigation }) {
             start={{ x: 0, y: 0 }}
             style={StyleSheet.absoluteFillObject}
           />
-          <View style={styles.heroGlow} />
           <View style={styles.heroRow}>
             <View style={styles.heroIconShell}>
               <MaterialCommunityIcons
@@ -557,15 +556,6 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     padding: theme.spacing.lg,
     position: "relative",
-  },
-  heroGlow: {
-    backgroundColor: "rgba(255,217,138,0.18)",
-    height: 180,
-    opacity: 0.22,
-    position: "absolute",
-    right: -36,
-    top: -36,
-    width: 180,
   },
   heroRow: {
     alignItems: "center",
