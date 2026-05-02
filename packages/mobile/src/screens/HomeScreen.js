@@ -9,13 +9,11 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { BranchCard } from "../components/BranchCard";
 import { LoadingOverlay } from "../components/LoadingOverlay";
 import { MenuCard } from "../components/MenuCard";
 import { SectionHeader } from "../components/SectionHeader";
 import { TopHeroCard } from "../components/TopHeroCard";
-import { useCart } from "../context/CartContext";
 import {
   fetchBranches,
   fetchMenu,
@@ -26,7 +24,6 @@ import { getResponsiveLayout } from "../theme/layout";
 import { theme } from "../theme/tokens";
 
 export function HomeScreen({ navigation }) {
-  const { itemCount } = useCart();
   const { width } = useWindowDimensions();
   const [isLoading, setIsLoading] = useState(true);
   const [branches, setBranches] = useState([]);
@@ -76,29 +73,6 @@ export function HomeScreen({ navigation }) {
 
   const layout = getResponsiveLayout(width);
   const nextReservation = reservations[0];
-  const quickActions = [
-    {
-      description: itemCount
-        ? `${itemCount} itens prontos para seguir.`
-        : "Veja os pratos em destaque e monte sua seleção.",
-      icon: itemCount ? "cart-outline" : "silverware-fork-knife",
-      label: itemCount ? "Finalizar seleção" : "Explorar cardápio",
-      onPress: () => navigation.navigate(itemCount ? "Cart" : "Menu"),
-    },
-    {
-      description: "Escolha a mesa ideal em poucos passos.",
-      icon: "calendar-month-outline",
-      label: "Reservar mesa",
-      onPress: () => navigation.navigate("Reserva"),
-    },
-    {
-      description: "Confira unidades, horários e atendimento.",
-      icon: "storefront-outline",
-      label: "Ver unidades",
-      onPress: () => navigation.navigate("Reserva"),
-    },
-  ];
-
   return (
     <ScrollView
       style={styles.screen}
@@ -118,23 +92,6 @@ export function HomeScreen({ navigation }) {
           title="Seu ritual começa aqui."
         />
 
-        <SectionHeader
-          description="Ações rápidas para seguir sem perder tempo."
-          eyebrow="Acesso rápido"
-          title="Comece por aqui"
-        />
-        <View style={styles.actionGrid}>
-          {quickActions.map((action, index) => (
-            <QuickActionCard
-              key={action.label}
-              description={action.description}
-              icon={action.icon}
-              label={action.label}
-              onPress={action.onPress}
-              wide={layout.isTablet && index === 0}
-            />
-          ))}
-        </View>
 
         <Pressable
           accessibilityRole="button"
@@ -260,38 +217,10 @@ export function HomeScreen({ navigation }) {
   );
 }
 
-function QuickActionCard({ description, icon, label, onPress, wide }) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={onPress}
-      style={[styles.quickActionCard, wide && styles.quickActionCardWide]}
-    >
-      <View style={styles.quickActionHeader}>
-        <MaterialCommunityIcons
-          color={theme.colors.warning}
-          name={icon}
-          size={18}
-        />
-        <Text style={styles.quickActionLabel}>{label}</Text>
-      </View>
-      <Text style={styles.quickActionDescription}>{description}</Text>
-    </Pressable>
-  );
-}
-
 HomeScreen.propTypes = {
   navigation: PropTypes.shape({
     navigate: PropTypes.func.isRequired,
   }).isRequired,
-};
-
-QuickActionCard.propTypes = {
-  description: PropTypes.string.isRequired,
-  icon: PropTypes.string.isRequired,
-  label: PropTypes.string.isRequired,
-  onPress: PropTypes.func.isRequired,
-  wide: PropTypes.bool,
 };
 
 const styles = StyleSheet.create({
@@ -305,41 +234,6 @@ const styles = StyleSheet.create({
   },
   shell: {
     width: "100%",
-  },
-  actionGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 12,
-    marginBottom: theme.spacing.lg,
-    marginTop: 2,
-  },
-  quickActionCard: {
-    backgroundColor: theme.colors.backgroundAlt,
-    borderColor: "rgba(255,255,255,0.08)",
-    borderWidth: 1,
-    padding: 12,
-    width: "100%",
-  },
-  quickActionCardWide: {
-    width: "31.9%",
-  },
-  quickActionHeader: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 6,
-    marginBottom: 6,
-  },
-  quickActionLabel: {
-    color: theme.colors.text,
-    fontFamily: theme.fonts.bodyBold,
-    fontSize: 13,
-    marginBottom: 0,
-  },
-  quickActionDescription: {
-    color: "rgba(150,183,201,0.88)",
-    fontFamily: theme.fonts.body,
-    fontSize: 12,
-    lineHeight: 18,
   },
   highlightCard: {
     backgroundColor: theme.colors.surfaceRaised,
