@@ -55,8 +55,8 @@ function MenuCardMedia({ item, mediaHeight, shellSize }) {
       ) : null}
 
       <LinearGradient
-        colors={["rgba(255, 217, 138, 0.04)", "rgba(4, 11, 23, 0.46)", "rgba(4, 11, 23, 0.92)"]}
-        end={{ x: 1, y: 1 }}
+        colors={["rgba(4, 11, 23, 0.32)", "transparent"]}
+        end={{ x: 0, y: 0.4 }}
         start={{ x: 0, y: 0 }}
         style={StyleSheet.absoluteFillObject}
       />
