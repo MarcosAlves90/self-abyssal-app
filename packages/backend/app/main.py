@@ -42,6 +42,11 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title="Abyssal API",
         version="3.0.0",
+        description=(
+            "API REST do restaurante Abyssal. "
+            "Gerencie autenticação, catálogo (filiais e cardápio) e operações (reservas e pedidos). "
+            "Endpoints protegidos exigem token JWT no header `Authorization: Bearer <token>`."
+        ),
         docs_url="/docs",
         redoc_url="/redoc",
         openapi_url="/openapi.json",
@@ -63,7 +68,7 @@ def create_app() -> FastAPI:
     app.include_router(catalog_router)
     app.include_router(operations_router)
 
-    @app.get("/health")
+    @app.get("/health", summary="Health check", description="Verifica se a API está online e respondendo corretamente.", tags=["Health"])
     async def health():
         return {"status": "ok", "service": "api"}
 
