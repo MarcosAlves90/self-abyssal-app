@@ -271,10 +271,20 @@ function ReservationContent({
           <FeedbackBanner
             message={feedback.message}
             details={
-              feedback.tone === "success" ? (
+              feedback.tone === "success" && confirmation ? (
                 <View style={styles.confirmationDetails}>
                   <Text style={styles.confirmationDetail}>
-                    Reserva confirmada com sucesso.
+                    {confirmation.branchName}
+                  </Text>
+                  <Text style={styles.confirmationDetail}>
+                    {new Date(confirmation.scheduledAt).toLocaleString("pt-BR", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    })}
+                    {" • "}
+                    {confirmation.depthLevel}
+                    {" • "}
+                    {confirmation.guests} {confirmation.guests === 1 ? "pessoa" : "pessoas"}
                   </Text>
                 </View>
               ) : null
