@@ -10,6 +10,9 @@ class Base(DeclarativeBase):
     pass
 
 
+CASCADE_ALL_DELETE_ORPHAN = "all, delete-orphan"
+
+
 def uuid_str() -> str:
     return str(uuid4())
 
@@ -35,7 +38,7 @@ class Branch(Base):
     )
 
     reservation_depths: Mapped[list["BranchReservationDepth"]] = relationship(
-        back_populates="branch", cascade="all, delete-orphan", lazy="selectin"
+        back_populates="branch", cascade=CASCADE_ALL_DELETE_ORPHAN, lazy="selectin"
     )
 
 
@@ -87,7 +90,7 @@ class User(Base):
     )
 
     addresses: Mapped[list["UserAddress"]] = relationship(
-        back_populates="user", cascade="all, delete-orphan", lazy="selectin"
+        back_populates="user", cascade=CASCADE_ALL_DELETE_ORPHAN, lazy="selectin"
     )
 
 
@@ -186,7 +189,7 @@ class Order(Base):
     )
 
     items: Mapped[list["OrderItem"]] = relationship(
-        back_populates="order", cascade="all, delete-orphan", lazy="selectin"
+        back_populates="order", cascade=CASCADE_ALL_DELETE_ORPHAN, lazy="selectin"
     )
 
 
