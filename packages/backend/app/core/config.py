@@ -8,7 +8,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
-    database_url: str = Field(default="postgresql+psycopg://abyssal:abyssal@localhost:5432/abyssal", alias="DATABASE_URL")
+    database_url: str = Field(default="postgresql+psycopg://localhost:5432/abyssal", alias="DATABASE_URL")
 
     app_security_jwt_secret: str = Field(
         default="dev-only-change-me-please-32-characters-minimum",
