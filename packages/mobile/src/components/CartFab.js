@@ -17,7 +17,7 @@ export function CartFab({ currentRouteName, navigation }) {
   const { itemCount } = useCart();
   const { isAuthenticated } = useAuth();
   const insets = useSafeAreaInsets();
-  const hiddenRoutes = new Set(["Cart", "DeliveryCheckout", "DishDetails"]);
+  const hiddenRoutes = new Set(["Cart", "DeliveryCheckout", "DishDetails", "ReservationDetails"]);
   const { scale: badgeScale } = usePopAnimation(itemCount, { toValue: 1.4 });
 
   if (!isAuthenticated || !itemCount || hiddenRoutes.has(currentRouteName)) {
