@@ -6,6 +6,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { SeaShellIcon } from "./icons/SeaShellIcon";
 import { getResponsiveLayout } from "../theme/layout";
 import { formatCurrency, getCategoryLabel, theme } from "../theme/tokens";
+import { getMenuCardImageUrl } from "../utils/cloudinary";
 
 const menuItemShape = {
   accentColor: PropTypes.string,
@@ -50,7 +51,7 @@ function MenuCardMedia({ item, mediaHeight, shellSize }) {
       </View>
 
       {item.imageUrl ? (
-        <Image resizeMode="cover" source={{ uri: item.imageUrl }} style={styles.mediaImage} />
+        <Image resizeMode="cover" source={{ uri: getMenuCardImageUrl(item.imageUrl) }} style={styles.mediaImage} />
       ) : null}
 
       <LinearGradient

@@ -14,6 +14,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useCart } from "../context/CartContext";
 import { getResponsiveLayout } from "../theme/layout";
 import { formatCurrency, getCategoryLabel, theme } from "../theme/tokens";
+import { getDishHeroImageUrl } from "../utils/cloudinary";
 
 function getExperienceNotes(item) {
   const notes = [];
@@ -79,7 +80,7 @@ function PremiumDetailHero({ item, layout }) {
         <Image
           accessibilityIgnoresInvertColors
           resizeMode="cover"
-          source={{ uri: item.imageUrl }}
+          source={{ uri: getDishHeroImageUrl(item.imageUrl) }}
           style={StyleSheet.absoluteFillObject}
         />
       ) : (
