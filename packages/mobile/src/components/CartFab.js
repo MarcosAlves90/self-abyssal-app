@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BlurView } from "expo-blur";
 
@@ -17,6 +17,25 @@ export function CartFab({ currentRouteName, navigation }) {
   const { isAuthenticated } = useAuth();
   const insets = useSafeAreaInsets();
   const hiddenRoutes = new Set(["Cart", "DeliveryCheckout", "DishDetails"]);
+  const badgeScale = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (!itemCount) return;
+    Animated.sequence([
+      Animated.spring(badgeScale, {
+        toValue: 1.4,
+        tension: 300,
+        friction: 5,
+        useNativeDriver: true,
+      }),
+      Animated.spring(badgeScale, {
+        toValue: 1,
+        tension: 120,
+        friction: 6,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [itemCount, badgeScale]);
 
   if (!isAuthenticated || !itemCount || hiddenRoutes.has(currentRouteName)) {
     return null;
@@ -56,9 +75,11 @@ export function CartFab({ currentRouteName, navigation }) {
             <Text style={styles.label}>Seleção</Text>
             <Text style={styles.hint}>Toque para revisar os pratos</Text>
           </View>
-          <View style={styles.badge}>
+          <Animated.View
+            style={[styles.badge, { transform: [{ scale: badgeScale }] }]}
+          >
             <Text style={styles.badgeText}>{itemCount}</Text>
-          </View>
+          </Animated.View>
         </View>
       </Pressable>
     </View>

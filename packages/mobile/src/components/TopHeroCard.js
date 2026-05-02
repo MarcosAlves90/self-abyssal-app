@@ -1,26 +1,55 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { StyleSheet, Text, View } from "react-native";
+import { Animated, Easing, StyleSheet, Text } from "react-native";
 
 import { theme } from "../theme/tokens";
 
 export function TopHeroCard({ eyebrow, title, copy, iconName, style }) {
+  const scaleAnim = useRef(new Animated.Value(0.96)).current;
+  const opacityAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 400,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacityAnim, {
+        toValue: 1,
+        duration: 350,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [scaleAnim, opacityAnim]);
+
   return (
-    <View style={[styles.card, style]}>
-      <View style={styles.row}>
-        <View style={styles.iconShell}>
+    <Animated.View
+      style={[
+        styles.card,
+        style,
+        {
+          opacity: opacityAnim,
+          transform: [{ scale: scaleAnim }],
+        },
+      ]}
+    >
+      <Animated.View style={styles.row}>
+        <Animated.View style={styles.iconShell}>
           <MaterialCommunityIcons
             color={theme.colors.warning}
             name={iconName}
             size={20}
           />
-        </View>
+        </Animated.View>
         <Text style={styles.eyebrow}>{eyebrow}</Text>
-      </View>
+      </Animated.View>
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.copy}>{copy}</Text>
-    </View>
+    </Animated.View>
   );
 }
 
