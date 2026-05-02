@@ -187,6 +187,7 @@ export function ReservationScreen() {
 
 function ReservationContent({
   branches,
+  confirmation,
   feedback,
   hasReservations,
   isCompact,
