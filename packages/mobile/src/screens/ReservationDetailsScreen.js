@@ -173,7 +173,7 @@ export function ReservationDetailsScreen({ route, navigation }) {
           <View style={styles.qrWrapper}>
             <QRCode
               backgroundColor={theme.colors.surfaceRaised}
-              color={theme.colors.text}
+              color={theme.colors.warning}
               size={180}
               value={reservation.id}
             />
