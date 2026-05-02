@@ -12,6 +12,7 @@ import { CartScreen } from "../screens/CartScreen";
 import { DishDetailsScreen } from "../screens/DishDetailsScreen";
 import { HomeScreen } from "../screens/HomeScreen";
 import { MenuScreen } from "../screens/MenuScreen";
+import { OrderTrackingScreen } from "../screens/OrderTrackingScreen";
 import { ProfileScreen } from "../screens/ProfileScreen";
 import { DeliveryCheckoutScreen } from "../screens/DeliveryCheckoutScreen";
 import { ReservationScreen } from "../screens/ReservationScreen";
@@ -138,6 +139,11 @@ export function RootNavigator() {
             component={ReservationDetailsScreen}
             name="ReservationDetails"
             options={{ title: "Detalhes da reserva" }}
+          />
+          <Stack.Screen
+            component={OrderTrackingScreen}
+            name="OrderTracking"
+            options={{ title: "Acompanhar pedido" }}
           />
         </>
       ) : (

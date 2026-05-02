@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import datetime
 
 from sqlalchemy import select
@@ -28,6 +29,16 @@ from .schemas import (
     ReservationResponse,
     ReservationUpdateRequest,
 )
+
+@dataclass
+class _PreparedOrderItem:
+    """Intermediate representation carrying both request data and menu-item-derived fields."""
+    menu_item_id: str
+    name: str
+    quantity: int
+    unit_price_cents: int
+    note: str | None
+
 
 ACTIVE_RESERVATION_CONFLICT_MESSAGE = "Já existe uma reserva ativa para esta filial, horário e nível."
 RESERVATION_ACCESS_DENIED_MESSAGE = "Acesso à reserva negado."
@@ -174,11 +185,11 @@ class OperationsService:
         menu_ids = list(dict.fromkeys(item.menuItemId for item in request.items))
         menu_items = {item.id: item for item in CatalogService(self.deps).lookup_menu_items(menu_ids)}
 
-        order_items = [
+        order_items: list[_PreparedOrderItem] = [
             self._to_order_item(item, menu_items, fulfillment_type)
             for item in request.items
         ]
-        total_cents = sum(order_item.quantity * order_item.unitPriceCents for order_item in order_items)
+        total_cents = sum(oi.quantity * oi.unit_price_cents for oi in order_items)
 
         order = Order(
             user_id=user.id,
@@ -194,14 +205,14 @@ class OperationsService:
             total_cents=total_cents,
             items=[],
         )
-        for order_item in order_items:
+        for oi in order_items:
             order.items.append(
                 OrderItem(
-                    menu_item_id=order_item.menuItemId,
-                    name_snapshot=order_item.name,
-                    quantity=order_item.quantity,
-                    unit_price_cents=order_item.unitPriceCents,
-                    note_encrypted=self.deps.crypto.encrypt(_normalize_optional(order_item.note)),
+                    menu_item_id=oi.menu_item_id,
+                    name_snapshot=oi.name,
+                    quantity=oi.quantity,
+                    unit_price_cents=oi.unit_price_cents,
+                    note_encrypted=self.deps.crypto.encrypt(_normalize_optional(oi.note)),
                 )
             )
 
@@ -305,7 +316,7 @@ class OperationsService:
         if session.scalar(query) is not None:
             raise ApiException(409, ACTIVE_RESERVATION_CONFLICT_MESSAGE)
 
-    def _to_order_item(self, item, menu_items, fulfillment_type: str):
+    def _to_order_item(self, item, menu_items, fulfillment_type: str) -> _PreparedOrderItem:
         menu_item = menu_items.get(item.menuItemId)
         if menu_item is None:
             raise ApiException(400, "Um ou mais itens do menu são inválidos.")
@@ -313,7 +324,13 @@ class OperationsService:
             raise ApiException(400, "Um ou mais itens do menu não estão disponíveis para entrega.")
         if fulfillment_type == FulfillmentType.DINE_IN.value and not menu_item.availableForDineIn:
             raise ApiException(400, "Um ou mais itens do menu não estão disponíveis para consumo no local.")
-        return item
+        return _PreparedOrderItem(
+            menu_item_id=item.menuItemId,
+            name=menu_item.name,
+            quantity=item.quantity,
+            unit_price_cents=menu_item.priceCents,
+            note=item.note,
+        )
 
     @staticmethod
     def _assert_ownership_or_admin(user: AuthenticatedUser, resource_user_id: str, message: str) -> None:

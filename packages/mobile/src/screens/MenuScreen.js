@@ -11,16 +11,19 @@ import {
   View
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { ActiveOrderCard } from "../components/ActiveOrderCard";
 import { LoadingOverlay } from "../components/LoadingOverlay";
 import { MenuCard } from "../components/MenuCard";
 import { TopHeroCard } from "../components/TopHeroCard";
 import { useCart } from "../context/CartContext";
+import { useActiveOrders } from "../hooks/useActiveOrders";
 import { fetchMenu, getApiErrorMessage } from "../services/api";
 import { getResponsiveLayout } from "../theme/layout";
 import { getCategoryLabel, theme } from "../theme/tokens";
 
 export function MenuScreen({ navigation }) {
   const { addItem } = useCart();
+  const { orders: activeOrders } = useActiveOrders();
   const { width } = useWindowDimensions();
   const [items, setItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -139,6 +142,19 @@ export function MenuScreen({ navigation }) {
             iconName="silverware-fork-knife"
             title="Escolha seu prato."
           />
+
+          {activeOrders.length > 0 && (
+            <View style={styles.activeOrdersSection}>
+              <Text style={styles.activeOrdersEyebrow}>Seus pedidos ativos</Text>
+              {activeOrders.map((order) => (
+                <ActiveOrderCard
+                  key={order.id}
+                  order={order}
+                  onPress={() => navigation.navigate("OrderTracking", { order })}
+                />
+              ))}
+            </View>
+          )}
 
           <View style={styles.filterBar}>
             <View style={styles.searchRow}>
@@ -297,6 +313,17 @@ const styles = StyleSheet.create({
   },
   menuCardWide: {
     width: "48.9%"
+  },
+  activeOrdersSection: {
+    marginBottom: theme.spacing.lg,
+  },
+  activeOrdersEyebrow: {
+    color: theme.colors.warning,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 11,
+    letterSpacing: 1.2,
+    marginBottom: theme.spacing.sm,
+    textTransform: "uppercase",
   },
   emptyState: {
     backgroundColor: theme.colors.surface,
