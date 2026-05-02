@@ -68,6 +68,7 @@ class MenuItem(Base):
     available_for_delivery: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     available_for_dine_in: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     accent_color: Mapped[str] = mapped_column(String(20), nullable=False, default="#31e7ff")
+    notes: Mapped[str] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False

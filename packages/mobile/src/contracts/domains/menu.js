@@ -20,6 +20,7 @@ export function normalizeMenuItemResponse(raw) {
     isFeatured: Boolean(raw?.isFeatured),
     availableForDineIn: Boolean(raw?.availableForDineIn),
     availableForDelivery: Boolean(raw?.availableForDelivery),
+    notes: optionalString(raw?.notes),
   };
 }
 

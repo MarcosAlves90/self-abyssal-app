@@ -87,6 +87,7 @@ class MenuItemUpsertRequest(BaseModel):
     availableForDelivery: bool | None = None
     availableForDineIn: bool | None = None
     accentColor: Annotated[str | None, Field(max_length=20)] = None
+    notes: Annotated[str | None, Field(max_length=600)] = None
 
     @field_validator("*", mode="before")
     @classmethod
@@ -108,6 +109,7 @@ class MenuItemUpdateRequest(BaseModel):
     availableForDelivery: bool | None = None
     availableForDineIn: bool | None = None
     accentColor: Annotated[str | None, Field(max_length=20)] = None
+    notes: Annotated[str | None, Field(max_length=600)] = None
 
     @field_validator("*", mode="before")
     @classmethod
@@ -131,6 +133,7 @@ class MenuItemUpdateRequest(BaseModel):
                 self.availableForDelivery is not None,
                 self.availableForDineIn is not None,
                 self.accentColor is not None,
+                self.notes is not None,
             ]
         ):
             raise ValueError("Pelo menos um campo do item deve ser informado.")
@@ -150,6 +153,7 @@ class MenuItemResponse(BaseModel):
     availableForDelivery: bool
     availableForDineIn: bool
     accentColor: str
+    notes: str | None = None
 
 
 class InternalMenuItemResponse(BaseModel):

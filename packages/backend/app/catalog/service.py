@@ -115,6 +115,7 @@ class CatalogService:
             available_for_delivery=True if request.availableForDelivery is None else request.availableForDelivery,
             available_for_dine_in=True if request.availableForDineIn is None else request.availableForDineIn,
             accent_color=(request.accentColor or "#31e7ff").strip(),
+            notes=_normalize_optional(request.notes),
         )
         session.add(item)
         session.commit()
@@ -146,6 +147,8 @@ class CatalogService:
             item.available_for_dine_in = request.availableForDineIn
         if request.accentColor is not None:
             item.accent_color = request.accentColor.strip()
+        if request.notes is not None:
+            item.notes = _normalize_optional(request.notes)
         session.commit()
         session.refresh(item)
         return self.to_menu_item_response(item)
@@ -243,6 +246,7 @@ class CatalogService:
             availableForDelivery=item.available_for_delivery,
             availableForDineIn=item.available_for_dine_in,
             accentColor=item.accent_color,
+            notes=item.notes,
         )
 
 

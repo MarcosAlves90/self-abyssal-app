@@ -16,22 +16,20 @@ import { getResponsiveLayout } from "../theme/layout";
 import { formatCurrency, getCategoryLabel, theme } from "../theme/tokens";
 import { getDishHeroImageUrl } from "../utils/cloudinary";
 
-function getExperienceNotes(item) {
-  const notes = [];
-
-  if (item.availableForDineIn) {
-    notes.push("Brilha no salão, onde textura, aroma e presença têm tempo.");
+function getPresentationLine(item) {
+  if (item.imageHint) {
+    return item.imageHint.replaceAll("-", " ").replaceAll("_", " ").trim();
   }
 
-  if (item.availableForDelivery) {
-    notes.push("Segue bem para delivery sem perder identidade ou acabamento.");
+  return "Assinatura da casa";
+}
+
+function parseDishNotes(item) {
+  if (!item.notes) {
+    return [];
   }
 
-  if (!notes.length) {
-    notes.push("Uma escolha da casa pensada para um momento específico.");
-  }
-
-  return notes;
+  return item.notes.split("\n").map((line) => line.trim()).filter(Boolean);
 }
 
 function getServicePills(item) {
@@ -42,19 +40,9 @@ function getServicePills(item) {
     },
     {
       label: item.availableForDelivery ? "Delivery" : "Somente na casa",
-      tone: item.availableForDelivery
-        ? styles.pillPositive
-        : styles.pillNeutral,
+      tone: item.availableForDelivery ? styles.pillPositive : styles.pillNeutral,
     },
   ];
-}
-
-function getPresentationLine(item) {
-  if (item.imageHint) {
-    return item.imageHint.replaceAll("-", " ").replaceAll("_", " ").trim();
-  }
-
-  return "Assinatura da casa";
 }
 
 function getHeroHeight(layout) {
@@ -72,7 +60,7 @@ function getHeroHeight(layout) {
 function PremiumDetailHero({ item, layout }) {
   const heroHeight = getHeroHeight(layout);
   const servicePills = getServicePills(item);
-  const experienceNotes = getExperienceNotes(item);
+  const dishNotes = parseDishNotes(item);
 
   return (
     <View style={[styles.hero, { minHeight: heroHeight }]}>
@@ -116,7 +104,7 @@ function PremiumDetailHero({ item, layout }) {
       </View>
 
       <View style={styles.heroContent}>
-        <Text style={styles.kicker}>Seleção da mesa</Text>
+        <Text style={styles.kicker}>{getCategoryLabel(item.category)}</Text>
         <Text
           style={[
             styles.title,
@@ -151,7 +139,7 @@ function PremiumDetailHero({ item, layout }) {
       </View>
 
       <View style={styles.heroBottomBand}>
-        <Text style={styles.heroBottomCopy}>{experienceNotes[0]}</Text>
+        <Text style={styles.heroBottomCopy}>{dishNotes[0] ?? ""}</Text>
       </View>
     </View>
   );
@@ -177,6 +165,7 @@ PremiumDetailHero.propTypes = {
     imageUrl: PropTypes.string,
     isFeatured: PropTypes.bool,
     name: PropTypes.string.isRequired,
+    notes: PropTypes.string,
     priceCents: PropTypes.number.isRequired,
   }).isRequired,
   layout: PropTypes.shape({
@@ -208,36 +197,9 @@ export function DishDetailsScreen({ route, navigation }) {
       <View style={[styles.shell, { maxWidth: layout.contentMaxWidth }]}>
         <PremiumDetailHero item={item} layout={layout} />
 
-        <PremiumSection title="Assinatura do prato">
-          <Text style={styles.sectionLead}>
-            Poucas linhas, imagem dominante e foco total no que importa:
-            presença, acabamento e decisão segura.
-          </Text>
+        <PremiumSection title="Sobre o prato">
           <View style={styles.benefitList}>
-            <View style={styles.benefitItem}>
-              <View style={styles.benefitDot} />
-              <Text style={styles.sectionCopy}>
-                Visual dominante para valorizar a construção do prato.
-              </Text>
-            </View>
-            <View style={styles.benefitItem}>
-              <View style={styles.benefitDot} />
-              <Text style={styles.sectionCopy}>
-                Texto direto, sem ruído, para manter a leitura elegante.
-              </Text>
-            </View>
-            <View style={styles.benefitItem}>
-              <View style={styles.benefitDot} />
-              <Text style={styles.sectionCopy}>
-                Um CTA único, com hierarquia clara e sem distrações.
-              </Text>
-            </View>
-          </View>
-        </PremiumSection>
-
-        <PremiumSection title="Quando pedir">
-          <View style={styles.benefitList}>
-            {getExperienceNotes(item).map((note) => (
+            {parseDishNotes(item).map((note) => (
               <View key={note} style={styles.benefitItem}>
                 <View style={styles.benefitDot} />
                 <Text style={styles.sectionCopy}>{note}</Text>
