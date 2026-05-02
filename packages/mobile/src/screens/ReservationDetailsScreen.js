@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
-  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -13,6 +12,7 @@ import {
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 
+import { ConfirmModal } from "../components/ConfirmModal";
 import { cancelReservation, getApiErrorMessage } from "../services/api";
 import { getResponsiveLayout } from "../theme/layout";
 import { theme } from "../theme/tokens";
@@ -66,24 +66,14 @@ export function ReservationDetailsScreen({ route, navigation }) {
   const { width } = useWindowDimensions();
   const layout = getResponsiveLayout(width);
   const [isCancelling, setIsCancelling] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
   const statusLabel = STATUS_LABELS[reservation.status] ?? reservation.status;
   const statusColor = STATUS_COLORS[reservation.status] ?? theme.colors.textMuted;
   const isCancellable = reservation.status === "confirmed";
 
   function confirmCancel() {
-    Alert.alert(
-      "Cancelar reserva",
-      `Deseja cancelar a reserva em ${reservation.branchName}? Esta ação não pode ser desfeita.`,
-      [
-        { text: "Voltar", style: "cancel" },
-        {
-          text: "Cancelar reserva",
-          style: "destructive",
-          onPress: handleCancel,
-        },
-      ]
-    );
+    setShowCancelModal(true);
   }
 
   async function handleCancel() {
@@ -102,7 +92,21 @@ export function ReservationDetailsScreen({ route, navigation }) {
   }
 
   return (
-    <ScrollView
+    <>
+      <ConfirmModal
+        confirmLabel="Cancelar reserva"
+        isDestructive
+        message={`Deseja cancelar a reserva em ${reservation.branchName}? Esta ação não pode ser desfeita.`}
+        onCancel={() => setShowCancelModal(false)}
+        onConfirm={() => {
+          setShowCancelModal(false);
+          handleCancel();
+        }}
+        title="Cancelar reserva"
+        visible={showCancelModal}
+      />
+
+      <ScrollView
       bounces={false}
       contentContainerStyle={[
         styles.content,
@@ -217,6 +221,7 @@ export function ReservationDetailsScreen({ route, navigation }) {
         ) : null}
       </View>
     </ScrollView>
+    </>
   );
 }
 
