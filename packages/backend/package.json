@@ -3,10 +3,10 @@
   "version": "2.0.0",
   "private": true,
   "scripts": {
-    "build": "python -m pip install -r requirements.txt",
-    "build:dev": "python -m pip install -r requirements.txt",
-    "start": "python -m uvicorn app.main:app --host 127.0.0.1 --port 3334",
-    "dev": "python -m uvicorn app.main:app --host 127.0.0.1 --port 3334 --reload",
-    "test": "python -m pytest -q"
+    "build": "node scripts/run-python.js -m pip install -r requirements.txt",
+    "build:dev": "node scripts/run-python.js -m pip install -r requirements.txt",
+    "start": "node scripts/run-python.js -m uvicorn app.main:app --host 127.0.0.1 --port 3334",
+    "dev": "node scripts/run-python.js -m uvicorn app.main:app --host 127.0.0.1 --port 3334 --reload",
+    "test": "node scripts/run-python.js -m pytest -q"
   }
 }
