@@ -1,8 +1,7 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import {
   Animated,
-  Easing,
   Modal,
   Pressable,
   StyleSheet,
@@ -10,6 +9,7 @@ import {
   View,
 } from "react-native";
 
+import { useModalEntrance } from "../hooks/useAnimations";
 import { theme } from "../theme/tokens";
 
 export function ConfirmModal({
@@ -21,30 +21,7 @@ export function ConfirmModal({
   title,
   visible,
 }) {
-  const scaleAnim = useRef(new Animated.Value(0.88)).current;
-  const opacityAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    if (visible) {
-      Animated.parallel([
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          tension: 80,
-          friction: 8,
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacityAnim, {
-          toValue: 1,
-          duration: 180,
-          easing: Easing.out(Easing.quad),
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else {
-      scaleAnim.setValue(0.88);
-      opacityAnim.setValue(0);
-    }
-  }, [visible, scaleAnim, opacityAnim]);
+  const { scale: scaleAnim, opacity: opacityAnim } = useModalEntrance(visible);
 
   return (
     <Modal

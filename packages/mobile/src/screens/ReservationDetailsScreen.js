@@ -1,9 +1,8 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   Animated,
-  Easing,
   ScrollView,
   StyleSheet,
   Text,
@@ -15,6 +14,7 @@ import {
 import QRCode from "react-native-qrcode-svg";
 
 import { ConfirmModal } from "../components/ConfirmModal";
+import { useStaggeredEntrance } from "../hooks/useAnimations";
 import { cancelReservation, getApiErrorMessage } from "../services/api";
 import { getResponsiveLayout } from "../theme/layout";
 import { theme } from "../theme/tokens";
@@ -69,42 +69,7 @@ export function ReservationDetailsScreen({ route, navigation }) {
   const layout = getResponsiveLayout(width);
   const [isCancelling, setIsCancelling] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
-
-  const sectionAnims = useRef(
-    [0, 1, 2, 3].map(() => ({
-      opacity: new Animated.Value(0),
-      translateY: new Animated.Value(20),
-    }))
-  ).current;
-
-  useEffect(() => {
-    Animated.stagger(
-      90,
-      sectionAnims.map(({ opacity, translateY }) =>
-        Animated.parallel([
-          Animated.timing(opacity, {
-            toValue: 1,
-            duration: 380,
-            easing: Easing.out(Easing.cubic),
-            useNativeDriver: true,
-          }),
-          Animated.timing(translateY, {
-            toValue: 0,
-            duration: 380,
-            easing: Easing.out(Easing.cubic),
-            useNativeDriver: true,
-          }),
-        ])
-      )
-    ).start();
-  }, [sectionAnims]);
-
-  function animStyle(index) {
-    return {
-      opacity: sectionAnims[index].opacity,
-      transform: [{ translateY: sectionAnims[index].translateY }],
-    };
-  }
+  const sectionStyles = useStaggeredEntrance(4, { stagger: 90, fromY: 20 });
 
   const statusLabel = STATUS_LABELS[reservation.status] ?? reservation.status;
   const statusColor = STATUS_COLORS[reservation.status] ?? theme.colors.textMuted;
@@ -156,7 +121,7 @@ export function ReservationDetailsScreen({ route, navigation }) {
       <View style={[styles.shell, { maxWidth: layout.contentMaxWidth }]}>
 
         {/* Status badge */}
-        <Animated.View style={[styles.statusRow, animStyle(0)]}>
+        <Animated.View style={[styles.statusRow, sectionStyles[0]]}>
           <View style={[styles.statusBadge, { borderColor: statusColor }]}>
             <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
             <Text style={[styles.statusText, { color: statusColor }]}>
@@ -166,7 +131,7 @@ export function ReservationDetailsScreen({ route, navigation }) {
         </Animated.View>
 
         {/* Branch hero card */}
-        <Animated.View style={[styles.heroCard, animStyle(1)]}>
+        <Animated.View style={[styles.heroCard, sectionStyles[1]]}>
           <MaterialCommunityIcons
             color={theme.colors.warning}
             name="calendar-star"
@@ -179,7 +144,7 @@ export function ReservationDetailsScreen({ route, navigation }) {
         </Animated.View>
 
         {/* Detail rows */}
-        <Animated.View style={[styles.infoCard, animStyle(2)]}>
+        <Animated.View style={[styles.infoCard, sectionStyles[2]]}>
           <InfoRow
             icon="account-group-outline"
             label="Pessoas"
@@ -210,7 +175,7 @@ export function ReservationDetailsScreen({ route, navigation }) {
         </Animated.View>
 
         {/* QR Code */}
-        <Animated.View style={[styles.qrSection, animStyle(3)]}>
+        <Animated.View style={[styles.qrSection, sectionStyles[3]]}>
           <Text style={styles.qrLabel}>Apresente na entrada</Text>
           <View style={styles.qrWrapper}>
             <QRCode
@@ -227,7 +192,7 @@ export function ReservationDetailsScreen({ route, navigation }) {
 
         {/* Cancel button */}
         {isCancellable ? (
-          <Animated.View style={[styles.cancelSection, animStyle(3)]}>
+          <Animated.View style={[styles.cancelSection, sectionStyles[3]]}>
             <Pressable
               accessibilityLabel="Cancelar reserva"
               accessibilityRole="button"

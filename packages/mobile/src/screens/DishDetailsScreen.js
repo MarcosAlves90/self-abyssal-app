@@ -1,8 +1,7 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import {
   Animated,
-  Easing,
   Image,
   Pressable,
   ScrollView,
@@ -14,6 +13,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 
 import { useCart } from "../context/CartContext";
+import { useEntranceAnimation } from "../hooks/useAnimations";
 import { getResponsiveLayout } from "../theme/layout";
 import { formatCurrency, getCategoryLabel, theme } from "../theme/tokens";
 import { getDishHeroImageUrl } from "../utils/cloudinary";
@@ -187,28 +187,7 @@ export function DishDetailsScreen({ route, navigation }) {
   const { item } = route.params;
   const { width } = useWindowDimensions();
   const layout = getResponsiveLayout(width);
-
-  const contentOpacity = useRef(new Animated.Value(0)).current;
-  const contentTranslateY = useRef(new Animated.Value(28)).current;
-
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(contentOpacity, {
-        toValue: 1,
-        duration: 420,
-        delay: 220,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: true,
-      }),
-      Animated.timing(contentTranslateY, {
-        toValue: 0,
-        duration: 420,
-        delay: 220,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [contentOpacity, contentTranslateY]);
+  const contentAnimStyle = useEntranceAnimation({ delay: 220, duration: 420, fromY: 28 });
 
   return (
     <ScrollView
@@ -220,12 +199,7 @@ export function DishDetailsScreen({ route, navigation }) {
       <View style={[styles.shell, { maxWidth: layout.contentMaxWidth }]}>
         <PremiumDetailHero item={item} layout={layout} />
 
-        <Animated.View
-          style={{
-            opacity: contentOpacity,
-            transform: [{ translateY: contentTranslateY }],
-          }}
-        >
+        <Animated.View style={contentAnimStyle}>
           <PremiumSection title="Sobre o prato">
             <View style={styles.benefitList}>
               {parseDishNotes(item).map((note) => (

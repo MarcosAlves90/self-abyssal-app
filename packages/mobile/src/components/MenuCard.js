@@ -1,9 +1,9 @@
-import React, { useRef } from "react";
 import PropTypes from "prop-types";
 import { Animated, Image, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { SeaShellIcon } from "./icons/SeaShellIcon";
+import { usePressScale } from "../hooks/useAnimations";
 import { getResponsiveLayout } from "../theme/layout";
 import { formatCurrency, getCategoryLabel, theme } from "../theme/tokens";
 import { getMenuCardImageUrl } from "../utils/cloudinary";
@@ -126,34 +126,16 @@ export function MenuCard({ item, onAdd, onPress, showAddButton = false, style })
   const layout = getResponsiveLayout(width);
   const { mediaHeight, shellSize } = getMediaMetrics(layout);
   const shouldStackFooter = showAddButton && layout.isCompact;
-  const scaleAnim = useRef(new Animated.Value(1)).current;
-
-  function handlePressIn() {
-    Animated.spring(scaleAnim, {
-      toValue: 0.97,
-      tension: 200,
-      friction: 10,
-      useNativeDriver: true,
-    }).start();
-  }
-
-  function handlePressOut() {
-    Animated.spring(scaleAnim, {
-      toValue: 1,
-      tension: 100,
-      friction: 6,
-      useNativeDriver: true,
-    }).start();
-  }
+  const { scale, onPressIn, onPressOut } = usePressScale({ toValue: 0.97 });
 
   return (
-    <Animated.View style={[styles.card, style, { transform: [{ scale: scaleAnim }] }]}>
+    <Animated.View style={[styles.card, style, { transform: [{ scale }] }]}>
       <Pressable
         accessibilityHint="Abre os detalhes do prato"
         accessibilityLabel={`${item.name}, ${getCategoryLabel(item.category)}`}
         onPress={onPress}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
+        onPressIn={onPressIn}
+        onPressOut={onPressOut}
         style={styles.pressable}
       >
       <LinearGradient

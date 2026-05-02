@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
@@ -7,6 +7,7 @@ import { BlurView } from "expo-blur";
 
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
+import { usePopAnimation } from "../hooks/useAnimations";
 import { theme } from "../theme/tokens";
 
 const TAB_BAR_HEIGHT = 82;
@@ -17,25 +18,7 @@ export function CartFab({ currentRouteName, navigation }) {
   const { isAuthenticated } = useAuth();
   const insets = useSafeAreaInsets();
   const hiddenRoutes = new Set(["Cart", "DeliveryCheckout", "DishDetails"]);
-  const badgeScale = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    if (!itemCount) return;
-    Animated.sequence([
-      Animated.spring(badgeScale, {
-        toValue: 1.4,
-        tension: 300,
-        friction: 5,
-        useNativeDriver: true,
-      }),
-      Animated.spring(badgeScale, {
-        toValue: 1,
-        tension: 120,
-        friction: 6,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [itemCount, badgeScale]);
+  const { scale: badgeScale } = usePopAnimation(itemCount, { toValue: 1.4 });
 
   if (!isAuthenticated || !itemCount || hiddenRoutes.has(currentRouteName)) {
     return null;

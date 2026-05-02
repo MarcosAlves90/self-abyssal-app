@@ -1,35 +1,16 @@
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { ActivityIndicator, Animated, Easing, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Animated, StyleSheet, Text, View } from "react-native";
 
+import { useRetriggerEntrance } from "../hooks/useAnimations";
 import { theme } from "../theme/tokens";
 
 export function FeedbackBanner({ details, tone, message }) {
-  const slideAnim = useRef(new Animated.Value(-12)).current;
-  const opacityAnim = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    if (tone !== "idle" && message) {
-      slideAnim.setValue(-12);
-      opacityAnim.setValue(0);
-
-      Animated.parallel([
-        Animated.timing(slideAnim, {
-          toValue: 0,
-          duration: 280,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacityAnim, {
-          toValue: 1,
-          duration: 220,
-          easing: Easing.out(Easing.quad),
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }
-  }, [tone, message, slideAnim, opacityAnim]);
+  const animStyle = useRetriggerEntrance(
+    tone !== "idle" && message ? `${tone}:${message}` : null,
+    { duration: 280, fromY: -12 }
+  );
 
   if (tone === "idle" || !message) {
     return null;
@@ -59,10 +40,7 @@ export function FeedbackBanner({ details, tone, message }) {
         styles.container,
         resolvedTone.container,
         details && styles.containerWithDetails,
-        {
-          opacity: opacityAnim,
-          transform: [{ translateY: slideAnim }],
-        },
+        animStyle,
       ]}
     >
       {tone === "saving" ? (
