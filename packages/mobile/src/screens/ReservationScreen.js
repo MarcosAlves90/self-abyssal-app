@@ -197,6 +197,13 @@ export function ReservationScreen({ navigation }) {
   );
 }
 
+ReservationScreen.propTypes = {
+  navigation: PropTypes.shape({
+    addListener: PropTypes.func.isRequired,
+    navigate: PropTypes.func.isRequired,
+  }).isRequired,
+};
+
 function ReservationContent({
   branches,
   confirmation,
