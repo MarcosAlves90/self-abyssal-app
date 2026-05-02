@@ -78,8 +78,8 @@ async function main() {
 
   process.stdout.write(formatLine(frontLogger, "starting mobile target: " + targetLabel) + "\n");
 
-  // Start backend via npm workspace script (expects `start` script in backend package)
-  backendProcess = spawnProcess("npm", ["--workspace", "@abyssal/backend", "run", "start"], {
+  // Start backend via npm workspace script (uses .venv in dev)
+  backendProcess = spawnProcess("npm", ["--workspace", "@abyssal/backend", "run", "dev"], {
     stdio: ["ignore", "pipe", "pipe"]
   });
 

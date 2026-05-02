@@ -8,9 +8,9 @@
   "scripts": {
     "dev": "node scripts/dev.js",
     "dev:web": "node scripts/dev.js --web",
-    "dev:backend": "npm --workspace @abyssal/backend run start",
-    "dev:backend:detached": "npm --workspace @abyssal/backend run start",
-    "build:backend": "npm --workspace @abyssal/backend run build",
+    "dev:backend": "npm --workspace @abyssal/backend run dev",
+    "dev:backend:detached": "npm --workspace @abyssal/backend run dev",
+    "build:backend": "npm --workspace @abyssal/backend run build:dev",
     "test:backend": "npm --workspace @abyssal/backend run test",
     "dev:mobile": "npm --workspace @abyssal/mobile run start",
     "dev:mobile:web": "npm --workspace @abyssal/mobile run web",

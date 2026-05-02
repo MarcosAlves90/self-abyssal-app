@@ -3,8 +3,10 @@
   "version": "2.0.0",
   "private": true,
   "scripts": {
-    "build": "../../.venv/bin/pip install -r requirements.txt",
-    "start": "../../.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 3334 --reload",
+    "build": "pip install -r requirements.txt",
+    "build:dev": "../../.venv/bin/pip install -r requirements.txt",
+    "start": "uvicorn app.main:app --host 127.0.0.1 --port 3334",
+    "dev": "../../.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 3334 --reload",
     "test": "../../.venv/bin/pytest -q"
   }
 }
