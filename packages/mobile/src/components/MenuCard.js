@@ -131,7 +131,6 @@ export function MenuCard({ item, onAdd, onPress, showAddButton = false, style })
     <Pressable
       accessibilityHint="Abre os detalhes do prato"
       accessibilityLabel={`${item.name}, ${getCategoryLabel(item.category)}`}
-      accessibilityRole="button"
       onPress={onPress}
       style={[styles.card, style]}
     >
