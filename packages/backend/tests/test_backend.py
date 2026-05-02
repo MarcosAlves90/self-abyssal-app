@@ -1,7 +1,7 @@
-from app.config import normalize_database_url
+from app.core.config import normalize_database_url
+from app.core.security import HashingService, JwtService, TextCrypto
 from app.main import create_app
 from app.seed import sample_branches
-from app.security import HashingService, JwtService, TextCrypto
 
 
 def test_normalize_database_url_supports_jdbc_form():

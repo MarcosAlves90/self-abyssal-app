@@ -4,13 +4,19 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from .models import Branch, BranchReservationDepth, MenuItem, User, UserRole
-from .security import HashingService, TextCrypto, hash_password
+from .core.security import HashingService, TextCrypto, hash_password
 
 IMAGE_BASE_URL = "https://res.cloudinary.com/dflvo098t/image/upload"
 DESCRIPTION = (
     "Composicao autoral com ingredientes do mar, finalizacao delicada e contraste luminoso inspirado na "
     "experiencia abissal."
 )
+
+DEPTH_SUPERFICIE = "Superficie"
+DEPTH_ZONA_CREPUSCULAR = "Zona Crepuscular"
+DEPTH_ZONA_MESOPELAGICA = "Zona Mesopelagica"
+DEPTH_ZONA_BATIPELAGICA = "Zona Batipelagica"
+DEPTH_ZONA_ABISSAL = "Zona Abissal"
 
 
 def seed_database(session: Session, *, enabled: bool, admin_name: str, admin_email: str, admin_password: str, crypto: TextCrypto, hashing: HashingService) -> None:
@@ -49,9 +55,9 @@ def seed_catalog(session: Session) -> None:
 
 def sample_branches() -> list[Branch]:
     return [
-        branch("Abyssal Paulista", "abyssal-paulista", "Sao Paulo", "Bela Vista", "Av. Paulista, 1100", "18:00 - 23:30", ["Zona Crepuscular", "Zona Mesopelagica", "Zona Abissal"]),
-        branch("Abyssal Pinheiros", "abyssal-pinheiros", "Sao Paulo", "Pinheiros", "Rua dos Corais, 245", "18:30 - 23:00", ["Superficie", "Zona Crepuscular", "Zona Abissal"]),
-        branch("Abyssal Santos", "abyssal-santos", "Santos", "Ponta da Praia", "Av. do Oceano, 89", "19:00 - 00:00", ["Zona Mesopelagica", "Zona Batipelagica", "Zona Abissal"]),
+        branch("Abyssal Paulista", "abyssal-paulista", "Sao Paulo", "Bela Vista", "Av. Paulista, 1100", "18:00 - 23:30", [DEPTH_ZONA_CREPUSCULAR, DEPTH_ZONA_MESOPELAGICA, DEPTH_ZONA_ABISSAL]),
+        branch("Abyssal Pinheiros", "abyssal-pinheiros", "Sao Paulo", "Pinheiros", "Rua dos Corais, 245", "18:30 - 23:00", [DEPTH_SUPERFICIE, DEPTH_ZONA_CREPUSCULAR, DEPTH_ZONA_ABISSAL]),
+        branch("Abyssal Santos", "abyssal-santos", "Santos", "Ponta da Praia", "Av. do Oceano, 89", "19:00 - 00:00", [DEPTH_ZONA_MESOPELAGICA, DEPTH_ZONA_BATIPELAGICA, DEPTH_ZONA_ABISSAL]),
     ]
 
 
