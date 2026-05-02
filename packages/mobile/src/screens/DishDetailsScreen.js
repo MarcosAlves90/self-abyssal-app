@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
-import { useCart } from "../context/CartContext";
+import { MAX_CART_ITEM_QUANTITY, useCart } from "../context/CartContext";
 import { useEntranceAnimation } from "../hooks/useAnimations";
 import { getResponsiveLayout } from "../theme/layout";
 import { formatCurrency, getCategoryLabel, theme } from "../theme/tokens";
@@ -183,11 +183,13 @@ PremiumSection.propTypes = {
 };
 
 export function DishDetailsScreen({ route, navigation }) {
-  const { addItem } = useCart();
+  const { addItem, items } = useCart();
   const { item } = route.params;
   const { width } = useWindowDimensions();
   const layout = getResponsiveLayout(width);
   const contentAnimStyle = useEntranceAnimation({ delay: 220, duration: 420, fromY: 28 });
+  const currentQuantity = items.find((cartItem) => cartItem.id === item.id)?.quantity ?? 0;
+  const isQuantityLimitReached = currentQuantity >= MAX_CART_ITEM_QUANTITY;
 
   return (
     <ScrollView
@@ -215,17 +217,27 @@ export function DishDetailsScreen({ route, navigation }) {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={`Selecionar ${item.name}`}
+              disabled={isQuantityLimitReached}
               onPress={() => {
                 addItem(item);
                 navigation.navigate("Cart");
               }}
-              style={styles.primaryButton}
+              style={[
+                styles.primaryButton,
+                isQuantityLimitReached && styles.primaryButtonDisabled,
+              ]}
             >
-              <Text style={styles.primaryButtonText}>Adicionar à seleção</Text>
+              <Text style={styles.primaryButtonText}>
+                {isQuantityLimitReached ? "Limite atingido" : "Adicionar à seleção"}
+              </Text>
             </Pressable>
 
             <Text style={styles.actionHint}>
               Vai para a seleção da mesa e segue para a finalização.
+            </Text>
+            <Text style={styles.limitHint}>
+              Máximo de {MAX_CART_ITEM_QUANTITY} unidades por prato.
+              {currentQuantity > 0 ? ` Você já tem ${currentQuantity} na seleção.` : ""}
             </Text>
           </View>
         </Animated.View>
@@ -468,6 +480,9 @@ const styles = StyleSheet.create({
     minHeight: 58,
     paddingHorizontal: theme.spacing.lg,
   },
+  primaryButtonDisabled: {
+    backgroundColor: "rgba(255, 217, 138, 0.35)",
+  },
   primaryButtonText: {
     color: theme.colors.background,
     fontFamily: theme.fonts.bodyBold,
@@ -479,6 +494,14 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 18,
     marginTop: 10,
+    textAlign: "center",
+  },
+  limitHint: {
+    color: theme.colors.textMuted,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 11,
+    lineHeight: 16,
+    marginTop: 8,
     textAlign: "center",
   },
 });

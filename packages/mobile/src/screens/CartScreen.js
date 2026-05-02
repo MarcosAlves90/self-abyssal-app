@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
-import { useCart } from "../context/CartContext";
+import { MAX_CART_ITEM_QUANTITY, useCart } from "../context/CartContext";
 import { getResponsiveLayout } from "../theme/layout";
 import { formatCurrency, theme } from "../theme/tokens";
 
@@ -53,12 +53,20 @@ function CartRow({ item, onRemove, onDecrease, onIncrease }) {
         <Text style={styles.quantityValue}>{item.quantity}</Text>
         <Pressable
           accessibilityRole="button"
+          disabled={item.quantity >= MAX_CART_ITEM_QUANTITY}
           onPress={onIncrease}
-          style={styles.quantityButton}
+          style={[
+            styles.quantityButton,
+            item.quantity >= MAX_CART_ITEM_QUANTITY && styles.quantityButtonDisabled,
+          ]}
         >
           <Text style={styles.quantityButtonText}>+</Text>
         </Pressable>
       </View>
+      <Text style={styles.quantityHint}>
+        Máximo de {MAX_CART_ITEM_QUANTITY} unidades por prato.
+        {item.quantity >= MAX_CART_ITEM_QUANTITY ? " Limite atingido." : ""}
+      </Text>
     </View>
   );
 }
@@ -124,6 +132,9 @@ export function CartScreen({ navigation }) {
           <Text style={styles.heroCopy}>
             Ajuste quantidades, retire itens ou siga para a finalização sem
             perder o ritmo da experiência.
+          </Text>
+          <Text style={styles.heroNote}>
+            Cada prato aceita até {MAX_CART_ITEM_QUANTITY} unidades.
           </Text>
         </View>
 
@@ -277,6 +288,17 @@ const styles = StyleSheet.create({
     position: "relative",
     zIndex: 1,
   },
+  heroNote: {
+    color: theme.colors.warning,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 11,
+    letterSpacing: 0.2,
+    lineHeight: 16,
+    marginTop: 10,
+    position: "relative",
+    textTransform: "uppercase",
+    zIndex: 1,
+  },
   summaryCard: {
     alignItems: "center",
     backgroundColor: theme.colors.surface,
@@ -370,6 +392,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     width: 34,
   },
+  quantityButtonDisabled: {
+    opacity: 0.35,
+  },
   quantityButtonText: {
     color: theme.colors.text,
     fontFamily: theme.fonts.bodyBold,
@@ -381,6 +406,13 @@ const styles = StyleSheet.create({
     fontSize: 15,
     minWidth: 18,
     textAlign: "center",
+  },
+  quantityHint: {
+    color: theme.colors.textMuted,
+    fontFamily: theme.fonts.body,
+    fontSize: 11,
+    lineHeight: 16,
+    marginTop: 10,
   },
   actionCard: {
     backgroundColor: theme.colors.surface,
