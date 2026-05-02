@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Annotated
+
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, Header, Request
@@ -48,19 +50,19 @@ def build_services(session: Session) -> AppServices:
     )
 
 
-def get_app_services(session: Session = Depends(get_db)) -> AppServices:
+def get_app_services(session: Annotated[Session, Depends(get_db)]) -> AppServices:
     return build_services(session)
 
 
-def get_auth_service(services: AppServices = Depends(get_app_services)) -> AuthService:
+def get_auth_service(services: Annotated[AppServices, Depends(get_app_services)]) -> AuthService:
     return AuthService(services)
 
 
-def get_catalog_service(services: AppServices = Depends(get_app_services)) -> CatalogService:
+def get_catalog_service(services: Annotated[AppServices, Depends(get_app_services)]) -> CatalogService:
     return CatalogService(services)
 
 
-def get_operations_service(services: AppServices = Depends(get_app_services)) -> OperationsService:
+def get_operations_service(services: Annotated[AppServices, Depends(get_app_services)]) -> OperationsService:
     return OperationsService(services)
 
 
@@ -141,17 +143,17 @@ def register_routes(app: FastAPI) -> None:
         return {"status": "ok", "service": "api"}
 
     @app.post("/api/auth/register", response_model=AuthResponse, status_code=201)
-    async def register(request: RegisterRequest, auth_service: AuthService = Depends(get_auth_service)):
+    async def register(request: RegisterRequest, auth_service: Annotated[AuthService, Depends(get_auth_service)]):
         return auth_service.register(request)
 
     @app.post("/api/auth/login", response_model=AuthResponse)
-    async def login(request: LoginRequest, auth_service: AuthService = Depends(get_auth_service)):
+    async def login(request: LoginRequest, auth_service: Annotated[AuthService, Depends(get_auth_service)]):
         return auth_service.login(request)
 
     @app.get("/api/auth/me", response_model=dict[str, UserResponse])
     async def get_me(
-        authorization: str | None = Header(default=None),
-        auth_service: AuthService = Depends(get_auth_service),
+        auth_service: Annotated[AuthService, Depends(get_auth_service)],
+        authorization: Annotated[str | None, Header(default=None)] = None,
     ):
         current_user = auth_service.authenticate_header(authorization)
         return {"user": auth_service.get_current_user(current_user.id)}
@@ -159,25 +161,25 @@ def register_routes(app: FastAPI) -> None:
     @app.put("/api/auth/me/address", response_model=dict[str, UserResponse])
     async def save_address(
         request: AddressUpsertRequest,
-        authorization: str | None = Header(default=None),
-        auth_service: AuthService = Depends(get_auth_service),
+        auth_service: Annotated[AuthService, Depends(get_auth_service)],
+        authorization: Annotated[str | None, Header(default=None)] = None,
     ):
         current_user = auth_service.authenticate_header(authorization)
         return {"user": auth_service.save_primary_address(current_user.id, request)}
 
     @app.get("/api/branches", response_model=dict[str, list[BranchResponse]])
-    async def list_branches(city: str | None = None, catalog_service: CatalogService = Depends(get_catalog_service)):
+    async def list_branches(catalog_service: Annotated[CatalogService, Depends(get_catalog_service)], city: str | None = None):
         return {"branches": catalog_service.list_branches(city)}
 
     @app.get("/api/branches/{branch_id}", response_model=dict[str, BranchResponse])
-    async def get_branch(branch_id: str, catalog_service: CatalogService = Depends(get_catalog_service)):
+    async def get_branch(branch_id: str, catalog_service: Annotated[CatalogService, Depends(get_catalog_service)]):
         return {"branch": catalog_service.get_branch(branch_id)}
 
     @app.post("/api/branches", response_model=dict[str, BranchResponse], status_code=201)
     async def create_branch(
         request: BranchUpsertRequest,
-        authorization: str | None = Header(default=None),
-        catalog_service: CatalogService = Depends(get_catalog_service),
+        catalog_service: Annotated[CatalogService, Depends(get_catalog_service)],
+        authorization: Annotated[str | None, Header(default=None)] = None,
     ):
         catalog_service.assert_administrator(authorization)
         return {"branch": catalog_service.create_branch(request)}
@@ -186,8 +188,8 @@ def register_routes(app: FastAPI) -> None:
     async def update_branch(
         branch_id: str,
         request: BranchUpdateRequest,
-        authorization: str | None = Header(default=None),
-        catalog_service: CatalogService = Depends(get_catalog_service),
+        catalog_service: Annotated[CatalogService, Depends(get_catalog_service)],
+        authorization: Annotated[str | None, Header(default=None)] = None,
     ):
         catalog_service.assert_administrator(authorization)
         return {"branch": catalog_service.update_branch(branch_id, request)}
@@ -195,29 +197,29 @@ def register_routes(app: FastAPI) -> None:
     @app.delete("/api/branches/{branch_id}", status_code=204)
     async def delete_branch(
         branch_id: str,
-        authorization: str | None = Header(default=None),
-        catalog_service: CatalogService = Depends(get_catalog_service),
+        catalog_service: Annotated[CatalogService, Depends(get_catalog_service)],
+        authorization: Annotated[str | None, Header(default=None)] = None,
     ):
         catalog_service.assert_administrator(authorization)
         catalog_service.delete_branch(branch_id)
 
     @app.get("/api/menu", response_model=dict[str, list[MenuItemResponse]])
     async def list_menu(
+        catalog_service: Annotated[CatalogService, Depends(get_catalog_service)],
         category: str | None = None,
         featured: bool | None = None,
-        catalog_service: CatalogService = Depends(get_catalog_service),
     ):
         return {"items": catalog_service.list_menu(category, featured)}
 
     @app.get("/api/menu/{menu_item_id}", response_model=dict[str, MenuItemResponse])
-    async def get_menu_item(menu_item_id: str, catalog_service: CatalogService = Depends(get_catalog_service)):
+    async def get_menu_item(menu_item_id: str, catalog_service: Annotated[CatalogService, Depends(get_catalog_service)]):
         return {"item": catalog_service.get_menu_item(menu_item_id)}
 
     @app.post("/api/menu", response_model=dict[str, MenuItemResponse], status_code=201)
     async def create_menu_item(
         request: MenuItemUpsertRequest,
-        authorization: str | None = Header(default=None),
-        catalog_service: CatalogService = Depends(get_catalog_service),
+        catalog_service: Annotated[CatalogService, Depends(get_catalog_service)],
+        authorization: Annotated[str | None, Header(default=None)] = None,
     ):
         catalog_service.assert_administrator(authorization)
         return {"item": catalog_service.create_menu_item(request)}
@@ -226,8 +228,8 @@ def register_routes(app: FastAPI) -> None:
     async def update_menu_item(
         menu_item_id: str,
         request: MenuItemUpdateRequest,
-        authorization: str | None = Header(default=None),
-        catalog_service: CatalogService = Depends(get_catalog_service),
+        catalog_service: Annotated[CatalogService, Depends(get_catalog_service)],
+        authorization: Annotated[str | None, Header(default=None)] = None,
     ):
         catalog_service.assert_administrator(authorization)
         return {"item": catalog_service.update_menu_item(menu_item_id, request)}
@@ -235,18 +237,18 @@ def register_routes(app: FastAPI) -> None:
     @app.delete("/api/menu/{menu_item_id}", status_code=204)
     async def delete_menu_item(
         menu_item_id: str,
-        authorization: str | None = Header(default=None),
-        catalog_service: CatalogService = Depends(get_catalog_service),
+        catalog_service: Annotated[CatalogService, Depends(get_catalog_service)],
+        authorization: Annotated[str | None, Header(default=None)] = None,
     ):
         catalog_service.assert_administrator(authorization)
         catalog_service.delete_menu_item(menu_item_id)
 
     @app.get("/api/reservations", response_model=dict[str, list[ReservationResponse]])
     async def list_reservations(
-        authorization: str | None = Header(default=None),
+        auth_service: Annotated[AuthService, Depends(get_auth_service)],
+        operations_service: Annotated[OperationsService, Depends(get_operations_service)],
+        authorization: Annotated[str | None, Header(default=None)] = None,
         status: str | None = None,
-        auth_service: AuthService = Depends(get_auth_service),
-        operations_service: OperationsService = Depends(get_operations_service),
     ):
         current_user = auth_service.authenticate_header(authorization)
         return {"reservations": operations_service.list_reservations(current_user, status)}
@@ -254,9 +256,9 @@ def register_routes(app: FastAPI) -> None:
     @app.get("/api/reservations/{reservation_id}", response_model=dict[str, ReservationResponse])
     async def get_reservation(
         reservation_id: str,
-        authorization: str | None = Header(default=None),
-        auth_service: AuthService = Depends(get_auth_service),
-        operations_service: OperationsService = Depends(get_operations_service),
+        auth_service: Annotated[AuthService, Depends(get_auth_service)],
+        operations_service: Annotated[OperationsService, Depends(get_operations_service)],
+        authorization: Annotated[str | None, Header(default=None)] = None,
     ):
         current_user = auth_service.authenticate_header(authorization)
         return {"reservation": operations_service.get_reservation(reservation_id, current_user)}
@@ -264,9 +266,9 @@ def register_routes(app: FastAPI) -> None:
     @app.post("/api/reservations", response_model=dict[str, ReservationResponse], status_code=201)
     async def create_reservation(
         request: ReservationCreateRequest,
-        authorization: str | None = Header(default=None),
-        auth_service: AuthService = Depends(get_auth_service),
-        operations_service: OperationsService = Depends(get_operations_service),
+        auth_service: Annotated[AuthService, Depends(get_auth_service)],
+        operations_service: Annotated[OperationsService, Depends(get_operations_service)],
+        authorization: Annotated[str | None, Header(default=None)] = None,
     ):
         current_user = auth_service.authenticate_header(authorization)
         return {"reservation": operations_service.create_reservation(request, current_user)}
@@ -275,9 +277,9 @@ def register_routes(app: FastAPI) -> None:
     async def update_reservation(
         reservation_id: str,
         request: ReservationUpdateRequest,
-        authorization: str | None = Header(default=None),
-        auth_service: AuthService = Depends(get_auth_service),
-        operations_service: OperationsService = Depends(get_operations_service),
+        auth_service: Annotated[AuthService, Depends(get_auth_service)],
+        operations_service: Annotated[OperationsService, Depends(get_operations_service)],
+        authorization: Annotated[str | None, Header(default=None)] = None,
     ):
         current_user = auth_service.authenticate_header(authorization)
         return {"reservation": operations_service.update_reservation(reservation_id, request, current_user)}
@@ -285,19 +287,19 @@ def register_routes(app: FastAPI) -> None:
     @app.delete("/api/reservations/{reservation_id}", status_code=204)
     async def delete_reservation(
         reservation_id: str,
-        authorization: str | None = Header(default=None),
-        auth_service: AuthService = Depends(get_auth_service),
-        operations_service: OperationsService = Depends(get_operations_service),
+        auth_service: Annotated[AuthService, Depends(get_auth_service)],
+        operations_service: Annotated[OperationsService, Depends(get_operations_service)],
+        authorization: Annotated[str | None, Header(default=None)] = None,
     ):
         current_user = auth_service.authenticate_header(authorization)
         operations_service.delete_reservation(reservation_id, current_user)
 
     @app.get("/api/orders", response_model=dict[str, list[OrderResponse]])
     async def list_orders(
-        authorization: str | None = Header(default=None),
+        auth_service: Annotated[AuthService, Depends(get_auth_service)],
+        operations_service: Annotated[OperationsService, Depends(get_operations_service)],
+        authorization: Annotated[str | None, Header(default=None)] = None,
         status: str | None = None,
-        auth_service: AuthService = Depends(get_auth_service),
-        operations_service: OperationsService = Depends(get_operations_service),
     ):
         current_user = auth_service.authenticate_header(authorization)
         return {"orders": operations_service.list_orders(current_user, status)}
@@ -305,9 +307,9 @@ def register_routes(app: FastAPI) -> None:
     @app.get("/api/orders/{order_id}", response_model=dict[str, OrderResponse])
     async def get_order(
         order_id: str,
-        authorization: str | None = Header(default=None),
-        auth_service: AuthService = Depends(get_auth_service),
-        operations_service: OperationsService = Depends(get_operations_service),
+        auth_service: Annotated[AuthService, Depends(get_auth_service)],
+        operations_service: Annotated[OperationsService, Depends(get_operations_service)],
+        authorization: Annotated[str | None, Header(default=None)] = None,
     ):
         current_user = auth_service.authenticate_header(authorization)
         return {"order": operations_service.get_order(order_id, current_user)}
@@ -315,9 +317,9 @@ def register_routes(app: FastAPI) -> None:
     @app.post("/api/orders", response_model=dict[str, OrderResponse], status_code=201)
     async def create_order(
         request: OrderCreateRequest,
-        authorization: str | None = Header(default=None),
-        auth_service: AuthService = Depends(get_auth_service),
-        operations_service: OperationsService = Depends(get_operations_service),
+        auth_service: Annotated[AuthService, Depends(get_auth_service)],
+        operations_service: Annotated[OperationsService, Depends(get_operations_service)],
+        authorization: Annotated[str | None, Header(default=None)] = None,
     ):
         current_user = auth_service.authenticate_header(authorization)
         return {"order": operations_service.create_order(request, current_user)}
@@ -326,9 +328,9 @@ def register_routes(app: FastAPI) -> None:
     async def update_order(
         order_id: str,
         request: OrderUpdateRequest,
-        authorization: str | None = Header(default=None),
-        auth_service: AuthService = Depends(get_auth_service),
-        operations_service: OperationsService = Depends(get_operations_service),
+        auth_service: Annotated[AuthService, Depends(get_auth_service)],
+        operations_service: Annotated[OperationsService, Depends(get_operations_service)],
+        authorization: Annotated[str | None, Header(default=None)] = None,
     ):
         current_user = auth_service.authenticate_header(authorization)
         return {"order": operations_service.update_order(order_id, request, current_user)}
@@ -336,9 +338,9 @@ def register_routes(app: FastAPI) -> None:
     @app.delete("/api/orders/{order_id}", status_code=204)
     async def delete_order(
         order_id: str,
-        authorization: str | None = Header(default=None),
-        auth_service: AuthService = Depends(get_auth_service),
-        operations_service: OperationsService = Depends(get_operations_service),
+        auth_service: Annotated[AuthService, Depends(get_auth_service)],
+        operations_service: Annotated[OperationsService, Depends(get_operations_service)],
+        authorization: Annotated[str | None, Header(default=None)] = None,
     ):
         current_user = auth_service.authenticate_header(authorization)
         operations_service.delete_order(order_id, current_user)
