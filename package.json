@@ -10,8 +10,6 @@
     "dev:web": "node scripts/dev.js --web",
     "dev:backend": "npm --workspace @abyssal/backend run start",
     "dev:backend:detached": "npm --workspace @abyssal/backend run start",
-    "dev:backend:down": "echo No containerized environment; stop backend process manually or use a process manager",
-    "clean:backend:db": "echo No containerized environment; drop DB manually (Postgres)",
     "build:backend": "npm --workspace @abyssal/backend run build",
     "test:backend": "npm --workspace @abyssal/backend run test",
     "dev:mobile": "npm --workspace @abyssal/mobile run start",
