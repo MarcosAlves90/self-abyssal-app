@@ -92,7 +92,6 @@ function PremiumDetailHero({ item, layout }) {
         style={StyleSheet.absoluteFillObject}
       />
 
-      <View style={styles.heroGlow} />
 
       <View style={styles.heroHeader}>
         <View style={styles.categoryPill}>
@@ -276,15 +275,6 @@ const styles = StyleSheet.create({
   },
   heroFallback: {
     ...StyleSheet.absoluteFillObject,
-  },
-  heroGlow: {
-    backgroundColor: "rgba(255, 217, 138, 0.16)",
-    height: 220,
-    opacity: 0.22,
-    position: "absolute",
-    right: -48,
-    top: -72,
-    width: 220,
   },
   heroHeader: {
     alignItems: "flex-start",
