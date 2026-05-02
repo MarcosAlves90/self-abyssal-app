@@ -98,34 +98,13 @@ class OperationsService:
         reservation = self._find_reservation(reservation_id)
         self._assert_ownership_or_admin(user, reservation.user_id, RESERVATION_ACCESS_DENIED_MESSAGE)
 
-        next_status = reservation.status
-        if request.status is not None:
-            parsed = _parse_reservation_status(request.status)
-            if user.role.upper() != UserRole.ADMIN.value.upper() and parsed != ReservationStatus.CANCELLED.value:
-                raise ApiException(403, "Apenas administradores podem aplicar este status de reserva.")
-            next_status = parsed
-
+        next_status = self._resolve_reservation_status_update(request, user, reservation.status)
         next_branch_id = request.branchId or reservation.branch_id
         next_depth_level = request.depthLevel.strip() if request.depthLevel is not None else reservation.depth_level
         next_scheduled_at = request.scheduledAt or reservation.scheduled_at
 
-        if request.branchId is not None or request.depthLevel is not None:
-            catalog = CatalogService(self.deps)
-            branch = catalog._find_branch(next_branch_id)
-            if next_depth_level not in {depth.depth_level for depth in branch.reservation_depths}:
-                raise ApiException(400, "A filial selecionada não suporta este nível.")
-            reservation.branch_id = next_branch_id
-            reservation.branch_name_snapshot = branch.name
-            reservation.depth_level = next_depth_level
-
-        if request.scheduledAt is not None:
-            reservation.scheduled_at = request.scheduledAt
-        if request.guests is not None:
-            reservation.guests = request.guests
-        if request.status is not None:
-            reservation.status = next_status
-        if request.specialRequest is not None:
-            reservation.special_request_encrypted = self.deps.crypto.encrypt(_normalize_optional(request.specialRequest))
+        self._apply_reservation_branch_update(reservation, next_branch_id, next_depth_level, request.branchId, request.depthLevel)
+        self._apply_reservation_field_updates(reservation, request, next_status)
 
         if reservation.status != ReservationStatus.CANCELLED.value:
             self._ensure_reservation_slot_is_available(next_branch_id, next_scheduled_at, next_depth_level, reservation.id)
@@ -315,6 +294,55 @@ class OperationsService:
 
         if session.scalar(query) is not None:
             raise ApiException(409, ACTIVE_RESERVATION_CONFLICT_MESSAGE)
+
+    def _resolve_reservation_status_update(
+        self,
+        request: ReservationUpdateRequest,
+        user: AuthenticatedUser,
+        current_status: str,
+    ) -> str:
+        if request.status is None:
+            return current_status
+
+        parsed = _parse_reservation_status(request.status)
+        if user.role.upper() != UserRole.ADMIN.value.upper() and parsed != ReservationStatus.CANCELLED.value:
+            raise ApiException(403, "Apenas administradores podem aplicar este status de reserva.")
+        return parsed
+
+    def _apply_reservation_branch_update(
+        self,
+        reservation: Reservation,
+        next_branch_id: str,
+        next_depth_level: str,
+        branch_id_requested: str | None,
+        depth_level_requested: str | None,
+    ) -> None:
+        if branch_id_requested is None and depth_level_requested is None:
+            return
+
+        catalog = CatalogService(self.deps)
+        branch = catalog._find_branch(next_branch_id)
+        if next_depth_level not in {depth.depth_level for depth in branch.reservation_depths}:
+            raise ApiException(400, "A filial selecionada não suporta este nível.")
+
+        reservation.branch_id = next_branch_id
+        reservation.branch_name_snapshot = branch.name
+        reservation.depth_level = next_depth_level
+
+    def _apply_reservation_field_updates(
+        self,
+        reservation: Reservation,
+        request: ReservationUpdateRequest,
+        next_status: str,
+    ) -> None:
+        if request.scheduledAt is not None:
+            reservation.scheduled_at = request.scheduledAt
+        if request.guests is not None:
+            reservation.guests = request.guests
+        if request.status is not None:
+            reservation.status = next_status
+        if request.specialRequest is not None:
+            reservation.special_request_encrypted = self.deps.crypto.encrypt(_normalize_optional(request.specialRequest))
 
     def _to_order_item(self, item, menu_items, fulfillment_type: str) -> _PreparedOrderItem:
         menu_item = menu_items.get(item.menuItemId)
