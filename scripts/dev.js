@@ -62,11 +62,11 @@ async function shutdown(exitCode = 0) {
 
   isShuttingDown = true;
 
-  if (backendProcess && backendProcess.exitCode === null) {
+  if (backendProcess?.exitCode === null) {
     backendProcess.kill("SIGINT");
   }
 
-  if (mobileProcess && mobileProcess.exitCode === null) {
+  if (mobileProcess?.exitCode === null) {
     mobileProcess.kill("SIGINT");
   }
 
