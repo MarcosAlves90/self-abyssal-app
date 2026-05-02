@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
+  Animated,
+  Easing,
   ScrollView,
   StyleSheet,
   Text,
@@ -68,6 +70,42 @@ export function ReservationDetailsScreen({ route, navigation }) {
   const [isCancelling, setIsCancelling] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
 
+  const sectionAnims = useRef(
+    [0, 1, 2, 3].map(() => ({
+      opacity: new Animated.Value(0),
+      translateY: new Animated.Value(20),
+    }))
+  ).current;
+
+  useEffect(() => {
+    Animated.stagger(
+      90,
+      sectionAnims.map(({ opacity, translateY }) =>
+        Animated.parallel([
+          Animated.timing(opacity, {
+            toValue: 1,
+            duration: 380,
+            easing: Easing.out(Easing.cubic),
+            useNativeDriver: true,
+          }),
+          Animated.timing(translateY, {
+            toValue: 0,
+            duration: 380,
+            easing: Easing.out(Easing.cubic),
+            useNativeDriver: true,
+          }),
+        ])
+      )
+    ).start();
+  }, [sectionAnims]);
+
+  function animStyle(index) {
+    return {
+      opacity: sectionAnims[index].opacity,
+      transform: [{ translateY: sectionAnims[index].translateY }],
+    };
+  }
+
   const statusLabel = STATUS_LABELS[reservation.status] ?? reservation.status;
   const statusColor = STATUS_COLORS[reservation.status] ?? theme.colors.textMuted;
   const isCancellable = reservation.status === "confirmed";
@@ -118,17 +156,17 @@ export function ReservationDetailsScreen({ route, navigation }) {
       <View style={[styles.shell, { maxWidth: layout.contentMaxWidth }]}>
 
         {/* Status badge */}
-        <View style={styles.statusRow}>
+        <Animated.View style={[styles.statusRow, animStyle(0)]}>
           <View style={[styles.statusBadge, { borderColor: statusColor }]}>
             <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
             <Text style={[styles.statusText, { color: statusColor }]}>
               {statusLabel}
             </Text>
           </View>
-        </View>
+        </Animated.View>
 
         {/* Branch hero card */}
-        <View style={styles.heroCard}>
+        <Animated.View style={[styles.heroCard, animStyle(1)]}>
           <MaterialCommunityIcons
             color={theme.colors.warning}
             name="calendar-star"
@@ -138,10 +176,10 @@ export function ReservationDetailsScreen({ route, navigation }) {
           <Text style={styles.heroDate}>
             {formatReservationDate(reservation.scheduledAt)}
           </Text>
-        </View>
+        </Animated.View>
 
         {/* Detail rows */}
-        <View style={styles.infoCard}>
+        <Animated.View style={[styles.infoCard, animStyle(2)]}>
           <InfoRow
             icon="account-group-outline"
             label="Pessoas"
@@ -169,10 +207,10 @@ export function ReservationDetailsScreen({ route, navigation }) {
             label="Código da reserva"
             value={reservation.id}
           />
-        </View>
+        </Animated.View>
 
         {/* QR Code */}
-        <View style={styles.qrSection}>
+        <Animated.View style={[styles.qrSection, animStyle(3)]}>
           <Text style={styles.qrLabel}>Apresente na entrada</Text>
           <View style={styles.qrWrapper}>
             <QRCode
@@ -185,11 +223,11 @@ export function ReservationDetailsScreen({ route, navigation }) {
           <Text style={styles.qrHint}>
             O QR Code será lido pelo anfitrião no momento do check-in.
           </Text>
-        </View>
+        </Animated.View>
 
         {/* Cancel button */}
         {isCancellable ? (
-          <View style={styles.cancelSection}>
+          <Animated.View style={[styles.cancelSection, animStyle(3)]}>
             <Pressable
               accessibilityLabel="Cancelar reserva"
               accessibilityRole="button"
@@ -217,7 +255,7 @@ export function ReservationDetailsScreen({ route, navigation }) {
             <Text style={styles.cancelHint}>
               Reservas canceladas não podem ser reativadas.
             </Text>
-          </View>
+          </Animated.View>
         ) : null}
       </View>
     </ScrollView>

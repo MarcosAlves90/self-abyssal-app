@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import {
+  Animated,
+  Easing,
   Modal,
   Pressable,
   StyleSheet,
@@ -19,6 +21,31 @@ export function ConfirmModal({
   title,
   visible,
 }) {
+  const scaleAnim = useRef(new Animated.Value(0.88)).current;
+  const opacityAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (visible) {
+      Animated.parallel([
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          tension: 80,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacityAnim, {
+          toValue: 1,
+          duration: 180,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      scaleAnim.setValue(0.88);
+      opacityAnim.setValue(0);
+    }
+  }, [visible, scaleAnim, opacityAnim]);
+
   return (
     <Modal
       animationType="fade"
@@ -32,10 +59,11 @@ export function ConfirmModal({
         onPress={onCancel}
         style={styles.backdrop}
       >
-        <Pressable
-          accessibilityRole="none"
-          onPress={() => {}}
-          style={styles.dialog}
+        <Animated.View
+          style={[
+            styles.dialog,
+            { opacity: opacityAnim, transform: [{ scale: scaleAnim }] },
+          ]}
         >
           <Text style={styles.title}>{title}</Text>
           {message ? <Text style={styles.message}>{message}</Text> : null}
@@ -72,7 +100,7 @@ export function ConfirmModal({
               </Text>
             </Pressable>
           </View>
-        </Pressable>
+        </Animated.View>
       </Pressable>
     </Modal>
   );

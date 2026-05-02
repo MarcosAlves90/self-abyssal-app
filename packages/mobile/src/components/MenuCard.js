@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useRef } from "react";
 import PropTypes from "prop-types";
-import { Image, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import { Animated, Image, Pressable, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { SeaShellIcon } from "./icons/SeaShellIcon";
@@ -126,14 +126,36 @@ export function MenuCard({ item, onAdd, onPress, showAddButton = false, style })
   const layout = getResponsiveLayout(width);
   const { mediaHeight, shellSize } = getMediaMetrics(layout);
   const shouldStackFooter = showAddButton && layout.isCompact;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  function handlePressIn() {
+    Animated.spring(scaleAnim, {
+      toValue: 0.97,
+      tension: 200,
+      friction: 10,
+      useNativeDriver: true,
+    }).start();
+  }
+
+  function handlePressOut() {
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      tension: 100,
+      friction: 6,
+      useNativeDriver: true,
+    }).start();
+  }
 
   return (
-    <Pressable
-      accessibilityHint="Abre os detalhes do prato"
-      accessibilityLabel={`${item.name}, ${getCategoryLabel(item.category)}`}
-      onPress={onPress}
-      style={[styles.card, style]}
-    >
+    <Animated.View style={[styles.card, style, { transform: [{ scale: scaleAnim }] }]}>
+      <Pressable
+        accessibilityHint="Abre os detalhes do prato"
+        accessibilityLabel={`${item.name}, ${getCategoryLabel(item.category)}`}
+        onPress={onPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        style={styles.pressable}
+      >
       <LinearGradient
         colors={["rgba(17, 35, 64, 0.98)", "rgba(11, 20, 35, 0.99)", "rgba(4, 11, 23, 1)"]}
         end={{ x: 1, y: 1 }}
@@ -171,7 +193,8 @@ export function MenuCard({ item, onAdd, onPress, showAddButton = false, style })
           />
         </View>
       </LinearGradient>
-    </Pressable>
+      </Pressable>
+    </Animated.View>
   );
 }
 
@@ -195,6 +218,10 @@ const styles = StyleSheet.create({
     shadowRadius: 26,
     elevation: 7,
     width: "100%"
+  },
+  pressable: {
+    flex: 1,
+    overflow: "hidden",
   },
   panel: {
     borderColor: "rgba(255, 217, 138, 0.18)",

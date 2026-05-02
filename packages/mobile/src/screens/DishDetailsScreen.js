@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import {
+  Animated,
+  Easing,
   Image,
   Pressable,
   ScrollView,
@@ -186,6 +188,28 @@ export function DishDetailsScreen({ route, navigation }) {
   const { width } = useWindowDimensions();
   const layout = getResponsiveLayout(width);
 
+  const contentOpacity = useRef(new Animated.Value(0)).current;
+  const contentTranslateY = useRef(new Animated.Value(28)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(contentOpacity, {
+        toValue: 1,
+        duration: 420,
+        delay: 220,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(contentTranslateY, {
+        toValue: 0,
+        duration: 420,
+        delay: 220,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [contentOpacity, contentTranslateY]);
+
   return (
     <ScrollView
       bounces={false}
@@ -196,34 +220,41 @@ export function DishDetailsScreen({ route, navigation }) {
       <View style={[styles.shell, { maxWidth: layout.contentMaxWidth }]}>
         <PremiumDetailHero item={item} layout={layout} />
 
-        <PremiumSection title="Sobre o prato">
-          <View style={styles.benefitList}>
-            {parseDishNotes(item).map((note) => (
-              <View key={note} style={styles.benefitItem}>
-                <View style={styles.benefitDot} />
-                <Text style={styles.sectionCopy}>{note}</Text>
-              </View>
-            ))}
+        <Animated.View
+          style={{
+            opacity: contentOpacity,
+            transform: [{ translateY: contentTranslateY }],
+          }}
+        >
+          <PremiumSection title="Sobre o prato">
+            <View style={styles.benefitList}>
+              {parseDishNotes(item).map((note) => (
+                <View key={note} style={styles.benefitItem}>
+                  <View style={styles.benefitDot} />
+                  <Text style={styles.sectionCopy}>{note}</Text>
+                </View>
+              ))}
+            </View>
+          </PremiumSection>
+
+          <View style={styles.actionBar}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Selecionar ${item.name}`}
+              onPress={() => {
+                addItem(item);
+                navigation.navigate("Cart");
+              }}
+              style={styles.primaryButton}
+            >
+              <Text style={styles.primaryButtonText}>Adicionar à seleção</Text>
+            </Pressable>
+
+            <Text style={styles.actionHint}>
+              Vai para a seleção da mesa e segue para a finalização.
+            </Text>
           </View>
-        </PremiumSection>
-
-        <View style={styles.actionBar}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={`Selecionar ${item.name}`}
-            onPress={() => {
-              addItem(item);
-              navigation.navigate("Cart");
-            }}
-            style={styles.primaryButton}
-          >
-            <Text style={styles.primaryButtonText}>Adicionar à seleção</Text>
-          </Pressable>
-
-          <Text style={styles.actionHint}>
-            Vai para a seleção da mesa e segue para a finalização.
-          </Text>
-        </View>
+        </Animated.View>
       </View>
     </ScrollView>
   );
