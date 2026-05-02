@@ -23,6 +23,18 @@ export function ConfirmModal({
 }) {
   const { scale: scaleAnim, opacity: opacityAnim } = useModalEntrance(visible);
 
+  const cancelButtonStyle = ({ pressed }) => [
+    styles.button,
+    styles.cancelButton,
+    pressed && styles.cancelButtonPressed,
+  ];
+
+  const confirmButtonStyle = ({ pressed }) => [
+    styles.button,
+    isDestructive ? styles.destructiveButton : styles.confirmButton,
+    pressed && styles.confirmButtonPressed,
+  ];
+
   return (
     <Modal
       animationType="fade"
@@ -36,48 +48,46 @@ export function ConfirmModal({
         onPress={onCancel}
         style={styles.backdrop}
       >
-        <Animated.View
-          style={[
-            styles.dialog,
-            { opacity: opacityAnim, transform: [{ scale: scaleAnim }] },
-          ]}
+        <Pressable
+          accessibilityRole="none"
+          onPress={(e) => e.stopPropagation?.()}
+          style={styles.dialogShell}
         >
-          <Text style={styles.title}>{title}</Text>
-          {message ? <Text style={styles.message}>{message}</Text> : null}
+          <Animated.View
+            style={[
+              styles.dialog,
+              { opacity: opacityAnim, transform: [{ scale: scaleAnim }] },
+            ]}
+          >
+            <Text style={styles.title}>{title}</Text>
+            {message ? <Text style={styles.message}>{message}</Text> : null}
 
-          <View style={styles.actions}>
-            <Pressable
-              accessibilityRole="button"
-              onPress={onCancel}
-              style={({ pressed }) => [
-                styles.button,
-                styles.cancelButton,
-                pressed && styles.cancelButtonPressed,
-              ]}
-            >
-              <Text style={styles.cancelButtonText}>Voltar</Text>
-            </Pressable>
-
-            <Pressable
-              accessibilityRole="button"
-              onPress={onConfirm}
-              style={({ pressed }) => [
-                styles.button,
-                isDestructive ? styles.destructiveButton : styles.confirmButton,
-                pressed && styles.confirmButtonPressed,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.confirmButtonText,
-                  isDestructive && styles.destructiveButtonText,
-                ]}
+            <View style={styles.actions}>
+              <Pressable
+                accessibilityRole="button"
+                onPress={onCancel}
+                style={cancelButtonStyle}
               >
-                {confirmLabel}
-              </Text>
-            </Pressable>
-          </View>
-        </Animated.View>
+                <Text style={styles.cancelButtonText}>Voltar</Text>
+              </Pressable>
+
+              <Pressable
+                accessibilityRole="button"
+                onPress={onConfirm}
+                style={confirmButtonStyle}
+              >
+                <Text
+                  style={[
+                    styles.confirmButtonText,
+                    isDestructive && styles.destructiveButtonText,
+                  ]}
+                >
+                  {confirmLabel}
+                </Text>
+              </Pressable>
+            </View>
+          </Animated.View>
+        </Pressable>
       </Pressable>
     </Modal>
   );
@@ -98,6 +108,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 10,
     marginTop: 24,
+  },
+  dialogShell: {
+    width: "100%",
   },
   backdrop: {
     alignItems: "center",
