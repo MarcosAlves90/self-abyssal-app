@@ -338,45 +338,48 @@ function ReservationsSummary({
         ) : (
           <View style={styles.reservationsList}>
             {reservations.map((reservation) => (
-              <View key={reservation.id} style={styles.reservationCard}>
-                <View style={styles.reservationHeader}>
+              <Pressable
+                key={reservation.id}
+                accessibilityLabel={`Ver detalhes da reserva em ${reservation.branchName}`}
+                accessibilityRole="button"
+                onPress={() =>
+                  navigation.navigate("ReservationDetails", {
+                    reservation,
+                    onCancelled: onReservationRemoved,
+                  })
+                }
+                style={({ pressed }) => [
+                  styles.reservationCard,
+                  pressed && styles.reservationCardPressed,
+                ]}
+              >
+                <View style={styles.reservationCardInner}>
+                  <View style={styles.reservationCardBody}>
+                    <View style={styles.reservationHeader}>
+                      <MaterialCommunityIcons
+                        color={theme.colors.warning}
+                        name="calendar-check-outline"
+                        size={16}
+                      />
+                      <Text style={styles.reservationBranch}>
+                        {reservation.branchName}
+                      </Text>
+                    </View>
+                    <Text style={styles.reservationMeta}>
+                      {formatReservationDate(reservation.scheduledAt)}
+                    </Text>
+                    <Text style={styles.reservationMeta}>
+                      {reservation.depthLevel} • {reservation.guests} pessoas
+                    </Text>
+                  </View>
+
                   <MaterialCommunityIcons
                     color={theme.colors.warning}
-                    name="calendar-check-outline"
-                    size={16}
+                    name="qrcode"
+                    size={36}
                   />
-                  <Text style={styles.reservationBranch}>
-                    {reservation.branchName}
-                  </Text>
-                  <Pressable
-                    accessibilityLabel={`Ver detalhes da reserva em ${reservation.branchName}`}
-                    accessibilityRole="button"
-                    hitSlop={8}
-                    onPress={() =>
-                      navigation.navigate("ReservationDetails", {
-                        reservation,
-                        onCancelled: onReservationRemoved,
-                      })
-                    }
-                    style={({ pressed }) => [
-                      styles.detailsIconButton,
-                      pressed && styles.detailsIconButtonPressed,
-                    ]}
-                  >
-                    <MaterialCommunityIcons
-                      color={theme.colors.warning}
-                      name="chevron-right"
-                      size={20}
-                    />
-                  </Pressable>
                 </View>
-                <Text style={styles.reservationMeta}>
-                  {formatReservationDate(reservation.scheduledAt)}
-                </Text>
-                <Text style={styles.reservationMeta}>
-                  {reservation.depthLevel} • {reservation.guests} pessoas
-                </Text>
-              </View>
+              </Pressable>
             ))}
           </View>
         )}
@@ -767,6 +770,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: theme.spacing.md,
   },
+  reservationCardPressed: {
+    backgroundColor: "rgba(255,217,138,0.05)",
+  },
+  reservationCardInner: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12,
+  },
+  reservationCardBody: {
+    flex: 1,
+  },
   reservationHeader: {
     alignItems: "center",
     flexDirection: "row",
@@ -904,14 +918,5 @@ const styles = StyleSheet.create({
     fontFamily: theme.fonts.body,
     fontSize: 13,
     lineHeight: 20,
-  },
-  detailsIconButton: {
-    alignItems: "center",
-    borderRadius: 6,
-    justifyContent: "center",
-    padding: 2,
-  },
-  detailsIconButtonPressed: {
-    backgroundColor: "rgba(255,217,138,0.1)",
   },
 });
