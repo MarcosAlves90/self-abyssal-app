@@ -1,14 +1,5 @@
-/**
- * useAnimations.js
- *
- * Centralized animation hooks for the Abyssal app.
- * All animations stop cleanly on unmount or re-trigger to avoid frozen frames.
- */
-
 import { useEffect, useRef } from "react";
 import { Animated, Easing } from "react-native";
-
-// ─── Entrance ────────────────────────────────────────────────────────────────
 
 /**
  * Fade + translateY entrance on mount.
@@ -17,8 +8,8 @@ import { Animated, Easing } from "react-native";
  * @param {object} [options]
  * @param {number} [options.delay=0]
  * @param {number} [options.duration=380]
- * @param {number} [options.fromY=20] - initial Y offset in px
- * @param {number} [options.fromScale=1] - if < 1, adds a scale component
+ * @param {number} [options.fromY=20]
+ * @param {number} [options.fromScale=1]
  */
 export function useEntranceAnimation({
   delay = 0,
@@ -66,7 +57,12 @@ export function useEntranceAnimation({
     animRef.current = Animated.parallel(animations);
     animRef.current.start();
 
-    return () => animRef.current?.stop();
+    return () => {
+      animRef.current?.stop();
+      opacity.setValue(1);
+      translateY.setValue(0);
+      if (fromScale !== 1) scale.setValue(1);
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -77,8 +73,6 @@ export function useEntranceAnimation({
 
   return style;
 }
-
-// ─── Staggered entrance ───────────────────────────────────────────────────────
 
 /**
  * Staggered fade + translateY entrance for lists of N items.
@@ -123,7 +117,13 @@ export function useStaggeredEntrance(count, { stagger = 90, duration = 380, from
     );
     animRef.current.start();
 
-    return () => animRef.current?.stop();
+    return () => {
+      animRef.current?.stop();
+      anims.forEach(({ opacity, translateY }) => {
+        opacity.setValue(1);
+        translateY.setValue(0);
+      });
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -132,8 +132,6 @@ export function useStaggeredEntrance(count, { stagger = 90, duration = 380, from
     transform: [{ translateY }],
   }));
 }
-
-// ─── Re-triggerable entrance ──────────────────────────────────────────────────
 
 /**
  * Entrance animation that restarts whenever `trigger` changes.
@@ -173,13 +171,15 @@ export function useRetriggerEntrance(trigger, { duration = 280, fromY = -12 } = 
     ]);
     animRef.current.start();
 
-    return () => animRef.current?.stop();
+    return () => {
+      animRef.current?.stop();
+      opacity.setValue(1);
+      translateY.setValue(0);
+    };
   }, [trigger, opacity, translateY, duration, fromY]);
 
   return { opacity, transform: [{ translateY }] };
 }
-
-// ─── Press scale ──────────────────────────────────────────────────────────────
 
 /**
  * Press scale micro-animation for interactive elements.
@@ -215,10 +215,13 @@ export function usePressScale({ toValue = 0.97 } = {}) {
     animRef.current.start();
   }
 
+  useEffect(() => () => {
+    animRef.current?.stop();
+    scale.setValue(1);
+  }, [scale]);
+
   return { scale, onPressIn, onPressOut };
 }
-
-// ─── Pop on change ────────────────────────────────────────────────────────────
 
 /**
  * Spring pop animation that fires whenever `trigger` changes.
@@ -236,6 +239,7 @@ export function usePopAnimation(trigger, { toValue = 1.4 } = {}) {
     if (!trigger) return;
 
     animRef.current?.stop();
+    scale.setValue(1);
     animRef.current = Animated.sequence([
       Animated.spring(scale, {
         toValue,
@@ -252,13 +256,14 @@ export function usePopAnimation(trigger, { toValue = 1.4 } = {}) {
     ]);
     animRef.current.start();
 
-    return () => animRef.current?.stop();
+    return () => {
+      animRef.current?.stop();
+      scale.setValue(1);
+    };
   }, [trigger, scale, toValue]);
 
   return { scale };
 }
-
-// ─── Modal entrance ───────────────────────────────────────────────────────────
 
 /**
  * Spring scale + fade for modal dialogs.

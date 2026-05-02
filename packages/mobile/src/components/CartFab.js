@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import PropTypes from "prop-types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
@@ -20,7 +20,15 @@ export function CartFab({ currentRouteName, navigation }) {
   const hiddenRoutes = new Set(["Cart", "DeliveryCheckout", "DishDetails", "ReservationDetails"]);
   const { scale: badgeScale } = usePopAnimation(itemCount, { toValue: 1.4 });
 
-  if (!isAuthenticated || !itemCount || hiddenRoutes.has(currentRouteName)) {
+  const isHidden = !isAuthenticated || !itemCount || hiddenRoutes.has(currentRouteName);
+
+  useEffect(() => {
+    if (isHidden) {
+      badgeScale.setValue(1);
+    }
+  }, [isHidden, badgeScale]);
+
+  if (isHidden) {
     return null;
   }
 
