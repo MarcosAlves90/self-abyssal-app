@@ -3,10 +3,10 @@
   "version": "2.0.0",
   "private": true,
   "scripts": {
-    "build": "pip install -r requirements.txt",
-    "build:dev": "../../.venv/bin/pip install -r requirements.txt",
-    "start": "uvicorn app.main:app --host 127.0.0.1 --port 3334",
-    "dev": "../../.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 3334 --reload",
-    "test": "../../.venv/bin/pytest -q"
+    "build": "python -m pip install -r requirements.txt",
+    "build:dev": "python -m pip install -r requirements.txt",
+    "start": "python -m uvicorn app.main:app --host 127.0.0.1 --port 3334",
+    "dev": "python -m uvicorn app.main:app --host 127.0.0.1 --port 3334 --reload",
+    "test": "python -m pytest -q"
   }
 }
