@@ -10,6 +10,7 @@ export function normalizeBranchResponse(raw) {
   return {
     id: requiredId(raw?.id, { entity: ENTITY_BRANCH }),
     name: requiredString(raw?.name, { entity: ENTITY_BRANCH, field: "name" }),
+    slug: requiredString(raw?.slug, { entity: ENTITY_BRANCH, field: "slug" }),
     city: requiredString(raw?.city, { entity: ENTITY_BRANCH, field: "city" }),
     neighborhood: requiredString(raw?.neighborhood, { entity: ENTITY_BRANCH, field: "neighborhood" }),
     openHours: requiredString(raw?.openHours, { entity: ENTITY_BRANCH, field: "openHours" }),

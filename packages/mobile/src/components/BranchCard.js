@@ -1,10 +1,20 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import { Image, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { getResponsiveLayout } from "../theme/layout";
 import { theme } from "../theme/tokens";
+
+const BRANCH_LOCATION_IMAGES = {
+  "abyssal-paulista": require("../../assets/images/locations/abyssal-paulista.png"),
+  "abyssal-pinheiros": require("../../assets/images/locations/abyssal-pinheiros.png"),
+  "abyssal-santos": require("../../assets/images/locations/abyssal-santos.png"),
+};
+
+function getBranchLocationImage(slug) {
+  return BRANCH_LOCATION_IMAGES[slug] || BRANCH_LOCATION_IMAGES["abyssal-paulista"];
+}
 
 function getNameTextDimensions(layout, compact) {
   if (layout.isTiny) {
@@ -34,6 +44,19 @@ export function BranchCard({ branch, compact = false, style }) {
       end={{ x: 1, y: 1 }}
       style={[styles.card, compact && styles.cardCompact, style]}
     >
+      <Image
+        source={getBranchLocationImage(branch.slug)}
+        style={styles.backgroundImage}
+        resizeMode="cover"
+        blurRadius={1.4}
+      />
+      <LinearGradient
+        colors={["rgba(4, 12, 24, 0.28)", "rgba(7, 18, 38, 0.42)"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={StyleSheet.absoluteFillObject}
+      />
+
       <View style={[styles.topRow, layout.isCompact && styles.topRowStack]}>
         <View style={styles.copy}>
           <Text style={styles.eyebrow}>Atendimento presencial</Text>
@@ -77,7 +100,8 @@ BranchCard.propTypes = {
     neighborhood: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
     openHours: PropTypes.string.isRequired,
-    reservationDepths: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired
+    reservationDepths: PropTypes.arrayOf(PropTypes.string.isRequired).isRequired,
+    slug: PropTypes.string.isRequired
   }).isRequired,
   compact: PropTypes.bool,
   style: PropTypes.any
@@ -89,8 +113,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     minHeight: 228,
     minWidth: 0,
+    overflow: "hidden",
     padding: theme.spacing.lg,
     width: "100%"
+  },
+  backgroundImage: {
+    ...StyleSheet.absoluteFillObject,
+    height: "100%",
+    width: "100%",
+    opacity: 0.9
   },
   cardCompact: {
     minHeight: 210
