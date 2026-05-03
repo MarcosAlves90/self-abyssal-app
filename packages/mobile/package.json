@@ -22,6 +22,7 @@
     "expo-blur": "^55.0.14",
     "expo-linear-gradient": "~15.0.8",
     "expo-status-bar": "~3.0.9",
+    "expo-system-ui": "~6.0.9",
     "prop-types": "^15.8.1",
     "react": "19.1.0",
     "react-dom": "19.1.0",
