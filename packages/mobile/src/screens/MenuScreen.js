@@ -23,7 +23,7 @@ import { getCategoryLabel, theme } from "../theme/tokens";
 
 export function MenuScreen({ navigation }) {
   const { addItem } = useCart();
-  const { orders: activeOrders } = useActiveOrders();
+  const { orders: activeOrders, refresh: refreshActiveOrders } = useActiveOrders();
   const { width } = useWindowDimensions();
   const [items, setItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -55,6 +55,14 @@ export function MenuScreen({ navigation }) {
       setActiveFilter("todos");
     }
   }, [activeFilter, items]);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("focus", () => {
+      refreshActiveOrders();
+    });
+
+    return unsubscribe;
+  }, [navigation, refreshActiveOrders]);
 
   if (isLoading) {
     return <LoadingOverlay label="Carregando cardápio..." />;
@@ -221,6 +229,7 @@ export function MenuScreen({ navigation }) {
 
 MenuScreen.propTypes = {
   navigation: PropTypes.shape({
+    addListener: PropTypes.func.isRequired,
     navigate: PropTypes.func.isRequired
   }).isRequired
 };

@@ -173,6 +173,10 @@ export async function createOrder(payload) {
   return data.order || data;
 }
 
+export async function cancelOrder(orderId) {
+  await api.patch(`/orders/${orderId}`, { status: "cancelled" });
+}
+
 export async function lookupPostalCode(postalCode) {
   const normalizedPostalCode = normalizePostalCode(postalCode);
 

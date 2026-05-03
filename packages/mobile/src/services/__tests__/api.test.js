@@ -3,6 +3,7 @@ jest.mock("axios", () => {
     post: jest.fn(),
     get: jest.fn(),
     put: jest.fn(),
+    patch: jest.fn(),
     defaults: { headers: { common: {} } },
   }));
 
@@ -35,7 +36,7 @@ jest.mock(
 describe("api service auth headers", () => {
   beforeEach(() => {
     jest.resetModules();
-    global.__DEV__ = true;
+    globalThis.__DEV__ = true;
   });
 
   it("usa uma instancia publica separada para login", async () => {
@@ -66,5 +67,22 @@ describe("api service auth headers", () => {
         email: "ana@mail.com",
       }),
     );
+  });
+
+  it("cancela um pedido usando o status cancelled", async () => {
+    const axios = require("axios").default;
+    const { api, cancelOrder } = require("../api");
+    const client = axios.create.mock.results[0].value;
+
+    expect(axios.create).toHaveBeenCalledTimes(2);
+    expect(api).toBe(client);
+
+    client.patch.mockResolvedValueOnce({});
+
+    await cancelOrder("order-123");
+
+    expect(client.patch).toHaveBeenCalledWith("/orders/order-123", {
+      status: "cancelled",
+    });
   });
 });
