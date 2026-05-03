@@ -26,6 +26,46 @@ import { RootNavigator } from "./src/navigation/RootNavigator";
 import { LoadingOverlay } from "./src/components/LoadingOverlay";
 import { theme } from "./src/theme/tokens";
 
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("App crashed:", error, errorInfo);
+  }
+
+  handleReload = () => {
+    this.setState({ hasError: false, error: null });
+  };
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorTitle}>Algo deu errado</Text>
+          <Text style={styles.errorMessage}>
+            {this.state.error?.message || "Erro desconhecido"}
+          </Text>
+          <Pressable
+            style={styles.errorButton}
+            onPress={this.handleReload}
+          >
+            <Text style={styles.errorButtonText}>Tentar Novamente</Text>
+          </Pressable>
+        </View>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
 const navigationTheme = {
   ...DarkTheme,
   colors: {
@@ -93,13 +133,15 @@ function AppShell() {
 
 export default function App() {
   return (
-    <SafeAreaProvider>
-      <AuthProvider>
-        <CartProvider>
-          <AppShell />
-        </CartProvider>
-      </AuthProvider>
-    </SafeAreaProvider>
+    <ErrorBoundary>
+      <SafeAreaProvider>
+        <AuthProvider>
+          <CartProvider>
+            <AppShell />
+          </CartProvider>
+        </AuthProvider>
+      </SafeAreaProvider>
+    </ErrorBoundary>
   );
 }
 
@@ -156,6 +198,39 @@ const styles = StyleSheet.create({
     opacity: 0.88,
   },
   modalButtonText: {
+    color: theme.colors.background,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 14,
+  },
+  errorContainer: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 24,
+  },
+  errorTitle: {
+    color: theme.colors.text,
+    fontFamily: theme.fonts.bodyBold,
+    fontSize: 20,
+    marginBottom: 12,
+    textAlign: "center",
+  },
+  errorMessage: {
+    color: theme.colors.textMuted,
+    fontFamily: theme.fonts.body,
+    fontSize: 14,
+    lineHeight: 22,
+    marginBottom: 24,
+    textAlign: "center",
+  },
+  errorButton: {
+    backgroundColor: theme.colors.accent,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+  },
+  errorButtonText: {
     color: theme.colors.background,
     fontFamily: theme.fonts.bodyBold,
     fontSize: 14,

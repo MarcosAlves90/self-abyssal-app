@@ -1,7 +1,22 @@
 {
+  "cli": {
+    "version": ">= 3.13.3"
+  },
   "build": {
+    "preview": {
+      "channel": "preview",
+      "env": {
+        "EXPO_PUBLIC_API_BASE_URL": "https://self-abyssal-app-1.onrender.com"
+      },
+      "android": {
+        "buildType": "apk"
+      }
+    },
     "production": {
-      "channel": "production"
+      "channel": "production",
+      "env": {
+        "EXPO_PUBLIC_API_BASE_URL": "https://self-abyssal-app-1.onrender.com"
+      }
     }
   }
 }
