@@ -20,9 +20,11 @@ import {
   fetchBranches,
   fetchReservations,
   getApiErrorMessage,
+  isAbortedRequest,
 } from "../services/api";
 import { getResponsiveLayout } from "../theme/layout";
 import { theme } from "../theme/tokens";
+import { useRequestManager } from "../utils/requestManager";
 
 function nextDate() {
   const date = new Date();
@@ -53,16 +55,23 @@ export function ReservationScreen({ navigation }) {
     guests: "2",
     depthLevel: "",
   });
+  const requestManager = useRequestManager();
 
   useEffect(() => {
+    const controller = requestManager.start("reservations.load");
+
     async function loadData() {
       setIsLoadingReservations(true);
 
       try {
         const [nextBranches, nextReservations] = await Promise.all([
-          fetchBranches(),
-          fetchReservations(),
+          fetchBranches({ signal: controller.signal }),
+          fetchReservations({ signal: controller.signal }),
         ]);
+
+        if (controller.signal.aborted) {
+          return;
+        }
 
         setBranches(nextBranches);
         setReservations(nextReservations);
@@ -82,22 +91,41 @@ export function ReservationScreen({ navigation }) {
           });
         }
       } catch (error) {
-        setFeedback({ tone: "error", message: getApiErrorMessage(error) });
+        if (!isAbortedRequest(error) && !controller.signal.aborted) {
+          setFeedback({ tone: "error", message: getApiErrorMessage(error) });
+        }
       } finally {
-        setIsLoadingReservations(false);
+        requestManager.finish("reservations.load", controller);
+        if (!controller.signal.aborted) {
+          setIsLoadingReservations(false);
+        }
       }
     }
 
     loadData();
-  }, []);
+  }, [requestManager]);
 
   useEffect(() => {
-    return navigation.addListener("focus", () => {
-      fetchReservations()
-        .then((next) => setReservations(next))
-        .catch(() => {});
+    const unsubscribe = navigation.addListener("focus", () => {
+      const controller = requestManager.start("reservations.refresh");
+
+      fetchReservations({ signal: controller.signal })
+        .then((next) => {
+          if (!controller.signal.aborted) {
+            setReservations(next);
+          }
+        })
+        .catch((error) => {
+          if (!isAbortedRequest(error)) {
+            // best-effort refresh only
+          }
+        })
+        .finally(() => {
+          requestManager.finish("reservations.refresh", controller);
+        });
     });
-  }, [navigation]);
+    return unsubscribe;
+  }, [navigation, requestManager]);
 
   const layout = getResponsiveLayout(width);
   const hasReservations = reservations.length > 0;

@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { fetchOrders } from "../services/api";
+import { useCallback, useEffect, useState } from "react";
+import { fetchOrders, isAbortedRequest } from "../services/api";
+import { useRequestManager } from "../utils/requestManager";
 
 const TERMINAL_STATUSES = new Set(["completed", "cancelled", "failed"]);
 const POLL_INTERVAL_MS = 30_000;
@@ -18,52 +19,41 @@ function isActiveDelivery(order) {
 export function useActiveOrders() {
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const intervalRef = useRef(null);
+  const requestManager = useRequestManager();
 
   const load = useCallback(async (showLoading = false) => {
+    const controller = requestManager.start("activeOrders.load");
+
     if (showLoading) setIsLoading(true);
     try {
-      const all = await fetchOrders();
+      const all = await fetchOrders({ signal: controller.signal });
       setOrders(all.filter(isActiveDelivery));
-    } catch {
-      // silently ignore – MenuScreen still renders without orders
+    } catch (error) {
+      if (!isAbortedRequest(error)) {
+        // network failures are intentionally non-blocking here
+      }
     } finally {
-      if (showLoading) setIsLoading(false);
-    }
-  }, []);
+      requestManager.finish("activeOrders.load", controller);
 
-  useEffect(() => {
-    let isMounted = true;
-
-    async function initialLoad() {
-      setIsLoading(true);
-      try {
-        const all = await fetchOrders();
-        if (isMounted) setOrders(all.filter(isActiveDelivery));
-      } catch {
-        // noop
-      } finally {
-        if (isMounted) setIsLoading(false);
+      if (showLoading && !controller.signal.aborted) {
+        setIsLoading(false);
       }
     }
+  }, [requestManager]);
 
-    initialLoad();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  useEffect(() => {
+    load(true);
+  }, [load]);
 
   // poll while orders are active
   useEffect(() => {
     if (orders.length === 0) {
-      clearInterval(intervalRef.current);
       return;
     }
 
-    intervalRef.current = setInterval(() => load(false), POLL_INTERVAL_MS);
+    const intervalId = setInterval(() => load(false), POLL_INTERVAL_MS);
 
-    return () => clearInterval(intervalRef.current);
+    return () => clearInterval(intervalId);
   }, [orders.length, load]);
 
   return { orders, isLoading, refresh: () => load(false) };

@@ -21,10 +21,12 @@ import { useCart } from "../context/CartContext";
 import {
   createOrder,
   getApiErrorMessage,
+  isAbortedRequest,
   lookupPostalCode,
 } from "../services/api";
 import { getResponsiveLayout } from "../theme/layout";
 import { formatCurrency, theme } from "../theme/tokens";
+import { useRequestManager } from "../utils/requestManager";
 import {
   buildAddressSummary,
   createEmptyAddress,
@@ -57,6 +59,7 @@ export function DeliveryCheckoutScreen({ navigation }) {
     address: createEmptyAddress(),
     paymentMethod: "in_app_card_tokenized",
   });
+  const requestManager = useRequestManager();
 
   useEffect(() => {
     setDeliveryForm((current) => ({
@@ -86,10 +89,18 @@ export function DeliveryCheckoutScreen({ navigation }) {
       return;
     }
 
+    const controller = requestManager.start("delivery.postalLookup");
     setIsLookingUpPostalCode(true);
 
     try {
-      const cepData = await lookupPostalCode(deliveryForm.address.postalCode);
+      const cepData = await lookupPostalCode(deliveryForm.address.postalCode, {
+        signal: controller.signal,
+      });
+
+      if (controller.signal.aborted) {
+        return;
+      }
+
       setDeliveryForm((current) => ({
         ...current,
         address: {
@@ -103,9 +114,15 @@ export function DeliveryCheckoutScreen({ navigation }) {
         },
       }));
     } catch (error) {
-      Alert.alert("Falha ao buscar CEP", error.message);
+      if (!isAbortedRequest(error) && !controller.signal.aborted) {
+        Alert.alert("Falha ao buscar CEP", error.message);
+      }
     } finally {
-      setIsLookingUpPostalCode(false);
+      requestManager.finish("delivery.postalLookup", controller);
+
+      if (!controller.signal.aborted) {
+        setIsLookingUpPostalCode(false);
+      }
     }
   }
 
@@ -137,6 +154,7 @@ export function DeliveryCheckoutScreen({ navigation }) {
       ? buildAddressSummary(deliveryForm.address)
       : primaryAddress?.summary;
 
+    const controller = requestManager.start("delivery.submit");
     setIsSubmitting(true);
 
     try {
@@ -150,7 +168,11 @@ export function DeliveryCheckoutScreen({ navigation }) {
         paymentMethod: deliveryForm.paymentMethod,
         deliveryAddress,
         contactName: deliveryForm.contactName.trim(),
-      });
+      }, { signal: controller.signal });
+
+      if (controller.signal.aborted) {
+        return;
+      }
 
       clearCart();
       const successFeedback = {
@@ -174,6 +196,10 @@ export function DeliveryCheckoutScreen({ navigation }) {
         }),
       );
     } catch (error) {
+      if (isAbortedRequest(error) || controller.signal.aborted) {
+        return;
+      }
+
       const probableReason = getDeliveryFailureReason(error);
 
       setCheckoutFeedback({
@@ -196,7 +222,11 @@ export function DeliveryCheckoutScreen({ navigation }) {
         }),
       );
     } finally {
-      setIsSubmitting(false);
+      requestManager.finish("delivery.submit", controller);
+
+      if (!controller.signal.aborted) {
+        setIsSubmitting(false);
+      }
     }
   }
 

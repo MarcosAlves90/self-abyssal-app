@@ -18,10 +18,12 @@ import {
   fetchBranches,
   fetchMenu,
   fetchReservations,
+  isAbortedRequest,
   getApiErrorMessage,
 } from "../services/api";
 import { getResponsiveLayout } from "../theme/layout";
 import { theme } from "../theme/tokens";
+import { useRequestManager } from "../utils/requestManager";
 
 export function HomeScreen({ navigation }) {
   const { width } = useWindowDimensions();
@@ -29,20 +31,21 @@ export function HomeScreen({ navigation }) {
   const [branches, setBranches] = useState([]);
   const [featuredItems, setFeaturedItems] = useState([]);
   const [reservations, setReservations] = useState([]);
+  const requestManager = useRequestManager();
 
   useEffect(() => {
-    let isMounted = true;
+    const controller = requestManager.start("home.load");
 
     async function loadHome() {
       try {
         const [nextBranches, nextFeaturedItems, nextReservations] =
           await Promise.all([
-            fetchBranches(),
-            fetchMenu({ featured: true }),
-            fetchReservations(),
+            fetchBranches({ signal: controller.signal }),
+            fetchMenu({ featured: true }, { signal: controller.signal }),
+            fetchReservations({ signal: controller.signal }),
           ]);
 
-        if (!isMounted) {
+        if (controller.signal.aborted) {
           return;
         }
 
@@ -50,22 +53,19 @@ export function HomeScreen({ navigation }) {
         setFeaturedItems(nextFeaturedItems.slice(0, 4));
         setReservations(nextReservations.slice(0, 2));
       } catch (error) {
-        if (isMounted) {
+        if (!isAbortedRequest(error) && !controller.signal.aborted) {
           Alert.alert("Falha ao carregar a home", getApiErrorMessage(error));
         }
       } finally {
-        if (isMounted) {
+        requestManager.finish("home.load", controller);
+        if (!controller.signal.aborted) {
           setIsLoading(false);
         }
       }
     }
 
     loadHome();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  }, [requestManager]);
 
   if (isLoading) {
     return <LoadingOverlay label="Carregando conteúdo..." />;

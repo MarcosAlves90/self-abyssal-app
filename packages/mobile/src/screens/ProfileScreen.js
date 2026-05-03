@@ -21,10 +21,12 @@ import {
   fetchReservations,
   getApiErrorMessage,
   lookupPostalCode,
+  isAbortedRequest,
   savePrimaryAddress,
 } from "../services/api";
 import { getResponsiveLayout } from "../theme/layout";
 import { theme } from "../theme/tokens";
+import { useRequestManager } from "../utils/requestManager";
 import {
   createEmptyAddress,
   isAddressComplete,
@@ -44,6 +46,7 @@ export function ProfileScreen() {
     message: "",
   });
   const [showAddressEditor, setShowAddressEditor] = useState(false);
+  const requestManager = useRequestManager();
 
   useEffect(() => {
     loadProfile();
@@ -66,19 +69,29 @@ export function ProfileScreen() {
   const primaryAddress = user?.savedAddresses?.[0];
 
   async function loadProfile() {
+    const controller = requestManager.start("profile.load");
+
     try {
       const [currentUser, nextOrders, nextReservations] = await Promise.all([
-        refreshUser(),
-        fetchOrders(),
-        fetchReservations(),
+        refreshUser({ signal: controller.signal }),
+        fetchOrders({ signal: controller.signal }),
+        fetchReservations({ signal: controller.signal }),
       ]);
+
+      if (controller.signal.aborted) {
+        return;
+      }
 
       setOrders(nextOrders);
       setReservations(nextReservations);
       setAddressForm(mapSavedAddressToForm(currentUser?.savedAddresses?.[0]));
       setShowAddressEditor(false);
     } catch (error) {
-      Alert.alert("Falha ao carregar perfil", getApiErrorMessage(error));
+      if (!isAbortedRequest(error) && !controller.signal.aborted) {
+        Alert.alert("Falha ao carregar perfil", getApiErrorMessage(error));
+      }
+    } finally {
+      requestManager.finish("profile.load", controller);
     }
   }
 
@@ -95,10 +108,18 @@ export function ProfileScreen() {
       return;
     }
 
+    const controller = requestManager.start("profile.postalLookup");
     setIsLookingUpPostalCode(true);
 
     try {
-      const cepData = await lookupPostalCode(addressForm.postalCode);
+      const cepData = await lookupPostalCode(addressForm.postalCode, {
+        signal: controller.signal,
+      });
+
+      if (controller.signal.aborted) {
+        return;
+      }
+
       setAddressForm((current) => ({
         ...current,
         postalCode: cepData.postalCode,
@@ -109,9 +130,15 @@ export function ProfileScreen() {
         complement: current.complement || cepData.complement || "",
       }));
     } catch (error) {
-      Alert.alert("Falha ao buscar CEP", error.message);
+      if (!isAbortedRequest(error) && !controller.signal.aborted) {
+        Alert.alert("Falha ao buscar CEP", error.message);
+      }
     } finally {
-      setIsLookingUpPostalCode(false);
+      requestManager.finish("profile.postalLookup", controller);
+
+      if (!controller.signal.aborted) {
+        setIsLookingUpPostalCode(false);
+      }
     }
   }
 
@@ -132,6 +159,7 @@ export function ProfileScreen() {
       tone: "saving",
       message: "Salvando endereço principal...",
     });
+    const controller = requestManager.start("profile.saveAddress");
     setIsSavingAddress(true);
 
     try {
@@ -144,9 +172,13 @@ export function ProfileScreen() {
         neighborhood: addressForm.neighborhood,
         city: addressForm.city,
         state: addressForm.state,
-      });
+      }, { signal: controller.signal });
 
-      const currentUser = await refreshUser();
+      const currentUser = await refreshUser({ signal: controller.signal });
+      if (controller.signal.aborted) {
+        return;
+      }
+
       setAddressForm(mapSavedAddressToForm(currentUser.savedAddresses?.[0]));
       setShowAddressEditor(false);
       setAddressSaveFeedback({
@@ -155,13 +187,19 @@ export function ProfileScreen() {
       });
       Alert.alert("Endereço salvo", "Seu endereço principal foi atualizado.");
     } catch (error) {
-      setAddressSaveFeedback({
-        tone: "error",
-        message: getApiErrorMessage(error),
-      });
-      Alert.alert("Falha ao salvar endereço", getApiErrorMessage(error));
+      if (!isAbortedRequest(error) && !controller.signal.aborted) {
+        setAddressSaveFeedback({
+          tone: "error",
+          message: getApiErrorMessage(error),
+        });
+        Alert.alert("Falha ao salvar endereço", getApiErrorMessage(error));
+      }
     } finally {
-      setIsSavingAddress(false);
+      requestManager.finish("profile.saveAddress", controller);
+
+      if (!controller.signal.aborted) {
+        setIsSavingAddress(false);
+      }
     }
   }
 

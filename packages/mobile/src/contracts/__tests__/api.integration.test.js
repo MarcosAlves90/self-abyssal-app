@@ -35,7 +35,7 @@ jest.mock(
 describe("api contract integration", () => {
   beforeEach(() => {
     jest.resetModules();
-    global.__DEV__ = true;
+    globalThis.__DEV__ = true;
   });
 
   it("falha rapido para resposta invalida de login", async () => {
@@ -55,6 +55,7 @@ describe("api contract integration", () => {
     const axios = require("axios").default;
     const { fetchMenu } = require("../../services/api");
     const client = axios.create.mock.results[0].value;
+    const signal = {};
 
     client.get.mockResolvedValueOnce({
       data: {
@@ -71,12 +72,17 @@ describe("api contract integration", () => {
       },
     });
 
-    await expect(fetchMenu()).resolves.toEqual([
+    await expect(fetchMenu({ featured: true }, { signal })).resolves.toEqual([
       expect.objectContaining({
         id: "m1",
         name: "Ravioli",
         isFeatured: true,
       }),
     ]);
+
+    expect(client.get).toHaveBeenCalledWith("/menu", {
+      params: { featured: true },
+      signal,
+    });
   });
 });

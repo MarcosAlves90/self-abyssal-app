@@ -66,12 +66,13 @@ describe("api service auth headers", () => {
       expect.objectContaining({
         email: "ana@mail.com",
       }),
+      undefined,
     );
   });
 
   it("cancela um pedido usando o status cancelled", async () => {
     const axios = require("axios").default;
-    const { api, cancelOrder } = require("../api");
+    const { api, cancelOrder, isAbortedRequest } = require("../api");
     const client = axios.create.mock.results[0].value;
 
     expect(axios.create).toHaveBeenCalledTimes(2);
@@ -83,6 +84,26 @@ describe("api service auth headers", () => {
 
     expect(client.patch).toHaveBeenCalledWith("/orders/order-123", {
       status: "cancelled",
+    }, undefined);
+
+    expect(isAbortedRequest({ code: "ERR_CANCELED" })).toBe(true);
+  });
+
+  it("repassa signal para fetchMenu", async () => {
+    const axios = require("axios").default;
+    const { fetchMenu } = require("../api");
+    const client = axios.create.mock.results[0].value;
+    const signal = {};
+
+    client.get.mockResolvedValueOnce({
+      data: { items: [] },
+    });
+
+    await fetchMenu({ featured: true }, { signal });
+
+    expect(client.get).toHaveBeenCalledWith("/menu", {
+      params: { featured: true },
+      signal,
     });
   });
 });

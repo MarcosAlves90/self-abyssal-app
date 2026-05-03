@@ -12,6 +12,7 @@ import PropTypes from "prop-types";
 import {
   fetchMe,
   getApiErrorMessage,
+  isAbortedRequest,
   loginAccount,
   registerAccount,
   setAuthToken
@@ -26,7 +27,7 @@ export function AuthProvider({ children }) {
   const [isBootstrapping, setIsBootstrapping] = useState(true);
 
   useEffect(() => {
-    let isMounted = true;
+    const controller = new AbortController();
 
     async function bootstrap() {
       try {
@@ -36,19 +37,27 @@ export function AuthProvider({ children }) {
           return;
         }
 
+        if (controller.signal.aborted) {
+          return;
+        }
+
         setAuthToken(storedToken);
-        const currentUser = await fetchMe();
-        if (!isMounted) {
+        const currentUser = await fetchMe({ signal: controller.signal });
+        if (controller.signal.aborted) {
           return;
         }
         setToken(storedToken);
         setUser(currentUser);
-      } catch {
+      } catch (error) {
+        if (isAbortedRequest(error) || controller.signal.aborted) {
+          return;
+        }
+
         setAuthToken(null);
         await AsyncStorage.removeItem(SESSION_STORAGE_KEY);
         console.warn("Auth bootstrap failed. Session state was reset.");
       } finally {
-        if (isMounted) {
+        if (!controller.signal.aborted) {
           setIsBootstrapping(false);
         }
       }
@@ -57,7 +66,7 @@ export function AuthProvider({ children }) {
     bootstrap();
 
     return () => {
-      isMounted = false;
+      controller.abort();
     };
   }, []);
 
@@ -68,27 +77,27 @@ export function AuthProvider({ children }) {
     await AsyncStorage.setItem(SESSION_STORAGE_KEY, nextToken);
   }, []);
 
-  const register = useCallback(async (payload) => {
+  const register = useCallback(async (payload, config = {}) => {
     try {
-      const result = await registerAccount(payload);
+      const result = await registerAccount(payload, config);
       await persistSession(result.token, result.user);
     } catch (error) {
       throw new Error(getApiErrorMessage(error));
     }
   }, [persistSession]);
 
-  const login = useCallback(async (payload) => {
+  const login = useCallback(async (payload, config = {}) => {
     try {
-      const result = await loginAccount(payload);
+      const result = await loginAccount(payload, config);
       await persistSession(result.token, result.user);
     } catch (error) {
       throw new Error(getApiErrorMessage(error));
     }
   }, [persistSession]);
 
-  const refreshUser = useCallback(async () => {
+  const refreshUser = useCallback(async (config = {}) => {
     try {
-      const currentUser = await fetchMe();
+      const currentUser = await fetchMe(config);
       setUser(currentUser);
       return currentUser;
     } catch (error) {

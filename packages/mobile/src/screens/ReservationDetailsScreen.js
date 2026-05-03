@@ -3,21 +3,23 @@ import PropTypes from "prop-types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   Animated,
+  Alert,
+  ActivityIndicator,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
   useWindowDimensions,
   View,
-  Pressable,
-  ActivityIndicator,
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 
 import { ConfirmModal } from "../components/ConfirmModal";
 import { useStaggeredEntrance } from "../hooks/useAnimations";
-import { cancelReservation, getApiErrorMessage } from "../services/api";
 import { getResponsiveLayout } from "../theme/layout";
+import { cancelReservation, getApiErrorMessage, isAbortedRequest } from "../services/api";
 import { theme } from "../theme/tokens";
+import { useRequestManager } from "../utils/requestManager";
 
 const STATUS_LABELS = {
   confirmed: "Confirmada",
@@ -70,6 +72,7 @@ export function ReservationDetailsScreen({ route, navigation }) {
   const [isCancelling, setIsCancelling] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const sectionStyles = useStaggeredEntrance(4, { stagger: 90, fromY: 20 });
+  const requestManager = useRequestManager();
 
   const statusLabel = STATUS_LABELS[reservation.status] ?? reservation.status;
   const statusColor = STATUS_COLORS[reservation.status] ?? theme.colors.textMuted;
@@ -80,17 +83,29 @@ export function ReservationDetailsScreen({ route, navigation }) {
   }
 
   async function handleCancel() {
+    const controller = requestManager.start("reservation.cancel");
     setIsCancelling(true);
     try {
-      await cancelReservation(reservation.id);
+      await cancelReservation(reservation.id, { signal: controller.signal });
+      if (controller.signal.aborted) {
+        return;
+      }
       if (onCancelled) {
         onCancelled(reservation.id);
       }
       navigation.goBack();
     } catch (error) {
+      if (isAbortedRequest(error) || controller.signal.aborted) {
+        return;
+      }
+
       Alert.alert("Erro", getApiErrorMessage(error));
     } finally {
-      setIsCancelling(false);
+      requestManager.finish("reservation.cancel", controller);
+
+      if (!controller.signal.aborted) {
+        setIsCancelling(false);
+      }
     }
   }
 
@@ -110,25 +125,25 @@ export function ReservationDetailsScreen({ route, navigation }) {
       />
 
       <ScrollView
-      bounces={false}
-      contentContainerStyle={[
-        styles.content,
-        { paddingHorizontal: layout.contentPadding },
-      ]}
-      showsVerticalScrollIndicator={false}
-      style={styles.screen}
-    >
-      <View style={[styles.shell, { maxWidth: layout.contentMaxWidth }]}>
+        bounces={false}
+        contentContainerStyle={[
+          styles.content,
+          { paddingHorizontal: layout.contentPadding },
+        ]}
+        showsVerticalScrollIndicator={false}
+        style={styles.screen}
+      >
+        <View style={[styles.shell, { maxWidth: layout.contentMaxWidth }]}>
 
-        {/* Status badge */}
-        <Animated.View style={[styles.statusRow, sectionStyles[0]]}>
-          <View style={[styles.statusBadge, { borderColor: statusColor }]}>
-            <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
-            <Text style={[styles.statusText, { color: statusColor }]}>
-              {statusLabel}
-            </Text>
-          </View>
-        </Animated.View>
+          {/* Status badge */}
+          <Animated.View style={[styles.statusRow, sectionStyles[0]]}>
+            <View style={[styles.statusBadge, { borderColor: statusColor }]}>
+              <View style={[styles.statusDot, { backgroundColor: statusColor }]} />
+              <Text style={[styles.statusText, { color: statusColor }]}>
+                {statusLabel}
+              </Text>
+            </View>
+          </Animated.View>
 
         {/* Branch hero card */}
         <Animated.View style={[styles.heroCard, sectionStyles[1]]}>
@@ -222,8 +237,8 @@ export function ReservationDetailsScreen({ route, navigation }) {
             </Text>
           </Animated.View>
         ) : null}
-      </View>
-    </ScrollView>
+        </View>
+      </ScrollView>
     </>
   );
 }

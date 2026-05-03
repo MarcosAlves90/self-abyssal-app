@@ -93,6 +93,18 @@ export const authApi = axios.create({
   timeout: 12000
 });
 
+function normalizeRequestConfig(config = {}) {
+  return Object.keys(config).length > 0 ? config : undefined;
+}
+
+export function isAbortedRequest(error) {
+  return (
+    error?.code === "ERR_CANCELED" ||
+    error?.name === "CanceledError" ||
+    error?.message === "canceled"
+  );
+}
+
 export function setAuthToken(token) {
   if (token) {
     api.defaults.headers.common.Authorization = `Bearer ${token}`;
@@ -102,6 +114,10 @@ export function setAuthToken(token) {
 }
 
 export function getApiErrorMessage(error) {
+  if (isAbortedRequest(error)) {
+    return "Requisição cancelada.";
+  }
+
   if (error?.safeMessage) {
     return error.safeMessage;
   }
@@ -112,72 +128,94 @@ export function getApiErrorMessage(error) {
   );
 }
 
-export async function registerAccount(payload) {
-  const { data } = await authApi.post("/auth/register", buildRegisterRequest(payload));
+export async function registerAccount(payload, config = {}) {
+  const { data } = await authApi.post(
+    "/auth/register",
+    buildRegisterRequest(payload),
+    normalizeRequestConfig(config)
+  );
   return normalizeAuthSessionResponse(data);
 }
 
-export async function loginAccount(payload) {
-  const { data } = await authApi.post("/auth/login", buildLoginRequest(payload));
+export async function loginAccount(payload, config = {}) {
+  const { data } = await authApi.post(
+    "/auth/login",
+    buildLoginRequest(payload),
+    normalizeRequestConfig(config)
+  );
   return normalizeAuthSessionResponse(data);
 }
 
-export async function fetchMe() {
-  const { data } = await api.get("/auth/me");
+export async function fetchMe(config = {}) {
+  const { data } = await api.get("/auth/me", normalizeRequestConfig(config));
   return normalizeUserResponse(data.user);
 }
 
-export async function savePrimaryAddress(payload) {
+export async function savePrimaryAddress(payload, config = {}) {
   const { data } = await api.put(
     "/auth/me/address",
-    buildAddressRequest(payload)
+    buildAddressRequest(payload),
+    normalizeRequestConfig(config)
   );
   return normalizeUserResponse(data.user);
 }
 
-export async function fetchBranches() {
-  const { data } = await api.get("/branches");
+export async function fetchBranches(config = {}) {
+  const { data } = await api.get("/branches", normalizeRequestConfig(config));
   return (data.branches || []).map(normalizeBranchResponse);
 }
 
-export async function fetchMenu(params = {}) {
-  const { data } = await api.get("/menu", { params });
+export async function fetchMenu(params = {}, config = {}) {
+  const requestConfig = normalizeRequestConfig(config);
+  const { data } = await api.get(
+    "/menu",
+    requestConfig ? { params, ...requestConfig } : { params }
+  );
   return (data.items || []).map(normalizeMenuItemResponse);
 }
 
-export async function fetchReservations() {
-  const { data } = await api.get("/reservations");
+export async function fetchReservations(config = {}) {
+  const { data } = await api.get("/reservations", normalizeRequestConfig(config));
   return (data.reservations || []).map(normalizeReservationResponse);
 }
 
-export async function createReservation(payload) {
+export async function createReservation(payload, config = {}) {
   const { data } = await api.post(
     "/reservations",
-    buildReservationRequest(payload)
+    buildReservationRequest(payload),
+    normalizeRequestConfig(config)
   );
   return normalizeReservationResponse(data.reservation);
 }
 
-export async function cancelReservation(reservationId) {
-  await api.delete(`/reservations/${reservationId}`);
+export async function cancelReservation(reservationId, config = {}) {
+  await api.delete(`/reservations/${reservationId}`, normalizeRequestConfig(config));
 }
 
 
-export async function fetchOrders() {
-  const { data } = await api.get("/orders");
+export async function fetchOrders(config = {}) {
+  const { data } = await api.get("/orders", normalizeRequestConfig(config));
   return (data.orders || []).map(normalizeOrderResponse);
 }
 
-export async function createOrder(payload) {
-  const { data } = await api.post("/orders", buildOrderRequest(payload));
+export async function createOrder(payload, config = {}) {
+  const { data } = await api.post(
+    "/orders",
+    buildOrderRequest(payload),
+    normalizeRequestConfig(config)
+  );
   return data.order || data;
 }
 
-export async function cancelOrder(orderId) {
-  await api.patch(`/orders/${orderId}`, { status: "cancelled" });
+export async function cancelOrder(orderId, config = {}) {
+  await api.patch(
+    `/orders/${orderId}`,
+    { status: "cancelled" },
+    normalizeRequestConfig(config)
+  );
 }
 
-export async function lookupPostalCode(postalCode) {
+export async function lookupPostalCode(postalCode, config = {}) {
   const normalizedPostalCode = normalizePostalCode(postalCode);
 
   if (normalizedPostalCode.length !== 8) {
@@ -185,7 +223,8 @@ export async function lookupPostalCode(postalCode) {
   }
 
   const { data } = await axios.get(`https://viacep.com.br/ws/${normalizedPostalCode}/json/`, {
-    timeout: 8000
+    timeout: 8000,
+    ...normalizeRequestConfig(config)
   });
 
   if (data.erro) {

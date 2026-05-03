@@ -8,7 +8,7 @@ import {
   Text,
   TextInput,
   useWindowDimensions,
-  View
+  View,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -17,6 +17,8 @@ import { FormFieldLabel } from "../components/FormFieldLabel";
 import { KeyboardScrollScreen } from "../components/KeyboardScrollScreen";
 import { SeaShellIcon } from "../components/icons/SeaShellIcon";
 import { useAuth } from "../context/AuthContext";
+import { isAbortedRequest } from "../services/api";
+import { useRequestManager } from "../utils/requestManager";
 import { theme } from "../theme/tokens";
 import { formatPhoneNumber, normalizePhoneNumber } from "../utils/phone";
 
@@ -30,7 +32,7 @@ const AUTH_MODES = {
     subtitle: "Pedidos, reservas e perfil em um só lugar.",
     submitLabel: "Entrar",
     switchLabel: "Ainda não tem conta?",
-    switchAction: "Criar agora"
+    switchAction: "Criar agora",
   },
   register: {
     eyebrow: "Comece por aqui",
@@ -38,14 +40,14 @@ const AUTH_MODES = {
     subtitle: "Leva menos de um minuto para seguir.",
     submitLabel: "Criar conta",
     switchLabel: "Já tem conta?",
-    switchAction: "Entrar"
-  }
+    switchAction: "Entrar",
+  },
 };
 
 function getBackgroundImageStyle(windowHeight) {
   return {
     height: windowHeight,
-    width: windowHeight * AUTH_BACKGROUND_ASPECT_RATIO
+    width: windowHeight * AUTH_BACKGROUND_ASPECT_RATIO,
   };
 }
 
@@ -56,6 +58,7 @@ export function AuthScreen() {
   const emailInputRef = useRef(null);
   const passwordInputRef = useRef(null);
   const phoneInputRef = useRef(null);
+  const requestManager = useRequestManager();
   const [mode, setMode] = useState("login");
   const [form, setForm] = useState({
     name: "",
@@ -104,29 +107,44 @@ export function AuthScreen() {
     }
 
     setIsSubmitting(true);
+    const controller = requestManager.start("auth.submit");
 
     try {
       if (mode === "login") {
-        await login({
-          email: form.email,
-          password: form.password
-        });
+        await login(
+          {
+            email: form.email,
+            password: form.password,
+          },
+          { signal: controller.signal },
+        );
       } else {
-        await register({
-          name: form.name,
-          email: form.email,
-          password: form.password,
-          phone: normalizedPhone
-        });
+        await register(
+          {
+            name: form.name,
+            email: form.email,
+            password: form.password,
+            phone: normalizedPhone,
+          },
+          { signal: controller.signal },
+        );
       }
     } catch (error) {
+      if (isAbortedRequest(error) || controller.signal.aborted) {
+        return;
+      }
+
       setFeedback({
         tone: "error",
-        message: error.message
+        message: error.message,
       });
       Alert.alert("Não foi possível autenticar", error.message);
     } finally {
-      setIsSubmitting(false);
+      requestManager.finish("auth.submit", controller);
+
+      if (!controller.signal.aborted) {
+        setIsSubmitting(false);
+      }
     }
   }
 
@@ -161,13 +179,13 @@ export function AuthScreen() {
                   }}
                   style={[
                     styles.modeButton,
-                    mode === value && styles.modeButtonActive
+                    mode === value && styles.modeButtonActive,
                   ]}
                 >
                   <Text
                     style={[
                       styles.modeButtonText,
-                      mode === value && styles.modeButtonTextActive
+                      mode === value && styles.modeButtonTextActive,
                     ]}
                   >
                     {value === "login" ? "Entrar" : "Criar conta"}
@@ -237,11 +255,11 @@ export function AuthScreen() {
             {isRegister ? (
               <FormField
                 autoComplete="tel"
-                inputRef={phoneInputRef}
-                keyboardType="phone-pad"
-                label="Telefone"
-                required
-                maxLength={15}
+              inputRef={phoneInputRef}
+              keyboardType="phone-pad"
+              label="Telefone"
+              required
+              maxLength={15}
                 onChangeText={(value) => updateField("phone", formatPhoneNumber(value))}
                 onSubmitEditing={handleSubmit}
                 placeholder="Ex.: (11) 98765-4321"

@@ -12,34 +12,35 @@ import {
   View,
 } from "react-native";
 import { ConfirmModal } from "../components/ConfirmModal";
-import { cancelOrder, getApiErrorMessage } from "../services/api";
-import { formatCurrency, theme } from "../theme/tokens";
 import { getResponsiveLayout } from "../theme/layout";
+import { cancelOrder, getApiErrorMessage, isAbortedRequest } from "../services/api";
+import { formatCurrency, theme } from "../theme/tokens";
+import { useRequestManager } from "../utils/requestManager";
 
 const ORDER_STEPS = [
-  { key: "pending",    label: "Recebido",   icon: "clock-outline" },
-  { key: "preparing", label: "Em preparo",  icon: "chef-hat" },
-  { key: "on_the_way",label: "A caminho",   icon: "moped" },
-  { key: "served",    label: "Entregue",    icon: "package-variant-closed" },
-  { key: "completed", label: "Concluído",   icon: "check-decagram" },
+  { key: "pending", label: "Recebido", icon: "clock-outline" },
+  { key: "preparing", label: "Em preparo", icon: "chef-hat" },
+  { key: "on_the_way", label: "A caminho", icon: "moped" },
+  { key: "served", label: "Entregue", icon: "package-variant-closed" },
+  { key: "completed", label: "Concluído", icon: "check-decagram" },
 ];
 
 const STATUS_COLORS = {
-  pending:    theme.colors.textMuted,
-  preparing:  theme.colors.warning,
+  pending: theme.colors.textMuted,
+  preparing: theme.colors.warning,
   on_the_way: theme.colors.accent,
-  served:     theme.colors.success,
-  completed:  theme.colors.success,
-  cancelled:  theme.colors.danger,
+  served: theme.colors.success,
+  completed: theme.colors.success,
+  cancelled: theme.colors.danger,
 };
 
 const STATUS_DESCRIPTIONS = {
-  pending:    "Seu pedido foi recebido e aguarda confirmação da cozinha.",
-  preparing:  "Seu pedido está sendo preparado com cuidado.",
+  pending: "Seu pedido foi recebido e aguarda confirmação da cozinha.",
+  preparing: "Seu pedido está sendo preparado com cuidado.",
   on_the_way: "Seu pedido está a caminho do seu endereço.",
-  served:     "Pedido entregue! Confirme o recebimento com o entregador.",
-  completed:  "Pedido finalizado. Bom apetite!",
-  cancelled:  "Este pedido foi cancelado.",
+  served: "Pedido entregue! Confirme o recebimento com o entregador.",
+  completed: "Pedido finalizado. Bom apetite!",
+  cancelled: "Este pedido foi cancelado.",
 };
 
 function getStepIndex(status) {
@@ -124,6 +125,7 @@ export function OrderTrackingScreen({ route, navigation }) {
   const layout = getResponsiveLayout(width);
   const [isCancelling, setIsCancelling] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const requestManager = useRequestManager();
 
   const activeColor = STATUS_COLORS[order.status] ?? theme.colors.textMuted;
   const description = STATUS_DESCRIPTIONS[order.status] ?? "Acompanhe o andamento do seu pedido abaixo.";
@@ -138,14 +140,26 @@ export function OrderTrackingScreen({ route, navigation }) {
   }
 
   async function handleCancel() {
+    const controller = requestManager.start("order.cancel");
     setIsCancelling(true);
     try {
-      await cancelOrder(order.id);
+      await cancelOrder(order.id, { signal: controller.signal });
+      if (controller.signal.aborted) {
+        return;
+      }
       navigation.goBack();
     } catch (error) {
+      if (isAbortedRequest(error) || controller.signal.aborted) {
+        return;
+      }
+
       Alert.alert("Erro", getApiErrorMessage(error));
     } finally {
-      setIsCancelling(false);
+      requestManager.finish("order.cancel", controller);
+
+      if (!controller.signal.aborted) {
+        setIsCancelling(false);
+      }
     }
   }
 

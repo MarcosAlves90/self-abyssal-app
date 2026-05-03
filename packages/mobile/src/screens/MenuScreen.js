@@ -17,9 +17,10 @@ import { MenuCard } from "../components/MenuCard";
 import { TopHeroCard } from "../components/TopHeroCard";
 import { useCart } from "../context/CartContext";
 import { useActiveOrders } from "../hooks/useActiveOrders";
-import { fetchMenu, getApiErrorMessage } from "../services/api";
+import { fetchMenu, getApiErrorMessage, isAbortedRequest } from "../services/api";
 import { getResponsiveLayout } from "../theme/layout";
 import { getCategoryLabel, theme } from "../theme/tokens";
+import { useRequestManager } from "../utils/requestManager";
 
 export function MenuScreen({ navigation }) {
   const { addItem } = useCart();
@@ -29,21 +30,33 @@ export function MenuScreen({ navigation }) {
   const [isLoading, setIsLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState("todos");
   const [searchQuery, setSearchQuery] = useState("");
+  const requestManager = useRequestManager();
 
   useEffect(() => {
+    const controller = requestManager.start("menu.load");
+
     async function loadMenu() {
       try {
-        const nextItems = await fetchMenu();
+        const nextItems = await fetchMenu({}, { signal: controller.signal });
+        if (controller.signal.aborted) {
+          return;
+        }
+
         setItems(nextItems);
       } catch (error) {
-        Alert.alert("Falha ao carregar o menu", getApiErrorMessage(error));
+        if (!isAbortedRequest(error) && !controller.signal.aborted) {
+          Alert.alert("Falha ao carregar o menu", getApiErrorMessage(error));
+        }
       } finally {
-        setIsLoading(false);
+        requestManager.finish("menu.load", controller);
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
       }
     }
 
     loadMenu();
-  }, []);
+  }, [requestManager]);
 
   useEffect(() => {
     if (!items.length) {
