@@ -43,3 +43,9 @@ npm-debug.log*
 **/build/
 **/site/
 **/target/
+packages/backend/target/
+packages/mobile/.expo/
+packages/mobile/.expo-shared/
+packages/mobile/android/.gradle/
+packages/mobile/android/app/build/
+packages/mobile/ios/build/
