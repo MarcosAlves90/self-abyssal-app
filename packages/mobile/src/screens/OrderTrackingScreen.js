@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
+  ActivityIndicator,
+  Alert,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -9,6 +11,8 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
+import { ConfirmModal } from "../components/ConfirmModal";
+import { cancelOrder, getApiErrorMessage } from "../services/api";
 import { formatCurrency, theme } from "../theme/tokens";
 import { getResponsiveLayout } from "../theme/layout";
 
@@ -52,11 +56,13 @@ function StepTracker({ status }) {
         const isDone = index < activeIndex;
         const isActive = index === activeIndex;
         const dotColor = isDone || isActive ? activeColor : theme.colors.border;
-        const labelColor = isActive
-          ? activeColor
-          : isDone
-          ? theme.colors.textMuted
-          : "rgba(150,183,201,0.4)";
+        let labelColor = "rgba(150,183,201,0.4)";
+
+        if (isDone) {
+          labelColor = theme.colors.textMuted;
+        } else if (isActive) {
+          labelColor = activeColor;
+        }
 
         return (
           <View key={step.key} style={styles.stepItem}>
@@ -116,6 +122,8 @@ export function OrderTrackingScreen({ route, navigation }) {
   const { order } = route.params;
   const { width } = useWindowDimensions();
   const layout = getResponsiveLayout(width);
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
 
   const activeColor = STATUS_COLORS[order.status] ?? theme.colors.textMuted;
   const description = STATUS_DESCRIPTIONS[order.status] ?? "Acompanhe o andamento do seu pedido abaixo.";
@@ -123,6 +131,23 @@ export function OrderTrackingScreen({ route, navigation }) {
     dateStyle: "short",
     timeStyle: "short",
   });
+  const isCancellable = !["completed", "cancelled"].includes(order.status);
+
+  function confirmCancel() {
+    setShowCancelModal(true);
+  }
+
+  async function handleCancel() {
+    setIsCancelling(true);
+    try {
+      await cancelOrder(order.id);
+      navigation.goBack();
+    } catch (error) {
+      Alert.alert("Erro", getApiErrorMessage(error));
+    } finally {
+      setIsCancelling(false);
+    }
+  }
 
   return (
     <ScrollView
@@ -134,6 +159,19 @@ export function OrderTrackingScreen({ route, navigation }) {
       showsVerticalScrollIndicator={false}
       style={styles.screen}
     >
+      <ConfirmModal
+        confirmLabel="Cancelar pedido"
+        isDestructive
+        message={`Deseja cancelar o pedido #${order.id.slice(0, 8).toUpperCase()}? Esta ação não pode ser desfeita.`}
+        onCancel={() => setShowCancelModal(false)}
+        onConfirm={() => {
+          setShowCancelModal(false);
+          handleCancel();
+        }}
+        title="Cancelar pedido"
+        visible={showCancelModal}
+      />
+
       <View style={[styles.shell, { maxWidth: layout.contentMaxWidth }]}>
 
         <View style={styles.statusRow}>
@@ -181,19 +219,37 @@ export function OrderTrackingScreen({ route, navigation }) {
           />
         </View>
 
-        <Pressable
-          accessibilityLabel="Voltar ao cardápio"
-          accessibilityRole="button"
-          onPress={() => navigation.goBack()}
-          style={({ pressed }) => [styles.backButton, pressed && styles.backButtonPressed]}
-        >
-          <MaterialCommunityIcons
-            color={theme.colors.textMuted}
-            name="arrow-left"
-            size={16}
-          />
-          <Text style={styles.backButtonText}>Voltar ao cardápio</Text>
-        </Pressable>
+        {isCancellable ? (
+          <View style={styles.cancelSection}>
+            <Pressable
+              accessibilityLabel="Cancelar pedido"
+              accessibilityRole="button"
+              disabled={isCancelling}
+              onPress={confirmCancel}
+              style={({ pressed }) => [
+                styles.cancelButton,
+                pressed && styles.cancelButtonPressed,
+                isCancelling && styles.cancelButtonDisabled,
+              ]}
+            >
+              {isCancelling ? (
+                <ActivityIndicator color="#f87171" size="small" />
+              ) : (
+                <>
+                  <MaterialCommunityIcons
+                    color="#f87171"
+                    name="close-circle-outline"
+                    size={18}
+                  />
+                  <Text style={styles.cancelButtonText}>Cancelar pedido</Text>
+                </>
+              )}
+            </Pressable>
+            <Text style={styles.cancelHint}>
+              Pedidos cancelados não podem ser reativados.
+            </Text>
+          </View>
+        ) : null}
       </View>
     </ScrollView>
   );
@@ -373,22 +429,37 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
   },
-  backButton: {
+  cancelSection: {
+    gap: 10,
+    marginBottom: 12,
+  },
+  cancelButton: {
     alignItems: "center",
-    borderColor: theme.colors.border,
+    borderColor: "rgba(248,113,113,0.4)",
     borderWidth: 1,
     flexDirection: "row",
     gap: 8,
     justifyContent: "center",
     minHeight: 44,
     paddingHorizontal: 20,
+    paddingVertical: 12,
   },
-  backButtonPressed: {
-    backgroundColor: "rgba(255,255,255,0.03)",
+  cancelButtonPressed: {
+    backgroundColor: "rgba(248,113,113,0.08)",
   },
-  backButtonText: {
-    color: theme.colors.textMuted,
+  cancelButtonDisabled: {
+    opacity: 0.7,
+  },
+  cancelButtonText: {
+    color: "#f87171",
     fontFamily: theme.fonts.bodyBold,
     fontSize: 13,
+  },
+  cancelHint: {
+    color: theme.colors.textMuted,
+    fontFamily: theme.fonts.body,
+    fontSize: 11,
+    lineHeight: 16,
+    textAlign: "center",
   },
 });
