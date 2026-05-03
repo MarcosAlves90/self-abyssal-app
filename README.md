@@ -96,6 +96,21 @@ npm run build:backend
 npm run test:backend
 ```
 
+Build do app mobile:
+
+```bash
+npm run build:android:debug
+npm run build:android:release
+npm run build:ios:debug
+npm run build:ios:release
+npm run build:mobile
+npm run build:android:store
+npm run build:ios:store
+npm run build:mobile:store
+```
+
+Os comandos de Android usam `expo run:android` e geram o projeto nativo se o diretório `android/` ainda não existir. Os comandos de iOS usam `expo run:ios` e exigem Xcode instalado. O `build:mobile` executa Android e iOS release em sequência. Para binários assinados de store, use os comandos `store`, que chamam o EAS Build com o perfil `production` definido em [packages/mobile/eas.json](packages/mobile/eas.json).
+
 ## Backend
 
 Os detalhes do backend e da configuração de segurança estão em [packages/backend/README.md](packages/backend/README.md).

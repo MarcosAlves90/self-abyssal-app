@@ -7,6 +7,12 @@
     "start": "expo start --clear",
     "android": "expo run:android",
     "ios": "expo run:ios",
+    "build:android:debug": "expo run:android --variant debug",
+    "build:android:release": "expo run:android --variant release",
+    "build:android:store": "npx --yes eas-cli build --platform android --profile production --non-interactive",
+    "build:ios:debug": "expo run:ios --configuration Debug",
+    "build:ios:release": "expo run:ios --configuration Release",
+    "build:ios:store": "npx --yes eas-cli build --platform ios --profile production --non-interactive",
     "web": "expo start --web",
     "test": "jest --runInBand"
   },
@@ -35,6 +41,7 @@
   },
   "devDependencies": {
     "babel-jest": "^30.3.0",
+    "eas-cli": "18.9.1",
     "jest": "^30.3.0"
   }
 }

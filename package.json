@@ -14,6 +14,14 @@
     "test:backend": "npm --workspace @abyssal/backend run test",
     "dev:mobile": "npm --workspace @abyssal/mobile run start",
     "dev:mobile:web": "npm --workspace @abyssal/mobile run web",
+    "build:android:debug": "npm --workspace @abyssal/mobile run build:android:debug",
+    "build:android:release": "npm --workspace @abyssal/mobile run build:android:release",
+    "build:android:store": "npm --workspace @abyssal/mobile run build:android:store",
+    "build:ios:debug": "npm --workspace @abyssal/mobile run build:ios:debug",
+    "build:ios:release": "npm --workspace @abyssal/mobile run build:ios:release",
+    "build:ios:store": "npm --workspace @abyssal/mobile run build:ios:store",
+    "build:mobile": "npm run build:android:release && npm run build:ios:release",
+    "build:mobile:store": "npm run build:android:store && npm run build:ios:store",
     "test:mobile": "npm --workspace @abyssal/mobile run test"
   }
 }
