@@ -10,6 +10,7 @@ const mobileScript = useWebTarget ? "dev:mobile:web" : "dev:mobile";
 let backendProcess;
 let mobileProcess;
 let isShuttingDown = false;
+let backendRestartTimer = null;
 
 function spawnProcess(command, args, options = {}) {
   return spawn(command, args, {
@@ -55,12 +56,25 @@ function writeLines(chunk, target, writeLine) {
   }
 }
 
+function describeProcessExit(code, signal) {
+  if (typeof code === "number") {
+    return `code ${code}`;
+  }
+
+  return `signal ${signal}`;
+}
+
 async function shutdown(exitCode = 0) {
   if (isShuttingDown) {
     return;
   }
 
   isShuttingDown = true;
+
+  if (backendRestartTimer) {
+    clearTimeout(backendRestartTimer);
+    backendRestartTimer = null;
+  }
 
   if (backendProcess?.exitCode === null) {
     backendProcess.kill("SIGINT");
@@ -73,25 +87,49 @@ async function shutdown(exitCode = 0) {
   process.exit(exitCode);
 }
 
+function startBackend() {
+  const childProcess = spawnProcess("npm", ["--workspace", "@abyssal/backend", "run", "dev"], {
+    stdio: ["ignore", "pipe", "pipe"]
+  });
+
+  attachPrefixedLogs(childProcess, backendLogger);
+
+  childProcess.on("exit", (code, signal) => {
+    if (isShuttingDown || childProcess !== backendProcess) {
+      return;
+    }
+
+    const exitDescription = describeProcessExit(code, signal);
+    const exitedBySignal = typeof signal === "string";
+
+    const restartMessage = "backend stopped (" + exitDescription + "); restarting...";
+    process.stderr.write(formatLine(backendLogger, restartMessage) + "\n");
+
+    if (backendRestartTimer) {
+      return;
+    }
+
+    backendRestartTimer = setTimeout(() => {
+      backendRestartTimer = null;
+
+      if (isShuttingDown) {
+        return;
+      }
+
+      backendProcess = startBackend();
+    }, exitedBySignal ? 1500 : 1000);
+  });
+
+  return childProcess;
+}
+
 async function main() {
   const targetLabel = useWebTarget ? "web" : "native";
 
   process.stdout.write(formatLine(frontLogger, "starting mobile target: " + targetLabel) + "\n");
 
   // Start backend via npm workspace script (uses .venv in dev)
-  backendProcess = spawnProcess("npm", ["--workspace", "@abyssal/backend", "run", "dev"], {
-    stdio: ["ignore", "pipe", "pipe"]
-  });
-
-  attachPrefixedLogs(backendProcess, backendLogger);
-
-  backendProcess.on("exit", (code) => {
-    if (!isShuttingDown && code && code !== 0) {
-      const message = `backend exited with code ${code}`;
-      process.stderr.write(`${formatLine(backendLogger, message)}\n`);
-      shutdown(code);
-    }
-  });
+  backendProcess = startBackend();
 
   // Start mobile process
   mobileProcess = spawnProcess("npm", ["run", mobileScript], {

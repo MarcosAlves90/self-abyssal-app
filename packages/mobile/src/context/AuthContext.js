@@ -1,5 +1,13 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState
+} from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import PropTypes from "prop-types";
 
 import {
   fetchMe,
@@ -18,6 +26,8 @@ export function AuthProvider({ children }) {
   const [isBootstrapping, setIsBootstrapping] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     async function bootstrap() {
       try {
         const storedToken = await AsyncStorage.getItem(SESSION_STORAGE_KEY);
@@ -28,45 +38,55 @@ export function AuthProvider({ children }) {
 
         setAuthToken(storedToken);
         const currentUser = await fetchMe();
+        if (!isMounted) {
+          return;
+        }
         setToken(storedToken);
         setUser(currentUser);
-      } catch (error) {
+      } catch {
         setAuthToken(null);
         await AsyncStorage.removeItem(SESSION_STORAGE_KEY);
+        console.warn("Auth bootstrap failed. Session state was reset.");
       } finally {
-        setIsBootstrapping(false);
+        if (isMounted) {
+          setIsBootstrapping(false);
+        }
       }
     }
 
     bootstrap();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  async function persistSession(nextToken, nextUser) {
+  const persistSession = useCallback(async (nextToken, nextUser) => {
     setAuthToken(nextToken);
     setToken(nextToken);
     setUser(nextUser);
     await AsyncStorage.setItem(SESSION_STORAGE_KEY, nextToken);
-  }
+  }, []);
 
-  async function register(payload) {
+  const register = useCallback(async (payload) => {
     try {
       const result = await registerAccount(payload);
       await persistSession(result.token, result.user);
     } catch (error) {
       throw new Error(getApiErrorMessage(error));
     }
-  }
+  }, [persistSession]);
 
-  async function login(payload) {
+  const login = useCallback(async (payload) => {
     try {
       const result = await loginAccount(payload);
       await persistSession(result.token, result.user);
     } catch (error) {
       throw new Error(getApiErrorMessage(error));
     }
-  }
+  }, [persistSession]);
 
-  async function refreshUser() {
+  const refreshUser = useCallback(async () => {
     try {
       const currentUser = await fetchMe();
       setUser(currentUser);
@@ -74,32 +94,44 @@ export function AuthProvider({ children }) {
     } catch (error) {
       throw new Error(getApiErrorMessage(error));
     }
-  }
+  }, []);
 
-  async function logout() {
+  const logout = useCallback(async () => {
     setAuthToken(null);
     setToken(null);
     setUser(null);
     await AsyncStorage.removeItem(SESSION_STORAGE_KEY);
-  }
+  }, []);
+
+  const value = useMemo(() => ({
+    token,
+    user,
+    isAuthenticated: Boolean(token),
+    isBootstrapping,
+    login,
+    logout,
+    refreshUser,
+    register
+  }), [
+    isBootstrapping,
+    login,
+    logout,
+    refreshUser,
+    register,
+    token,
+    user
+  ]);
 
   return (
-    <AuthContext.Provider
-      value={{
-        token,
-        user,
-        isAuthenticated: Boolean(token),
-        isBootstrapping,
-        login,
-        logout,
-        refreshUser,
-        register
-      }}
-    >
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
 }
+
+AuthProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};
 
 export function useAuth() {
   const context = useContext(AuthContext);
