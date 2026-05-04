@@ -1,9 +1,8 @@
 import React, { useEffect } from "react";
 import PropTypes from "prop-types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Animated, Platform, Pressable, StyleSheet, Text, View } from "react-native";
+import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { BlurView } from "expo-blur";
 
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
@@ -46,14 +45,6 @@ export function CartFab({ currentRouteName, navigation }) {
         onPress={() => navigation.navigate("Cart")}
         style={styles.button}
       >
-        <BlurView
-          intensity={32}
-          tint="light"
-          experimentalBlurMethod={
-            Platform.OS === "android" ? "dimezisBlurView" : undefined
-          }
-          style={StyleSheet.absoluteFillObject}
-        />
         <View style={styles.accentOverlay} />
         <View style={styles.backdrop} />
 
@@ -101,7 +92,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     minHeight: 66,
     width: "100%",
+    needsOffscreenAlphaCompositing: true,
     overflow: "hidden",
+    renderToHardwareTextureAndroid: true,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -112,11 +105,11 @@ const styles = StyleSheet.create({
     elevation: 12,
   },
   backdrop: {
-    backgroundColor: "rgba(4, 11, 23, 0.08)",
+    backgroundColor: "rgba(4, 11, 23, 0.22)",
     ...StyleSheet.absoluteFillObject,
   },
   accentOverlay: {
-    backgroundColor: "rgba(255,217,138,0.18)",
+    backgroundColor: "rgba(255,217,138,0.9)",
     ...StyleSheet.absoluteFillObject,
   },
   contentRow: {

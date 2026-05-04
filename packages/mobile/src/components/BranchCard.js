@@ -1,7 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Image, Platform, StyleSheet, Text, useWindowDimensions, View } from "react-native";
-import { BlurView } from "expo-blur";
+import { Image, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { getResponsiveLayout } from "../theme/layout";
@@ -50,18 +49,9 @@ export function BranchCard({ branch, compact = false, style }) {
         style={styles.backgroundImage}
         resizeMode="cover"
         resizeMethod="resize"
-        blurRadius={Platform.OS === "web" ? 1.4 : 0}
       />
-      {Platform.OS !== "web" ? (
-        <BlurView
-          intensity={28}
-          tint="dark"
-          experimentalBlurMethod="dimezisBlurView"
-          style={StyleSheet.absoluteFillObject}
-        />
-      ) : null}
       <LinearGradient
-        colors={["rgba(4, 12, 24, 0.28)", "rgba(7, 18, 38, 0.42)"]}
+        colors={["rgba(4, 12, 24, 0.42)", "rgba(7, 18, 38, 0.6)"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 0, y: 1 }}
         style={StyleSheet.absoluteFillObject}
@@ -131,7 +121,7 @@ const styles = StyleSheet.create({
   backgroundImage: {
     ...StyleSheet.absoluteFillObject,
     height: "100%",
-    opacity: 0.9,
+    opacity: 0.96,
     width: "100%"
   },
   content: {
