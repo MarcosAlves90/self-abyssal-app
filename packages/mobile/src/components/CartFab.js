@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import PropTypes from "prop-types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { Animated, Pressable, StyleSheet, Text, View } from "react-native";
+import { Animated, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { BlurView } from "expo-blur";
 
@@ -10,7 +10,7 @@ import { useCart } from "../context/CartContext";
 import { usePopAnimation } from "../hooks/useAnimations";
 import { theme } from "../theme/tokens";
 
-const TAB_BAR_HEIGHT = 82;
+const TAB_BAR_HEIGHT = 84;
 const TAB_BAR_OVERLAP = 2;
 
 export function CartFab({ currentRouteName, navigation }) {
@@ -49,6 +49,9 @@ export function CartFab({ currentRouteName, navigation }) {
         <BlurView
           intensity={32}
           tint="light"
+          experimentalBlurMethod={
+            Platform.OS === "android" ? "dimezisBlurView" : undefined
+          }
           style={StyleSheet.absoluteFillObject}
         />
         <View style={styles.accentOverlay} />

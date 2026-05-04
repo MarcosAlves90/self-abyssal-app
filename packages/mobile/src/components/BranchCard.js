@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Image, StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import { Image, Platform, StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { getResponsiveLayout } from "../theme/layout";
@@ -48,8 +49,17 @@ export function BranchCard({ branch, compact = false, style }) {
         source={getBranchLocationImage(branch.slug)}
         style={styles.backgroundImage}
         resizeMode="cover"
-        blurRadius={1.4}
+        resizeMethod="resize"
+        blurRadius={Platform.OS === "web" ? 1.4 : 0}
       />
+      {Platform.OS !== "web" ? (
+        <BlurView
+          intensity={28}
+          tint="dark"
+          experimentalBlurMethod="dimezisBlurView"
+          style={StyleSheet.absoluteFillObject}
+        />
+      ) : null}
       <LinearGradient
         colors={["rgba(4, 12, 24, 0.28)", "rgba(7, 18, 38, 0.42)"]}
         start={{ x: 0, y: 0 }}
@@ -57,37 +67,39 @@ export function BranchCard({ branch, compact = false, style }) {
         style={StyleSheet.absoluteFillObject}
       />
 
-      <View style={[styles.topRow, layout.isCompact && styles.topRowStack]}>
-        <View style={styles.copy}>
-          <Text style={styles.eyebrow}>Atendimento presencial</Text>
-          <Text
-            style={[
-              styles.name,
-              compact && styles.nameCompact,
-              {
-                fontSize: nameFontSize,
-                lineHeight: nameLineHeight
-              }
-            ]}
-          >
-            {branch.name}
-          </Text>
-          <Text style={styles.meta}>
-            {branch.city} • {branch.neighborhood}
-          </Text>
+      <View style={styles.content}>
+        <View style={[styles.topRow, layout.isCompact && styles.topRowStack]}>
+          <View style={styles.copy}>
+            <Text style={styles.eyebrow}>Atendimento presencial</Text>
+            <Text
+              style={[
+                styles.name,
+                compact && styles.nameCompact,
+                {
+                  fontSize: nameFontSize,
+                  lineHeight: nameLineHeight
+                }
+              ]}
+            >
+              {branch.name}
+            </Text>
+            <Text style={styles.meta}>
+              {branch.city} • {branch.neighborhood}
+            </Text>
+          </View>
+          <View style={[styles.hoursBadge, layout.isCompact && styles.hoursBadgeCompact]}>
+            <Text style={styles.hoursBadgeText}>{branch.openHours}</Text>
+          </View>
         </View>
-        <View style={[styles.hoursBadge, layout.isCompact && styles.hoursBadgeCompact]}>
-          <Text style={styles.hoursBadgeText}>{branch.openHours}</Text>
+        <Text style={styles.address}>{branch.addressLine}</Text>
+        <Text style={styles.sectionLabel}>Opções de reserva</Text>
+        <View style={styles.depths}>
+          {branch.reservationDepths.map((depth) => (
+            <Text key={depth} style={styles.depthTag}>
+              {depth}
+            </Text>
+          ))}
         </View>
-      </View>
-      <Text style={styles.address}>{branch.addressLine}</Text>
-      <Text style={styles.sectionLabel}>Opções de reserva</Text>
-      <View style={styles.depths}>
-        {branch.reservationDepths.map((depth) => (
-          <Text key={depth} style={styles.depthTag}>
-            {depth}
-          </Text>
-        ))}
       </View>
     </LinearGradient>
   );
@@ -114,14 +126,16 @@ const styles = StyleSheet.create({
     minHeight: 228,
     minWidth: 0,
     overflow: "hidden",
-    padding: theme.spacing.lg,
     width: "100%"
   },
   backgroundImage: {
     ...StyleSheet.absoluteFillObject,
     height: "100%",
-    width: "100%",
-    opacity: 0.9
+    opacity: 0.9,
+    width: "100%"
+  },
+  content: {
+    padding: theme.spacing.lg,
   },
   cardCompact: {
     minHeight: 210

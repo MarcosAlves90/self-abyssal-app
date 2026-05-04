@@ -28,6 +28,7 @@ export const KeyboardScrollScreen = forwardRef(function KeyboardScrollScreen({
   const scrollRef = useRef(null);
   const lastFocusedTargetRef = useRef(null);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   const scrollToTarget = useCallback(
     (target) => {
@@ -54,22 +55,30 @@ export const KeyboardScrollScreen = forwardRef(function KeyboardScrollScreen({
     const hideVisibilityEvent =
       Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
 
-    const showVisibilitySubscription = Keyboard.addListener(showVisibilityEvent, () => {
+    const showVisibilitySubscription = Keyboard.addListener(showVisibilityEvent, (event) => {
       setIsKeyboardVisible(true);
+      setKeyboardHeight(event?.endCoordinates?.height || 0);
     });
     const hideVisibilitySubscription = Keyboard.addListener(hideVisibilityEvent, () => {
       setIsKeyboardVisible(false);
+      setKeyboardHeight(0);
     });
     const showScrollSubscription = Keyboard.addListener("keyboardDidShow", () => {
       scrollToTarget(
         lastFocusedTargetRef.current || TextInput.State.currentlyFocusedInput?.()
       );
     });
+    const changeFrameSubscription = Keyboard.addListener("keyboardWillChangeFrame", (event) => {
+      if (Platform.OS === "ios") {
+        setKeyboardHeight(event?.endCoordinates?.height || 0);
+      }
+    });
 
     return () => {
       showVisibilitySubscription.remove();
       hideVisibilitySubscription.remove();
       showScrollSubscription.remove();
+      changeFrameSubscription.remove();
     };
   }, [scrollToTarget]);
 
@@ -83,7 +92,7 @@ export const KeyboardScrollScreen = forwardRef(function KeyboardScrollScreen({
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={
         Platform.OS === "ios" ? insets.top + keyboardVerticalOffset : 0
       }
@@ -95,7 +104,10 @@ export const KeyboardScrollScreen = forwardRef(function KeyboardScrollScreen({
         contentContainerStyle={[
           styles.content,
           centerContent && !isKeyboardVisible && styles.centerContent,
-          contentContainerStyle
+          contentContainerStyle,
+          isKeyboardVisible && {
+            paddingBottom: insets.bottom + keyboardHeight + extraKeyboardSpace
+          }
         ]}
         contentInsetAdjustmentBehavior="always"
         keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}

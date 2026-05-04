@@ -6,7 +6,7 @@
     "preview": {
       "channel": "preview",
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://self-abyssal-app-1.onrender.com"
+        "EXPO_PUBLIC_API_BASE_URL": "https://self-abyssal-app-1.onrender.com/api"
       },
       "android": {
         "buildType": "apk"
@@ -15,7 +15,7 @@
     "production": {
       "channel": "production",
       "env": {
-        "EXPO_PUBLIC_API_BASE_URL": "https://self-abyssal-app-1.onrender.com"
+        "EXPO_PUBLIC_API_BASE_URL": "https://self-abyssal-app-1.onrender.com/api"
       }
     }
   }

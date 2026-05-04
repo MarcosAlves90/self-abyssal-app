@@ -11,6 +11,7 @@ import {
   View,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { FeedbackBanner } from "../components/FeedbackBanner";
 import { FormFieldLabel } from "../components/FormFieldLabel";
@@ -44,16 +45,18 @@ const AUTH_MODES = {
   },
 };
 
-function getBackgroundImageStyle(windowHeight) {
+function getBackgroundImageStyle(windowHeight, bottomInset) {
+  const height = windowHeight + bottomInset;
   return {
-    height: windowHeight,
-    width: windowHeight * AUTH_BACKGROUND_ASPECT_RATIO,
+    height,
+    width: height * AUTH_BACKGROUND_ASPECT_RATIO,
   };
 }
 
 export function AuthScreen() {
   const { login, register } = useAuth();
   const { height: windowHeight } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const nameInputRef = useRef(null);
   const emailInputRef = useRef(null);
   const passwordInputRef = useRef(null);
@@ -155,7 +158,10 @@ export function AuthScreen() {
     <View style={styles.container}>
       <Image
         source={AUTH_BACKGROUND_IMAGE}
-        style={[styles.backgroundImage, getBackgroundImageStyle(windowHeight)]}
+        style={[
+          styles.backgroundImage,
+          getBackgroundImageStyle(windowHeight, insets.bottom)
+        ]}
         resizeMode="contain"
       />
       <LinearGradient

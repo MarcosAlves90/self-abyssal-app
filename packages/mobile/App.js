@@ -117,7 +117,11 @@ function AppShell() {
         theme={navigationTheme}
         onStateChange={() => setRouteName(navigationRef.getCurrentRoute()?.name || null)}
       >
-        <StatusBar style="light" />
+        <StatusBar
+          style="light"
+          backgroundColor={theme.colors.background}
+          translucent={false}
+        />
         <RootNavigator />
       </NavigationContainer>
       {checkoutFeedback ? (

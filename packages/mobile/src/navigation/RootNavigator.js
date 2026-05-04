@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { StyleSheet } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useAuth } from "../context/AuthContext";
 import { theme } from "../theme/tokens";
@@ -54,6 +55,11 @@ function TabBarBackground() {
 }
 
 function MainTabs() {
+  const insets = useSafeAreaInsets();
+  const tabBarBaseHeight = 84;
+  const tabBarBottomPadding = 10 + insets.bottom;
+  const tabBarHeight = tabBarBaseHeight + insets.bottom;
+
   return (
     <Tabs.Navigator
       screenOptions={({ route }) => ({
@@ -70,9 +76,9 @@ function MainTabs() {
           backgroundColor: "transparent",
           borderTopColor: "rgba(255, 217, 138, 0.16)",
           borderTopWidth: 1,
-          height: 84,
+          height: tabBarHeight,
           elevation: 0,
-          paddingBottom: 10,
+          paddingBottom: tabBarBottomPadding,
           paddingTop: 10,
         },
         tabBarLabelStyle: {
@@ -96,12 +102,15 @@ function MainTabs() {
 
 export function RootNavigator() {
   const { isAuthenticated } = useAuth();
+  const insets = useSafeAreaInsets();
 
   return (
     <Stack.Navigator
       screenOptions={{
         contentStyle: {
           backgroundColor: theme.colors.background,
+          paddingBottom: insets.bottom,
+          paddingTop: insets.top,
         },
         headerBackTitleVisible: false,
         headerStyle: {
@@ -118,7 +127,14 @@ export function RootNavigator() {
           <Stack.Screen
             component={MainTabs}
             name="MainTabs"
-            options={{ headerShown: false }}
+            options={{
+              headerShown: false,
+              contentStyle: {
+                backgroundColor: theme.colors.background,
+                paddingBottom: 0,
+                paddingTop: insets.top,
+              },
+            }}
           />
           <Stack.Screen
             component={DishDetailsScreen}
