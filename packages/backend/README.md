@@ -1,37 +1,46 @@
 # Backend
 
-Backend refeito em FastAPI + SQLAlchemy com:
+API do Abyssal construída com FastAPI, SQLAlchemy e PostgreSQL.
 
-- `api`: aplicação principal com autenticação, catálogo, reservas e pedidos.
-- `postgres`: um cluster PostgreSQL com um banco dedicado para o backend.
+## Estado atual
 
-Por padrão, a publicação de portas usa `127.0.0.1` e a API sobe diretamente em `http://localhost:3334`. O CORS da própria aplicação aceita as origens locais `http://localhost:19006` e `http://127.0.0.1:19006`, além de `localhost`/`127.0.0.1` em desenvolvimento enquanto `CORS_ALLOW_LOCALHOST=true`. Se precisar expor a stack para outra máquina ou para produção, defina `BIND_ADDRESS`, `API_PORT`, `CORS_ALLOWED_ORIGINS` e `CORS_ALLOW_LOCALHOST=false` com valores explicitamente seguros.
+O backend hoje expõe três áreas principais:
 
-## Executar localmente
+- autenticação e perfil em `/api/auth`;
+- catálogo de filiais e cardápio em `/api/branches` e `/api/menu`;
+- reservas e pedidos em `/api/reservations` e `/api/orders`.
 
-Siga estes passos para executar o backend localmente sem contêineres:
+Além disso, a API publica `/health`, `/docs` e `/openapi.json`, executa seed inicial no bootstrap e usa JWT Bearer nas rotas protegidas.
 
-- Crie um ambiente virtual em `packages/backend/.venv` se quiser isolar as dependências. Os scripts do projeto detectam esse venv automaticamente em Linux, macOS e Windows, sem exigir ativação manual.
+## Execução local
 
-- Instale dependências:
+Os scripts do pacote são:
 
-	```bash
-	npm run build
-	```
+- `npm run build` e `npm run build:dev` para instalar as dependências Python declaradas em `requirements.txt`;
+- `npm run dev` para subir a API com reload em `http://localhost:3334`;
+- `npm run start` para subir sem reload;
+- `npm run test` para executar a suíte com `pytest`.
 
-- Execute a aplicação (desenvolvimento):
+Se quiser isolar as dependências, crie um virtualenv em `packages/backend/.venv`. Os scripts detectam esse ambiente automaticamente em macOS, Linux e Windows.
 
-	```bash
-	npm run dev
-	```
+## Configuração
 
-- Executar testes:
+As variáveis mais importantes são:
 
-	```bash
-	npm run test
-	```
+- `DATABASE_URL`;
+- `JWT_SECRET`;
+- `ENCRYPTION_KEY`;
+- `APP_SEED_ENABLED`;
+- `APP_SEED_ADMIN_NAME`;
+- `APP_SEED_ADMIN_EMAIL`;
+- `APP_SEED_ADMIN_PASSWORD`;
+- `CORS_ALLOWED_ORIGINS`;
+- `CORS_ALLOW_LOCALHOST`;
+- `REQUIRE_HTTPS_IN_PRODUCTION`.
 
-## Smoke test da API
+O backend normaliza URLs do PostgreSQL para `postgresql+psycopg://` quando necessário. Em desenvolvimento, a API fica presa em `127.0.0.1:3334` e o CORS aceita origens locais do Expo web enquanto `CORS_ALLOW_LOCALHOST=true`.
+
+## Smoke test
 
 ```bash
 curl http://localhost:3334/health
@@ -39,16 +48,11 @@ curl http://localhost:3334/health
 
 ## Swagger/OpenAPI
 
-A documentação fica disponível diretamente na API:
+- Swagger: `http://localhost:3334/docs`
+- OpenAPI: `http://localhost:3334/openapi.json`
 
-- `http://localhost:3334/docs`
+## Segurança
 
-O JSON do OpenAPI fica em:
-
-- `http://localhost:3334/openapi.json`
-
-## Observações de segurança
-
-- PII sensível fica criptografada em repouso com AES-256-GCM.
-- Email é indexado por hash SHA-256 para evitar armazenamento em claro como chave de busca.
-- Antes de usar fora de ambiente local, troque `DATABASE_URL`, `JWT_SECRET`, `ENCRYPTION_KEY`, `BIND_ADDRESS`, `API_PORT`, `CORS_ALLOWED_ORIGINS`, `CORS_ALLOW_LOCALHOST=false` e a senha do administrador inicial.
+- PII sensível é criptografada em repouso com AES-256-GCM.
+- E-mails são indexados por hash SHA-256.
+- Em produção, use `HTTPS`, defina `CORS_ALLOW_LOCALHOST=false` e restrinja `CORS_ALLOWED_ORIGINS` para a origem exata do frontend.
